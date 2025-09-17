@@ -12,7 +12,16 @@ license = "MIT OR Apache-2.0"
 keywords = ["rust", "linting", "standards", "development", "quality"]
 categories = ["development-tools", "command-line-utilities"]
 readme = "README.md"
-exclude = ["docs/", "tests/fixtures/", "benches/"]
+exclude = [
+    "target/",
+    "docs/", 
+    "tests/fixtures/", 
+    "benches/",
+    ".git/",
+    ".github/",
+    "*.tmp",
+    "*.log"
+]
 
 [dependencies]
 # CLI and terminal
