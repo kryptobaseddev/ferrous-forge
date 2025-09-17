@@ -5,7 +5,7 @@
 [![Crates.io](https://img.shields.io/crates/v/ferrous-forge)](https://crates.io/crates/ferrous-forge)
 [![Documentation](https://docs.rs/ferrous-forge/badge.svg)](https://docs.rs/ferrous-forge)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE)
-[![CI](https://github.com/yourusername/ferrous-forge/workflows/CI/badge.svg)](https://github.com/yourusername/ferrous-forge/actions)
+[![CI](https://github.com/kryptobaseddev/ferrous-forge/workflows/CI/badge.svg)](https://github.com/kryptobaseddev/ferrous-forge/actions)
 
 > *"Like a blacksmith forges iron into steel, Ferrous Forge shapes your Rust code into perfection."*
 
@@ -151,7 +151,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ### Development Setup
 ```bash
-git clone https://github.com/yourusername/ferrous-forge
+git clone https://github.com/kryptobaseddev/ferrous-forge
 cd ferrous-forge
 cargo install --path .
 cargo test --all-features
@@ -212,8 +212,8 @@ at your option.
 
 ## 🤝 Community
 
-- **Issues**: [Bug Reports & Feature Requests](https://github.com/yourusername/ferrous-forge/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/ferrous-forge/discussions)
+- **Issues**: [Bug Reports & Feature Requests](https://github.com/kryptobaseddev/ferrous-forge/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/kryptobaseddev/ferrous-forge/discussions)
 - **Discord**: [Ferrous Forge Community](https://discord.gg/ferrous-forge) - Coming Soon!
 - **Blog**: [Development Updates](https://ferrous-forge.dev/blog) - Coming Soon!
 
@@ -229,4 +229,4 @@ at your option.
 
 **Forge better Rust, automatically.** 🔨
 
-[⭐ Star us on GitHub](https://github.com/yourusername/ferrous-forge) • [📦 Install from Crates.io](https://crates.io/crates/ferrous-forge) • [📖 Read the Docs](https://docs.rs/ferrous-forge)
+[⭐ Star us on GitHub](https://github.com/kryptobaseddev/ferrous-forge) • [📦 Install from Crates.io](https://crates.io/crates/ferrous-forge) • [📖 Read the Docs](https://docs.rs/ferrous-forge)
