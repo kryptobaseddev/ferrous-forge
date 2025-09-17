@@ -26,6 +26,8 @@ pub enum ViolationType {
     FileTooLarge,
     /// Function exceeds size limit
     FunctionTooLarge,
+    /// Line exceeds length limit
+    LineTooLong,
     /// Use of .unwrap() or .expect() in production code
     UnwrapInProduction,
     /// Missing documentation
@@ -351,6 +353,19 @@ impl RustValidator {
                 message: format!("File has {} lines, maximum allowed is 300", lines.len()),
                 severity: Severity::Error,
             });
+        }
+        
+        // Check line lengths (100 character limit)
+        for (i, line) in lines.iter().enumerate() {
+            if line.len() > 100 {
+                violations.push(Violation {
+                    violation_type: ViolationType::LineTooLong,
+                    file: rust_file.to_path_buf(),
+                    line: i,
+                    message: format!("Line has {} characters, maximum allowed is 100", line.len()),
+                    severity: Severity::Warning,
+                });
+            }
         }
 
         let mut in_test_block = false;

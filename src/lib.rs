@@ -39,6 +39,7 @@
 pub mod cli;
 pub mod commands;
 pub mod config;
+pub mod doc_coverage;
 pub mod error;
 pub mod standards;
 pub mod templates;
