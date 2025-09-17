@@ -1,0 +1,125 @@
+[package]
+name = "ferrous-forge"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Ferrous Forge Contributors"]
+description = "System-wide Rust development standards enforcer"
+documentation = "https://docs.rs/ferrous-forge"
+repository = "https://github.com/yourusername/ferrous-forge"
+homepage = "https://ferrous-forge.dev"
+license = "MIT OR Apache-2.0"
+keywords = ["rust", "linting", "standards", "development", "quality"]
+categories = ["development-tools", "command-line-utilities"]
+readme = "README.md"
+exclude = ["docs/", "tests/fixtures/", "benches/"]
+
+[dependencies]
+# CLI and terminal
+clap = { version = "4.5", features = ["derive", "env", "color"] }
+console = "0.15"
+indicatif = "0.17"
+termcolor = "1.4"
+
+# File system and paths
+dirs = "5.0"
+walkdir = "2.5"
+glob = "0.3"
+
+# Configuration and serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Async runtime and networking
+tokio = { version = "1.40", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "2.0"
+
+# Logging and tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Process management
+which = "6.0"
+shell-escape = "0.1"
+
+# Version management and updates
+semver = { version = "1.0", features = ["serde"] }
+self_update = { version = "0.41", optional = true }
+
+# Template processing
+handlebars = "6.0"
+include_dir = "0.7"
+
+# System integration
+home = "0.5"
+
+# Additional dependencies
+regex = "1.11"
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tempfile = "3.10"
+assert_cmd = "2.0"
+predicates = "3.1"
+rstest = "0.22"
+proptest = "1.5"
+insta = "1.40"
+
+[build-dependencies]
+built = "0.7"
+
+[features]
+default = ["update-system", "telemetry"]
+update-system = ["self_update"]
+telemetry = ["tracing-subscriber/json"]
+dev-tools = []
+
+# Profile optimizations
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+split-debuginfo = "unpacked"
+
+# Lint configuration 
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unused_import_braces = "warn"
+unused_qualifications = "warn"
+
+[lints.clippy]
+# Error on these
+unwrap_used = "deny"
+expect_used = "deny" 
+panic = "deny"
+unimplemented = "deny"
+todo = "deny"
+
+# Warn on these
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+
+# Allow these specific pedantic lints
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+
+[[bin]]
+name = "ferrous-forge"
+path = "src/main.rs"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

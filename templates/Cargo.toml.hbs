@@ -1,0 +1,69 @@
+[package]
+name = "{{project_name}}"
+version = "{{version}}"
+edition = "{{edition}}"
+rust-version = "{{rust_version}}"
+authors = ["{{author_name}} <{{author_email}}>"]
+description = "{{description}}"
+readme = "README.md"
+homepage = "https://github.com/{{github_username}}/{{project_name}}"
+repository = "https://github.com/{{github_username}}/{{project_name}}"
+license = "MIT OR Apache-2.0"
+keywords = []
+categories = []
+
+[dependencies]
+# Error handling
+anyhow = "1.0"
+thiserror = "2.0"
+
+# Async runtime
+tokio = { version = "1.40", features = ["full"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+{{#if is_lib}}
+[lib]
+name = "{{project_name}}"
+{{else}}
+[[bin]]
+name = "{{project_name}}"
+path = "src/main.rs"
+{{/if}}
+
+[dev-dependencies]
+tempfile = "3.0"
+
+# Profile optimizations - Ferrous Forge standards
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+# Lint configuration - Ferrous Forge standards
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unused_import_braces = "warn"
+unused_qualifications = "warn"
+
+[lints.clippy]
+# Error on these
+unwrap_used = "deny"
+expect_used = "deny" 
+panic = "deny"
+unimplemented = "deny"
+todo = "deny"
+
+# Warn on these
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }

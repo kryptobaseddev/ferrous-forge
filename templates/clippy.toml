@@ -1,0 +1,51 @@
+# Ferrous Forge - Rust Standards Enforcement
+# This file enforces strict coding standards across all Rust projects
+
+# Rust Edition Requirements
+msrv = "1.85.0"  # Minimum Rust 1.85+ enforced
+
+# STRICT FILE AND FUNCTION SIZE LIMITS
+max-fn-params-bools = 2          # Max 2 bool parameters (stricter than default 3)
+max-struct-bools = 2             # Max 2 bool fields (stricter than default 3)  
+max-trait-bounds = 2             # Max 2 trait bounds (stricter than default 3)
+max-include-file-size = 300000   # 300KB max include file size
+
+# CHARACTER AND IDENTIFIER LIMITS
+min-ident-chars-threshold = 2    # Minimum 2 chars for identifiers (no single letters except i,j,x,y,z)
+literal-representation-threshold = 1000  # Lint large literals sooner
+
+# DOCUMENTATION ENFORCEMENT  
+check-private-items = true       # Document ALL items, even private ones
+missing-docs-allow-unused = false # NO exception for _underscore fields
+
+# BANNED PRACTICES
+allow-comparison-to-zero = false         # Force explicit comparisons
+allow-mixed-uninlined-format-args = false # Force consistent format args
+allow-one-hash-in-raw-strings = false   # Force minimal raw strings
+allow-useless-vec-in-tests = false      # No useless vecs even in tests
+allow-indexing-slicing-in-tests = false # No unsafe indexing in tests
+
+# UNDERSCORE BANDAID CODING PREVENTION
+# These settings help catch underscore abuse
+allowed-idents-below-min-chars = ["i", "j", "x", "y", "z"]  # Only these single chars allowed
+
+# MODULE AND IMPORT ORGANIZATION
+allowed-wildcard-imports = []    # NO wildcard imports allowed
+allow-exact-repetitions = false  # No module name repetitions
+allow-private-module-inception = false # No private module inception
+
+# PERFORMANCE AND QUALITY
+too-large-for-stack = 100       # 100 bytes max on stack (stricter than 200)
+upper-case-acronyms-aggressive = true # Strict acronym casing
+
+# SECURITY AND SAFETY
+allowed-scripts = ["Latin"]      # Only Latin script identifiers
+disallowed-names = ["foo", "bar", "baz", "qux", "quux", "test", "tmp", "temp"]
+
+# STYLE ENFORCEMENT
+unreadable-literal-lint-fractions = true # Lint fraction separators
+semicolon-inside-block-ignore-singleline = false  # Always lint semicolons
+semicolon-outside-block-ignore-multiline = false  # Always lint semicolons
+
+# ARITHMETIC SAFETY - No arithmetic side effects for any types
+arithmetic-side-effects-allowed = []

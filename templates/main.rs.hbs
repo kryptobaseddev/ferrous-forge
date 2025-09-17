@@ -1,0 +1,24 @@
+//! {{project_name}}
+//!
+//! A Rust application built with Ferrous Forge standards.
+
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
+use anyhow::Result;
+use tracing::{info, warn, error};
+
+/// Main entry point for {{project_name}}
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Initialize tracing
+    tracing_subscriber::fmt::init();
+
+    info!("Starting {{project_name}}...");
+
+    // TODO: Implement your application logic here
+    println!("Hello, world!");
+
+    info!("{{project_name}} completed successfully");
+    Ok(())
+}

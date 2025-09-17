@@ -1,0 +1,53 @@
+//! {{project_name}}
+//!
+//! A Rust library built with Ferrous Forge standards.
+//!
+//! # Examples
+//!
+//! ```
+//! use {{project_name}}::hello;
+//! 
+//! let result = hello("world");
+//! assert_eq!(result, "Hello, world!");
+//! ```
+
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
+/// Error types for {{project_name}}
+pub mod error;
+
+pub use error::{Error, Result};
+
+/// Say hello to someone
+///
+/// # Arguments
+///
+/// * `name` - The name to greet
+///
+/// # Returns
+///
+/// A greeting string
+///
+/// # Examples
+///
+/// ```
+/// use {{project_name}}::hello;
+/// 
+/// let result = hello("world");
+/// assert_eq!(result, "Hello, world!");
+/// ```
+pub fn hello(name: &str) -> String {
+    format!("Hello, {}!", name)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hello() {
+        assert_eq!(hello("world"), "Hello, world!");
+        assert_eq!(hello("Rust"), "Hello, Rust!");
+    }
+}
