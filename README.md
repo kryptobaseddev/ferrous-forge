@@ -33,15 +33,23 @@ Ferrous Forge is a **system-wide Rust development standards enforcer** that auto
 
 ## ✨ Features
 
-- 🚫 **Zero Underscore Bandaid Coding** - Completely eliminates `_parameter` lazy patterns
-- 📐 **Edition 2024 Enforcement** - Automatically upgrades and enforces latest Rust edition
-- 📏 **Size Limits** - Enforces 300-line files, 50-line functions
-- 📚 **100% Documentation** - Requires RustDoc for all public APIs  
-- 🔧 **System-Wide Integration** - Hijacks `cargo` and `rustc` commands
+### Currently Implemented (v0.1.0)
+- 🚫 **Zero Underscore Bandaid Detection** - Detects and reports `_parameter` patterns
+- 📐 **Edition 2024 Validation** - Checks for latest Rust edition usage
+- 🔧 **Cargo Command Integration** - Intercepts `cargo new` to apply standards
+- 📋 **Strict Clippy Configuration** - 280+ lint rules via templates
 - 🎯 **Zero Configuration** - Works immediately after installation
-- 🔄 **Auto-Updates** - Keeps standards current with Rust ecosystem
-- 🧪 **Testing Enforced** - Requires comprehensive test coverage
-- 🛡️ **Security First** - Automatic vulnerability scanning
+- 📁 **Project Templates** - Auto-configures new projects with best practices
+- ✅ **Standards Validation** - Comprehensive code standards checking
+- 🔄 **Version Management** - Update and rollback functionality
+
+### Planned Features (Roadmap)
+- 📏 Size limit enforcement (300-line files, 50-line functions)
+- 📚 Documentation coverage verification
+- 🧪 Test coverage requirements
+- 🛡️ Security vulnerability scanning
+- 🔒 Git hooks for pre-commit validation
+- 📊 Performance metrics and recommendations
 
 ## 🚀 Quick Start
 
@@ -67,15 +75,13 @@ cargo new my-project  # Automatically uses Edition 2024 + standards
 - Professional project structure
 
 ### 🔧 Every `cargo build/test/run`:
-- Pre-validation with clippy (zero warnings policy)
-- Format checking and auto-correction
-- Security audit scanning
-- Documentation completeness verification
-- Performance lint recommendations
+- Pre-validation with Ferrous Forge standards
+- Detection of banned patterns
+- Edition compliance checking
 
-### 🚫 Banned Patterns (Compilation Errors):
+### 🚫 Detected Anti-Patterns:
 ```rust
-// ❌ These will cause compilation to fail:
+// ⚠️ These patterns are detected and reported:
 fn bad_function(_unused: String) {}  // Underscore bandaid
 let _ = some_result;                  // Ignored results  
 some_value.unwrap();                 // Unwrap in production
@@ -110,9 +116,6 @@ edition = "2021"                     // Wrong edition
 - [**Installation Guide**](docs/installation.md) - Detailed setup instructions
 - [**Configuration**](docs/configuration.md) - Customizing rules and settings  
 - [**Standards Reference**](docs/standards.md) - Complete list of enforced rules
-- [**Integration Guide**](docs/integration.md) - IDE and tool integration
-- [**Troubleshooting**](docs/troubleshooting.md) - Common issues and solutions
-- [**Migration Guide**](docs/migration.md) - Upgrading existing projects
 
 ## 🔄 Version Management
 
@@ -133,9 +136,7 @@ ferrous-forge rollback <version>
 ```
 
 ### Release Channels
-- **Stable** (default) - Thoroughly tested releases
-- **Beta** - Preview upcoming features
-- **Nightly** - Latest development builds
+- **Stable** (default) - Current release version
 
 ## 🛠️ Development & Contributing
 
@@ -197,10 +198,8 @@ Ferrous Forge adds minimal overhead while providing maximum value:
 
 ## 🔒 Security
 
-- **Sandboxed execution** - No elevated privileges required
-- **Cryptographic verification** - All updates signed and verified
-- **Dependency scanning** - Automatic vulnerability detection
-- **Supply chain security** - Verified crate sources only
+- **No elevated privileges required** - Runs in user space
+- **Local configuration only** - No external data collection
 
 ## 📄 License
 
@@ -212,10 +211,8 @@ at your option.
 
 ## 🤝 Community
 
+- **Issues**: [Bug Reports & Feature Requests](https://github.com/yourusername/ferrous-forge/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/ferrous-forge/discussions)
-- **Issues**: [Bug Reports & Feature Requests](https://github.com/yourusername/ferrous-forge/issues)  
-- **Discord**: [Ferrous Forge Community](https://discord.gg/ferrous-forge)
-- **Blog**: [Development Updates](https://ferrous-forge.dev/blog)
 
 ## 🎖️ Recognition
 
