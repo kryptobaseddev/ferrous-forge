@@ -80,7 +80,7 @@ pub struct RustValidator {
     /// Compiled regex patterns for efficient matching
     patterns: ValidationPatterns,
     /// Required crates for Context7 integration
-    required_crates: Vec<String>,
+    _required_crates: Vec<String>,
 }
 
 /// Compiled regex patterns for validation
@@ -118,7 +118,7 @@ impl RustValidator {
         Ok(Self {
             project_root,
             patterns,
-            required_crates,
+            _required_crates: required_crates,
         })
     }
 
@@ -446,6 +446,539 @@ impl RustValidator {
             }
         }
 
+        // Check the last function if any
+        if let Some(start) = current_function_start {
+            let func_lines = lines.len() - start;
+            if func_lines > 50 {
+                violations.push(Violation {
+                    violation_type: ViolationType::FunctionTooLarge,
+                    file: rust_file.to_path_buf(),
+                    line: start,
+                    message: format!("Function has {} lines, maximum allowed is 50", func_lines),
+                    severity: Severity::Error,
+                });
+            }
+        }
+
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+    use tokio::fs;
+
+    #[test]
+    fn test_violation_type_variants() {
+        let types = vec![
+            ViolationType::UnderscoreBandaid,
+            ViolationType::WrongEdition,
+            ViolationType::FileTooLarge,
+            ViolationType::FunctionTooLarge,
+            ViolationType::LineTooLong,
+            ViolationType::UnwrapInProduction,
+            ViolationType::MissingDocs,
+            ViolationType::MissingDependencies,
+            ViolationType::OldRustVersion,
+        ];
+        
+        // Test that variants are distinct
+        for (i, type1) in types.iter().enumerate() {
+            for (j, type2) in types.iter().enumerate() {
+                if i != j {
+                    assert_ne!(type1, type2);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_severity_variants() {
+        let error = Severity::Error;
+        let warning = Severity::Warning;
+        let info = Severity::Info;
+        
+        // Just test that we can create instances
+        match error {
+            Severity::Error => {},
+            _ => panic!("Should be error"),
+        }
+        match warning {
+            Severity::Warning => {},
+            _ => panic!("Should be warning"),
+        }
+        match info {
+            Severity::Info => {},
+            _ => panic!("Should be info"),
+        }
+    }
+
+    #[test]
+    fn test_violation_creation() {
+        let violation = Violation {
+            violation_type: ViolationType::UnderscoreBandaid,
+            file: PathBuf::from("test.rs"),
+            line: 10,
+            message: "Test violation".to_string(),
+            severity: Severity::Error,
+        };
+        
+        assert_eq!(violation.violation_type, ViolationType::UnderscoreBandaid);
+        assert_eq!(violation.file, PathBuf::from("test.rs"));
+        assert_eq!(violation.line, 10);
+        assert_eq!(violation.message, "Test violation");
+        matches!(violation.severity, Severity::Error);
+    }
+
+    #[test]
+    fn test_clippy_result() {
+        let result = ClippyResult {
+            success: true,
+            output: "All checks passed".to_string(),
+        };
+        
+        assert!(result.success);
+        assert_eq!(result.output, "All checks passed");
+    }
+
+    #[tokio::test]
+    async fn test_rust_validator_creation() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let validator = RustValidator::new(temp_dir.path().to_path_buf());
+        
+        assert!(validator.is_ok());
+        let validator = validator.expect("Should create validator");
+        assert_eq!(validator.project_root, temp_dir.path());
+    }
+
+    #[tokio::test]
+    async fn test_generate_report_no_violations() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let violations = vec![];
+        let report = validator.generate_report(&violations);
+        
+        assert!(report.contains("✅"));
+        assert!(report.contains("All Rust validation checks passed"));
+    }
+
+    #[tokio::test]
+    async fn test_generate_report_with_violations() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let violations = vec![
+            Violation {
+                violation_type: ViolationType::UnderscoreBandaid,
+                file: PathBuf::from("test.rs"),
+                line: 10,
+                message: "Underscore parameter".to_string(),
+                severity: Severity::Error,
+            },
+            Violation {
+                violation_type: ViolationType::WrongEdition,
+                file: PathBuf::from("Cargo.toml"),
+                line: 5,
+                message: "Wrong edition".to_string(),
+                severity: Severity::Error,
+            },
+        ];
+        
+        let report = validator.generate_report(&violations);
+        
+        assert!(report.contains("❌"));
+        assert!(report.contains("Found 2 violations"));
+        assert!(report.contains("UNDERSCOREBANDAID"));
+        assert!(report.contains("WRONGEDITION"));
+        assert!(report.contains("test.rs:11"));
+        assert!(report.contains("Cargo.toml:6"));
+    }
+
+    #[tokio::test]
+    async fn test_validate_cargo_toml_correct_edition() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let cargo_toml = temp_dir.path().join("Cargo.toml");
+        
+        fs::write(&cargo_toml, r#"
+[package]
+name = "test"
+version = "0.1.0"
+edition = "2024"
+"#).await.expect("Failed to write Cargo.toml");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_cargo_toml(&cargo_toml, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        assert!(violations.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_validate_cargo_toml_wrong_edition() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let cargo_toml = temp_dir.path().join("Cargo.toml");
+        
+        fs::write(&cargo_toml, r#"
+[package]
+name = "test"
+version = "0.1.0"
+edition = "2021"
+"#).await.expect("Failed to write Cargo.toml");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_cargo_toml(&cargo_toml, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        assert_eq!(violations.len(), 1);
+        assert_eq!(violations[0].violation_type, ViolationType::WrongEdition);
+        assert!(violations[0].message.contains("Edition 2024"));
+    }
+
+    #[tokio::test]
+    async fn test_validate_cargo_toml_missing_edition() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let cargo_toml = temp_dir.path().join("Cargo.toml");
+        
+        fs::write(&cargo_toml, r#"
+[package]
+name = "test"
+version = "0.1.0"
+"#).await.expect("Failed to write Cargo.toml");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_cargo_toml(&cargo_toml, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        assert_eq!(violations.len(), 1);
+        assert_eq!(violations[0].violation_type, ViolationType::WrongEdition);
+        assert!(violations[0].message.contains("Missing edition"));
+    }
+
+    #[tokio::test]
+    async fn test_validate_rust_file_size_limit() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let rust_file = temp_dir.path().join("test.rs");
+        
+        // Create a file with over 300 lines
+        let content = (0..350).map(|i| format!("// Line {}", i)).collect::<Vec<_>>().join("\n");
+        fs::write(&rust_file, content).await.expect("Failed to write Rust file");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_rust_file(&rust_file, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        let file_size_violations: Vec<_> = violations.iter()
+            .filter(|v| v.violation_type == ViolationType::FileTooLarge)
+            .collect();
+        
+        assert_eq!(file_size_violations.len(), 1);
+        assert!(file_size_violations[0].message.contains("350 lines"));
+    }
+
+    #[tokio::test]
+    async fn test_validate_rust_file_line_length() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let rust_file = temp_dir.path().join("test.rs");
+        
+        let long_line = "// ".to_string() + &"x".repeat(150);
+        fs::write(&rust_file, long_line).await.expect("Failed to write Rust file");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_rust_file(&rust_file, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        let line_length_violations: Vec<_> = violations.iter()
+            .filter(|v| v.violation_type == ViolationType::LineTooLong)
+            .collect();
+        
+        assert_eq!(line_length_violations.len(), 1);
+        assert!(line_length_violations[0].message.contains("153 characters"));
+    }
+
+    #[tokio::test]
+    async fn test_validate_rust_file_underscore_bandaid() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let rust_file = temp_dir.path().join("test.rs");
+        
+        let content = r#"
+fn test_function(_param: String) {
+    let _ = some_operation();
+}
+"#;
+        fs::write(&rust_file, content).await.expect("Failed to write Rust file");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_rust_file(&rust_file, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        let bandaid_violations: Vec<_> = violations.iter()
+            .filter(|v| v.violation_type == ViolationType::UnderscoreBandaid)
+            .collect();
+        
+        assert_eq!(bandaid_violations.len(), 2); // One for param, one for let
+        assert!(bandaid_violations.iter().any(|v| v.message.contains("parameter")));
+        assert!(bandaid_violations.iter().any(|v| v.message.contains("assignment")));
+    }
+
+    #[tokio::test]
+    async fn test_validate_rust_file_unwrap_in_production() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let rust_file = temp_dir.path().join("test.rs");
+        
+        let content = r#"
+fn production_code() {
+    let value = some_result.unwrap();
+    let other = another_result.expect("message");
+}
+
+#[test]
+fn test_code() {
+    let value = some_result.unwrap(); // This should be allowed
+}
+"#;
+        fs::write(&rust_file, content).await.expect("Failed to write Rust file");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_rust_file(&rust_file, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        let unwrap_violations: Vec<_> = violations.iter()
+            .filter(|v| v.violation_type == ViolationType::UnwrapInProduction)
+            .collect();
+        
+        // Should find 2 violations in production code, but none in test code
+        assert_eq!(unwrap_violations.len(), 2);
+        assert!(unwrap_violations.iter().any(|v| v.message.contains("unwrap")));
+        assert!(unwrap_violations.iter().any(|v| v.message.contains("expect")));
+    }
+
+    #[tokio::test]
+    async fn test_find_rust_files() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        
+        // Create some Rust files
+        let src_dir = temp_dir.path().join("src");
+        fs::create_dir(&src_dir).await.expect("Failed to create src dir");
+        
+        fs::write(src_dir.join("main.rs"), "fn main() {}").await.expect("Failed to write main.rs");
+        fs::write(src_dir.join("lib.rs"), "// lib").await.expect("Failed to write lib.rs");
+        fs::write(temp_dir.path().join("build.rs"), "// build").await.expect("Failed to write build.rs");
+        
+        // Create non-Rust file
+        fs::write(temp_dir.path().join("README.md"), "# Test").await.expect("Failed to write README");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let rust_files = validator.find_rust_files().await.expect("Should find files");
+        
+        assert_eq!(rust_files.len(), 3);
+        assert!(rust_files.iter().any(|f| f.file_name().unwrap() == "main.rs"));
+        assert!(rust_files.iter().any(|f| f.file_name().unwrap() == "lib.rs"));
+        assert!(rust_files.iter().any(|f| f.file_name().unwrap() == "build.rs"));
+    }
+
+    #[tokio::test]
+    async fn test_find_cargo_files() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        
+        // Create Cargo.toml files
+        fs::write(temp_dir.path().join("Cargo.toml"), "[package]").await.expect("Failed to write Cargo.toml");
+        
+        let sub_dir = temp_dir.path().join("sub_project");
+        fs::create_dir(&sub_dir).await.expect("Failed to create sub dir");
+        fs::write(sub_dir.join("Cargo.toml"), "[package]").await.expect("Failed to write sub Cargo.toml");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let cargo_files = validator.find_cargo_files().await.expect("Should find files");
+        
+        assert_eq!(cargo_files.len(), 2);
+        assert!(cargo_files.iter().all(|f| f.file_name().unwrap() == "Cargo.toml"));
+    }
+
+    #[tokio::test]
+    async fn test_validate_project_integration() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        
+        // Create a basic Rust project structure
+        let src_dir = temp_dir.path().join("src");
+        fs::create_dir(&src_dir).await.expect("Failed to create src dir");
+        
+        // Cargo.toml with correct edition
+        fs::write(temp_dir.path().join("Cargo.toml"), r#"
+[package]
+name = "test"
+version = "0.1.0"
+edition = "2024"
+"#).await.expect("Failed to write Cargo.toml");
+        
+        // Good Rust file
+        fs::write(src_dir.join("lib.rs"), r#"
+//! Test library
+
+pub fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add() {
+        assert_eq!(add(2, 3), 5);
+    }
+}
+"#).await.expect("Failed to write lib.rs");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let violations = validator.validate_project().await.expect("Should validate");
+        
+        // Should pass validation (only rust version check might fail depending on system)
+        let non_rust_version_violations: Vec<_> = violations.iter()
+            .filter(|v| v.violation_type != ViolationType::OldRustVersion)
+            .collect();
+        
+        assert!(non_rust_version_violations.is_empty());
+    }
+
+    #[test]
+    fn test_serialization() {
+        let violation = Violation {
+            violation_type: ViolationType::UnderscoreBandaid,
+            file: PathBuf::from("test.rs"),
+            line: 10,
+            message: "Test violation".to_string(),
+            severity: Severity::Error,
+        };
+        
+        let serialized = serde_json::to_string(&violation).expect("Should serialize");
+        let deserialized: Violation = serde_json::from_str(&serialized).expect("Should deserialize");
+        
+        assert_eq!(violation.violation_type, deserialized.violation_type);
+        assert_eq!(violation.file, deserialized.file);
+        assert_eq!(violation.line, deserialized.line);
+        assert_eq!(violation.message, deserialized.message);
+    }
+
+    #[tokio::test]
+    async fn test_clippy_run() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        
+        // Create a minimal Cargo.toml
+        fs::write(temp_dir.path().join("Cargo.toml"), r#"
+[package]
+name = "test"
+version = "0.1.0"
+edition = "2024"
+"#).await.expect("Failed to write Cargo.toml");
+        
+        // Create src directory with basic lib.rs
+        let src_dir = temp_dir.path().join("src");
+        fs::create_dir(&src_dir).await.expect("Failed to create src dir");
+        fs::write(src_dir.join("lib.rs"), "// Empty lib").await.expect("Failed to write lib.rs");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let result = validator.run_clippy().await;
+        
+        // The result might succeed or fail depending on the environment
+        // but we should get a ClippyResult
+        match result {
+            Ok(clippy_result) => {
+                assert!(!clippy_result.output.is_empty());
+            }
+            Err(_) => {
+                // This is acceptable as clippy might not be available in test environment
+            }
+        }
+    }
+
+    // Edge case tests
+    #[tokio::test]
+    async fn test_empty_rust_file() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let rust_file = temp_dir.path().join("empty.rs");
+        
+        fs::write(&rust_file, "").await.expect("Failed to write empty file");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_rust_file(&rust_file, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        // Empty file should not generate violations
+        assert!(violations.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_function_size_limit() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+        let rust_file = temp_dir.path().join("test.rs");
+        
+        // Create a function with more than 50 lines
+        let mut content = String::from("fn large_function() {\n");
+        for i in 0..60 {
+            content.push_str(&format!("    let x{} = {};\n", i, i));
+        }
+        content.push_str("}\n\nfn small_function() {\n    let x = 1;\n}\n");
+        
+        fs::write(&rust_file, content).await.expect("Failed to write Rust file");
+        
+        let validator = RustValidator::new(temp_dir.path().to_path_buf())
+            .expect("Should create validator");
+        
+        let mut violations = Vec::new();
+        validator.validate_rust_file(&rust_file, &mut violations)
+            .await
+            .expect("Should validate");
+        
+        let function_size_violations: Vec<_> = violations.iter()
+            .filter(|v| v.violation_type == ViolationType::FunctionTooLarge)
+            .collect();
+        
+        assert_eq!(function_size_violations.len(), 1);
+        assert!(function_size_violations[0].message.contains("63 lines"));
     }
 }

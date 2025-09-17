@@ -118,7 +118,7 @@ pub async fn check_file_formatting(file_path: &Path) -> Result<bool> {
     
     // Run rustfmt with check mode on single file
     let output = Command::new("rustfmt")
-        .args(&["--check", file_path.to_str().unwrap()])
+        .args(&["--check", file_path.to_str().ok_or_else(|| Error::process("Invalid file path"))?])
         .output()
         .map_err(|e| Error::process(format!("Failed to run rustfmt: {}", e)))?;
     
@@ -132,7 +132,7 @@ pub async fn format_file(file_path: &Path) -> Result<()> {
     
     // Run rustfmt on single file
     let output = Command::new("rustfmt")
-        .arg(file_path.to_str().unwrap())
+        .arg(file_path.to_str().ok_or_else(|| Error::process("Invalid file path"))?)
         .output()
         .map_err(|e| Error::process(format!("Failed to run rustfmt: {}", e)))?;
     
@@ -165,7 +165,7 @@ async fn ensure_rustfmt_installed() -> Result<()> {
         .arg("--version")
         .output();
     
-    if check.is_err() || !check.unwrap().status.success() {
+    if check.as_ref().map_or(true, |output| !output.status.success()) {
         println!("📦 Installing rustfmt...");
         
         let install = Command::new("rustup")

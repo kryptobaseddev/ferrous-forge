@@ -46,6 +46,7 @@ pub mod git_hooks;
 pub mod security;
 pub mod standards;
 pub mod templates;
+pub mod test_coverage;
 pub mod updater;
 pub mod validation;
 

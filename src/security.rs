@@ -106,7 +106,7 @@ async fn ensure_cargo_audit_installed() -> Result<()> {
         .args(&["audit", "--version"])
         .output();
     
-    if check.is_err() || !check.unwrap().status.success() {
+    if check.as_ref().map_or(true, |output| !output.status.success()) {
         println!("📦 Installing cargo-audit for security scanning...");
         
         let install = Command::new("cargo")
@@ -230,7 +230,7 @@ mod tests {
         };
         
         assert_eq!(vuln.severity, "critical");
-        assert!(vuln.cvss.unwrap() > 9.0);
+        assert!(vuln.cvss.unwrap_or(0.0) > 9.0);
     }
     
     #[test]

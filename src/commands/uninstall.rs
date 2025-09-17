@@ -1,6 +1,6 @@
 //! Uninstall command implementation
 
-use crate::Result;
+use crate::{Error, Result};
 use console::style;
 use std::io::{self, Write};
 
@@ -8,10 +8,10 @@ use std::io::{self, Write};
 pub async fn execute(confirm: bool) -> Result<()> {
     if !confirm {
         print!("Are you sure you want to uninstall Ferrous Forge? This will remove all system integration. [y/N]: ");
-        io::stdout().flush().unwrap();
+        io::stdout().flush().map_err(|e| Error::process(format!("Failed to flush stdout: {}", e)))?;
         
         let mut input = String::new();
-        io::stdin().read_line(&mut input).unwrap();
+        io::stdin().read_line(&mut input).map_err(|e| Error::process(format!("Failed to read input: {}", e)))?;
         
         if !input.trim().to_lowercase().starts_with('y') {
             println!("Uninstall cancelled.");
@@ -46,7 +46,7 @@ pub async fn execute(confirm: bool) -> Result<()> {
 
 async fn remove_cargo_hijacking() -> Result<()> {
     let home_dir = dirs::home_dir()
-        .ok_or_else(|| crate::Error::config("Could not find home directory"))?;
+        .ok_or_else(|| Error::config("Could not find home directory"))?;
     
     let cargo_wrapper = home_dir.join(".local").join("bin").join("cargo");
     if cargo_wrapper.exists() {
@@ -59,7 +59,7 @@ async fn remove_cargo_hijacking() -> Result<()> {
 
 async fn remove_clippy_config() -> Result<()> {
     let home_dir = dirs::home_dir()
-        .ok_or_else(|| crate::Error::config("Could not find home directory"))?;
+        .ok_or_else(|| Error::config("Could not find home directory"))?;
     
     let clippy_config = home_dir.join(".clippy.toml");
     if clippy_config.exists() {
@@ -72,7 +72,7 @@ async fn remove_clippy_config() -> Result<()> {
 
 async fn remove_shell_integration() -> Result<()> {
     let home_dir = dirs::home_dir()
-        .ok_or_else(|| crate::Error::config("Could not find home directory"))?;
+        .ok_or_else(|| Error::config("Could not find home directory"))?;
     
     for shell_file in &[".bashrc", ".zshrc", ".profile"] {
         let shell_path = home_dir.join(shell_file);

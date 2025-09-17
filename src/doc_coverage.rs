@@ -82,8 +82,6 @@ pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCove
 
     // Parse JSON messages for missing docs warnings
     let mut missing = Vec::new();
-    let missing_docs_re = Regex::new(r#""code":\{"code":"missing_docs".*?"message":"([^"]+)"#)
-        .map_err(|e| Error::validation(format!("Invalid regex: {}", e)))?;
     
     for line in stdout.lines() {
         if line.contains("missing_docs") {
@@ -139,7 +137,7 @@ async fn count_documentation_items(project_path: &Path) -> Result<(usize, usize)
 
     for entry in walker {
         let content = tokio::fs::read_to_string(entry.path()).await?;
-        let (file_total, file_documented) = count_items_in_file(&content);
+        let (file_total, file_documented) = count_items_in_file(&content)?;
         total += file_total;
         documented += file_documented;
     }
@@ -148,13 +146,13 @@ async fn count_documentation_items(project_path: &Path) -> Result<(usize, usize)
 }
 
 /// Count documentation items in a single file
-fn count_items_in_file(content: &str) -> (usize, usize) {
+fn count_items_in_file(content: &str) -> Result<(usize, usize)> {
     let mut total = 0;
     let mut documented = 0;
     let lines: Vec<&str> = content.lines().collect();
     
     let pub_item_re = Regex::new(r"^\s*pub\s+(fn|struct|enum|trait|type|const|static|mod)\s+")
-        .unwrap();
+        .map_err(|e| Error::validation(format!("Failed to compile regex: {}", e)))?;
     
     for (i, line) in lines.iter().enumerate() {
         if pub_item_re.is_match(line) {
@@ -168,7 +166,7 @@ fn count_items_in_file(content: &str) -> (usize, usize) {
         }
     }
     
-    (total, documented)
+    Ok((total, documented))
 }
 
 /// Extract item name from error message
@@ -249,7 +247,7 @@ pub struct DocStruct {}
 
 pub struct UndocStruct {}
 "#;
-        let (total, documented) = count_items_in_file(content);
+        let (total, documented) = count_items_in_file(content).unwrap();
         assert_eq!(total, 4);
         assert_eq!(documented, 2);
     }

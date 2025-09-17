@@ -1,7 +1,6 @@
 //! Command implementations for Ferrous Forge
 
 use clap::Subcommand;
-use crate::Result;
 
 /// Available commands for Ferrous Forge
 #[derive(Subcommand)]

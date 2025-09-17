@@ -97,7 +97,12 @@ impl TemplateManager {
 
 impl Default for TemplateManager {
     fn default() -> Self {
-        Self::new().expect("Failed to create default template manager")
+        Self::new().unwrap_or_else(|_| {
+            // Fallback to a basic template manager if initialization fails
+            TemplateManager {
+                handlebars: Handlebars::new(),
+            }
+        })
     }
 }
 

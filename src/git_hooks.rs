@@ -290,16 +290,16 @@ mod tests {
     
     #[tokio::test]
     async fn test_hooks_require_git_repo() {
-        let temp_dir = TempDir::new().unwrap();
+        let temp_dir = TempDir::new().expect("Failed to create temp dir for test");
         let result = install_git_hooks(temp_dir.path()).await;
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Not a git repository"));
+        assert!(result.expect_err("Should have failed").to_string().contains("Not a git repository"));
     }
     
     #[tokio::test]
     async fn test_check_hooks_not_installed() {
-        let temp_dir = TempDir::new().unwrap();
-        let installed = check_hooks_installed(temp_dir.path()).await.unwrap();
+        let temp_dir = TempDir::new().expect("Failed to create temp dir for test");
+        let installed = check_hooks_installed(temp_dir.path()).await.expect("Check should succeed");
         assert!(!installed);
     }
 }

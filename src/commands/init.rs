@@ -2,7 +2,6 @@
 
 use crate::{Result, config::Config};
 use console::style;
-use std::path::Path;
 
 /// Execute the init command
 pub async fn execute(force: bool) -> Result<()> {
