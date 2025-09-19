@@ -20,16 +20,16 @@ async fn main() -> Result<()> {
     match cli.command {
         commands::Commands::Init { force } => commands::init::execute(force).await,
         commands::Commands::Status => commands::status::execute().await,
-        commands::Commands::Update { 
-            channel, 
-            rules_only, 
-            dry_run 
+        commands::Commands::Update {
+            channel,
+            rules_only,
+            dry_run,
         } => commands::update::execute(channel, rules_only, dry_run).await,
-        commands::Commands::Config { 
-            set, 
-            get, 
-            list, 
-            reset 
+        commands::Commands::Config {
+            set,
+            get,
+            list,
+            reset,
         } => commands::config::execute(set, get, list, reset).await,
         commands::Commands::Validate { path } => commands::validate::execute(path).await,
         commands::Commands::Rollback { version } => commands::rollback::execute(version).await,

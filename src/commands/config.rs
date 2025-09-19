@@ -1,12 +1,12 @@
 //! Config command implementation
 
-use crate::{Result, config::Config};
+use crate::{config::Config, Result};
 use console::style;
 
 /// Execute the config command
 pub async fn execute(
     set: Option<String>,
-    get: Option<String>, 
+    get: Option<String>,
     list: bool,
     reset: bool,
 ) -> Result<()> {
@@ -20,9 +20,12 @@ pub async fn execute(
     }
 
     if list {
-        println!("{}", style("⚙️  Ferrous Forge Configuration:").bold().cyan());
+        println!(
+            "{}",
+            style("⚙️  Ferrous Forge Configuration:").bold().cyan()
+        );
         println!();
-        
+
         for (key, value) in config.list() {
             println!("  {}: {}", style(&key).bold(), value);
         }
@@ -33,7 +36,10 @@ pub async fn execute(
         if let Some(value) = config.get(&get_key) {
             println!("{}", value);
         } else {
-            println!("{}", style(&format!("Unknown configuration key: {}", get_key)).red());
+            println!(
+                "{}",
+                style(&format!("Unknown configuration key: {}", get_key)).red()
+            );
             std::process::exit(1);
         }
         return Ok(());

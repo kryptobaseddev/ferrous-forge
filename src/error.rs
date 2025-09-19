@@ -2,7 +2,6 @@
 //!
 //! This module provides a unified error handling system for all Ferrous Forge operations.
 
-
 /// Ferrous Forge specific errors
 #[derive(Debug, thiserror::Error)]
 pub enum Error {

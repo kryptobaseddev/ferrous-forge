@@ -31,7 +31,7 @@ impl DocCoverage {
     /// Generate a human-readable report
     pub fn report(&self) -> String {
         let mut report = String::new();
-        
+
         if self.coverage_percent >= 100.0 {
             report.push_str("✅ Documentation coverage: 100% - All items documented!\n");
         } else if self.coverage_percent >= 80.0 {
@@ -45,7 +45,7 @@ impl DocCoverage {
                 self.coverage_percent
             ));
         }
-        
+
         if !self.missing.is_empty() {
             report.push_str("\nMissing documentation for:\n");
             for (i, item) in self.missing.iter().take(10).enumerate() {
@@ -58,7 +58,7 @@ impl DocCoverage {
                 ));
             }
         }
-        
+
         report
     }
 }
@@ -82,7 +82,7 @@ pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCove
 
     // Parse JSON messages for missing docs warnings
     let mut missing = Vec::new();
-    
+
     for line in stdout.lines() {
         if line.contains("missing_docs") {
             if let Ok(json) = serde_json::from_str::<serde_json::Value>(line) {
@@ -99,7 +99,7 @@ pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCove
     // Also check stderr for traditional warnings
     let warning_re = Regex::new(r"warning: missing documentation for (.+)")
         .map_err(|e| Error::validation(format!("Invalid regex: {}", e)))?;
-    
+
     for cap in warning_re.captures_iter(&stderr) {
         missing.push(cap[1].to_string());
     }
@@ -150,22 +150,24 @@ fn count_items_in_file(content: &str) -> Result<(usize, usize)> {
     let mut total = 0;
     let mut documented = 0;
     let lines: Vec<&str> = content.lines().collect();
-    
+
     let pub_item_re = Regex::new(r"^\s*pub\s+(fn|struct|enum|trait|type|const|static|mod)\s+")
         .map_err(|e| Error::validation(format!("Failed to compile regex: {}", e)))?;
-    
+
     for (i, line) in lines.iter().enumerate() {
         if pub_item_re.is_match(line) {
             total += 1;
-            
+
             // Check if there's documentation above this line
-            if i > 0 && (lines[i - 1].trim().starts_with("///") || 
-                        lines[i - 1].trim().starts_with("//!")) {
+            if i > 0
+                && (lines[i - 1].trim().starts_with("///")
+                    || lines[i - 1].trim().starts_with("//!"))
+            {
                 documented += 1;
             }
         }
     }
-    
+
     Ok((total, documented))
 }
 
@@ -179,7 +181,7 @@ fn extract_item_name(message: &str) -> Option<String> {
             return Some(message[start + 1..start + 1 + end].to_string());
         }
     }
-    
+
     // Fallback: extract type after "for"
     if let Some(pos) = message.find("for ") {
         Some(message[pos + 4..].trim().to_string())
@@ -236,7 +238,7 @@ mod tests {
 
     #[test]
     fn test_count_items_in_file() {
-        let content = r#"
+        let content = r"
 /// Documented function
 pub fn documented() {}
 
@@ -246,7 +248,7 @@ pub fn undocumented() {}
 pub struct DocStruct {}
 
 pub struct UndocStruct {}
-"#;
+";
         let (total, documented) = count_items_in_file(content).unwrap();
         assert_eq!(total, 4);
         assert_eq!(documented, 2);
@@ -260,7 +262,7 @@ pub struct UndocStruct {}
             coverage_percent: 80.0,
             missing: vec![],
         };
-        
+
         assert!(coverage.meets_threshold(75.0));
         assert!(!coverage.meets_threshold(85.0));
     }

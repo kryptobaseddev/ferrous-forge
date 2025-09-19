@@ -188,11 +188,14 @@ jobs:
           # Test binary works
           ./target/release/ferrous-forge --version
           
+          # Store the binary path
+          FERROUS_FORGE_BIN="$PWD/target/release/ferrous-forge"
+          
           # Test init in clean environment
           mkdir -p /tmp/test-ferrous-forge
           cd /tmp/test-ferrous-forge
           export HOME=/tmp/test-ferrous-forge
-          ../ferrous-forge init --force
+          "$FERROUS_FORGE_BIN" init --force
           
           # Test project creation
           cargo new test-project

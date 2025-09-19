@@ -3,7 +3,7 @@
 //! This module manages project templates and configuration files that get
 //! injected into new Rust projects to enforce standards.
 
-use crate::{Result, Error};
+use crate::{Error, Result};
 use handlebars::Handlebars;
 use serde_json::json;
 use std::path::Path;
@@ -17,20 +17,31 @@ impl TemplateManager {
     /// Create a new template manager
     pub fn new() -> Result<Self> {
         let mut handlebars = Handlebars::new();
-        
+
         // Register built-in templates
-        handlebars.register_template_string("cargo_toml", include_str!("../templates/Cargo.toml.hbs"))
-            .map_err(|e| Error::template(format!("Failed to register Cargo.toml template: {}", e)))?;
-            
-        handlebars.register_template_string("main_rs", include_str!("../templates/main.rs.hbs"))
+        handlebars
+            .register_template_string("cargo_toml", include_str!("../templates/Cargo.toml.hbs"))
+            .map_err(|e| {
+                Error::template(format!("Failed to register Cargo.toml template: {}", e))
+            })?;
+
+        handlebars
+            .register_template_string("main_rs", include_str!("../templates/main.rs.hbs"))
             .map_err(|e| Error::template(format!("Failed to register main.rs template: {}", e)))?;
-            
-        handlebars.register_template_string("lib_rs", include_str!("../templates/lib.rs.hbs"))
+
+        handlebars
+            .register_template_string("lib_rs", include_str!("../templates/lib.rs.hbs"))
             .map_err(|e| Error::template(format!("Failed to register lib.rs template: {}", e)))?;
-            
-        handlebars.register_template_string("github_workflow", include_str!("../templates/ci.yml.hbs"))
-            .map_err(|e| Error::template(format!("Failed to register GitHub workflow template: {}", e)))?;
-            
+
+        handlebars
+            .register_template_string("github_workflow", include_str!("../templates/ci.yml.hbs"))
+            .map_err(|e| {
+                Error::template(format!(
+                    "Failed to register GitHub workflow template: {}",
+                    e
+                ))
+            })?;
+
         Ok(Self { handlebars })
     }
 
@@ -44,7 +55,8 @@ impl TemplateManager {
             "rust_version": "1.85",
         });
 
-        self.handlebars.render("cargo_toml", &data)
+        self.handlebars
+            .render("cargo_toml", &data)
             .map_err(|e| Error::template(format!("Failed to render Cargo.toml: {}", e)))
     }
 
@@ -54,7 +66,8 @@ impl TemplateManager {
             "project_name": project_name,
         });
 
-        self.handlebars.render("main_rs", &data)
+        self.handlebars
+            .render("main_rs", &data)
             .map_err(|e| Error::template(format!("Failed to render main.rs: {}", e)))
     }
 
@@ -64,7 +77,8 @@ impl TemplateManager {
             "project_name": project_name,
         });
 
-        self.handlebars.render("lib_rs", &data)
+        self.handlebars
+            .render("lib_rs", &data)
             .map_err(|e| Error::template(format!("Failed to render lib.rs: {}", e)))
     }
 
@@ -74,7 +88,8 @@ impl TemplateManager {
             "project_name": project_name,
         });
 
-        self.handlebars.render("github_workflow", &data)
+        self.handlebars
+            .render("github_workflow", &data)
             .map_err(|e| Error::template(format!("Failed to render GitHub workflow: {}", e)))
     }
 
@@ -82,15 +97,18 @@ impl TemplateManager {
     pub async fn apply_to_project(&self, project_path: &Path) -> Result<()> {
         // This would be used to retrofit existing projects with Ferrous Forge standards
         // For now, just create a placeholder
-        tracing::info!("Applying Ferrous Forge templates to project: {}", project_path.display());
-        
+        tracing::info!(
+            "Applying Ferrous Forge templates to project: {}",
+            project_path.display()
+        );
+
         // TODO: Implement project retrofitting
         // - Backup existing files
         // - Update Cargo.toml with Edition 2024
         // - Add strict clippy configuration
         // - Add GitHub Actions if .git exists
         // - Update main.rs/lib.rs with documentation requirements
-        
+
         Ok(())
     }
 }

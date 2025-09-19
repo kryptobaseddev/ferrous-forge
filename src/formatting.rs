@@ -34,7 +34,7 @@ impl FormatResult {
     /// Generate a human-readable report
     pub fn report(&self) -> String {
         let mut report = String::new();
-        
+
         if self.formatted {
             report.push_str("✅ Code formatting check passed - All files properly formatted!\n");
         } else {
@@ -42,12 +42,12 @@ impl FormatResult {
                 "⚠️ Code formatting issues found in {} files\n\n",
                 self.unformatted_files.len()
             ));
-            
+
             report.push_str("Files needing formatting:\n");
             for file in &self.unformatted_files {
                 report.push_str(&format!("  • {}\n", file));
             }
-            
+
             if !self.suggestions.is_empty() {
                 report.push_str("\nFormatting suggestions:\n");
                 for suggestion in &self.suggestions.iter().take(10).collect::<Vec<_>>() {
@@ -56,7 +56,7 @@ impl FormatResult {
                         suggestion.file, suggestion.line, suggestion.description
                     ));
                 }
-                
+
                 if self.suggestions.len() > 10 {
                     report.push_str(&format!(
                         "  ... and {} more suggestions\n",
@@ -64,10 +64,12 @@ impl FormatResult {
                     ));
                 }
             }
-            
-            report.push_str("\n💡 Run 'ferrous-forge fix --format' to automatically fix these issues\n");
+
+            report.push_str(
+                "\n💡 Run 'ferrous-forge fix --format' to automatically fix these issues\n",
+            );
         }
-        
+
         report
     }
 }
@@ -76,14 +78,14 @@ impl FormatResult {
 pub async fn check_formatting(project_path: &Path) -> Result<FormatResult> {
     // Ensure rustfmt is installed
     ensure_rustfmt_installed().await?;
-    
+
     // Run cargo fmt with check mode
     let output = Command::new("cargo")
         .args(&["fmt", "--", "--check", "--verbose"])
         .current_dir(project_path)
         .output()
         .map_err(|e| Error::process(format!("Failed to run cargo fmt: {}", e)))?;
-    
+
     // Parse the output
     parse_format_output(&output.stdout, &output.stderr, output.status.success())
 }
@@ -92,16 +94,16 @@ pub async fn check_formatting(project_path: &Path) -> Result<FormatResult> {
 pub async fn auto_format(project_path: &Path) -> Result<()> {
     // Ensure rustfmt is installed
     ensure_rustfmt_installed().await?;
-    
+
     println!("🔧 Auto-formatting code...");
-    
+
     // Run cargo fmt
     let output = Command::new("cargo")
         .arg("fmt")
         .current_dir(project_path)
         .output()
         .map_err(|e| Error::process(format!("Failed to run cargo fmt: {}", e)))?;
-    
+
     if output.status.success() {
         println!("✨ Code formatted successfully!");
         Ok(())
@@ -115,13 +117,18 @@ pub async fn auto_format(project_path: &Path) -> Result<()> {
 pub async fn check_file_formatting(file_path: &Path) -> Result<bool> {
     // Ensure rustfmt is installed
     ensure_rustfmt_installed().await?;
-    
+
     // Run rustfmt with check mode on single file
     let output = Command::new("rustfmt")
-        .args(&["--check", file_path.to_str().ok_or_else(|| Error::process("Invalid file path"))?])
+        .args(&[
+            "--check",
+            file_path
+                .to_str()
+                .ok_or_else(|| Error::process("Invalid file path"))?,
+        ])
         .output()
         .map_err(|e| Error::process(format!("Failed to run rustfmt: {}", e)))?;
-    
+
     Ok(output.status.success())
 }
 
@@ -129,18 +136,26 @@ pub async fn check_file_formatting(file_path: &Path) -> Result<bool> {
 pub async fn format_file(file_path: &Path) -> Result<()> {
     // Ensure rustfmt is installed
     ensure_rustfmt_installed().await?;
-    
+
     // Run rustfmt on single file
     let output = Command::new("rustfmt")
-        .arg(file_path.to_str().ok_or_else(|| Error::process("Invalid file path"))?)
+        .arg(
+            file_path
+                .to_str()
+                .ok_or_else(|| Error::process("Invalid file path"))?,
+        )
         .output()
         .map_err(|e| Error::process(format!("Failed to run rustfmt: {}", e)))?;
-    
+
     if output.status.success() {
         Ok(())
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(Error::process(format!("Failed to format {}: {}", file_path.display(), stderr)))
+        Err(Error::process(format!(
+            "Failed to format {}: {}",
+            file_path.display(),
+            stderr
+        )))
     }
 }
 
@@ -148,38 +163,39 @@ pub async fn format_file(file_path: &Path) -> Result<()> {
 pub async fn get_format_diff(project_path: &Path) -> Result<String> {
     // Ensure rustfmt is installed
     ensure_rustfmt_installed().await?;
-    
+
     // Run cargo fmt with diff output
     let output = Command::new("cargo")
         .args(&["fmt", "--", "--check", "--emit=stdout"])
         .current_dir(project_path)
         .output()
         .map_err(|e| Error::process(format!("Failed to run cargo fmt: {}", e)))?;
-    
+
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
 /// Ensure rustfmt is installed
 async fn ensure_rustfmt_installed() -> Result<()> {
-    let check = Command::new("rustfmt")
-        .arg("--version")
-        .output();
-    
-    if check.as_ref().map_or(true, |output| !output.status.success()) {
+    let check = Command::new("rustfmt").arg("--version").output();
+
+    if check
+        .as_ref()
+        .map_or(true, |output| !output.status.success())
+    {
         println!("📦 Installing rustfmt...");
-        
+
         let install = Command::new("rustup")
             .args(&["component", "add", "rustfmt"])
             .output()
             .map_err(|e| Error::process(format!("Failed to install rustfmt: {}", e)))?;
-        
+
         if !install.status.success() {
             return Err(Error::process("Failed to install rustfmt"));
         }
-        
+
         println!("✅ rustfmt installed successfully");
     }
-    
+
     Ok(())
 }
 
@@ -192,13 +208,13 @@ fn parse_format_output(stdout: &[u8], stderr: &[u8], success: bool) -> Result<Fo
             suggestions: vec![],
         });
     }
-    
+
     let stderr_str = String::from_utf8_lossy(stderr);
     let stdout_str = String::from_utf8_lossy(stdout);
-    
+
     let mut unformatted_files = Vec::new();
     let mut suggestions = Vec::new();
-    
+
     // Parse file names from stderr (rustfmt --check output)
     for line in stderr_str.lines() {
         if line.starts_with("Diff in") {
@@ -209,7 +225,7 @@ fn parse_format_output(stdout: &[u8], stderr: &[u8], success: bool) -> Result<Fo
             }
         }
     }
-    
+
     // Parse suggestions from stdout if available
     for line in stdout_str.lines() {
         if line.starts_with("warning:") || line.contains("formatting") {
@@ -217,14 +233,14 @@ fn parse_format_output(stdout: &[u8], stderr: &[u8], success: bool) -> Result<Fo
             if let Some(pos) = line.find(".rs:") {
                 let start = line.rfind('/').unwrap_or(0);
                 let file = &line[start..pos + 3];
-                
+
                 // Try to extract line number
                 let line_num = if let Some(num_start) = line[pos + 3..].find(':') {
                     line[pos + 4..pos + 3 + num_start].parse().unwrap_or(0)
                 } else {
                     0
                 };
-                
+
                 suggestions.push(FormatSuggestion {
                     file: file.to_string(),
                     line: line_num,
@@ -233,7 +249,7 @@ fn parse_format_output(stdout: &[u8], stderr: &[u8], success: bool) -> Result<Fo
             }
         }
     }
-    
+
     Ok(FormatResult {
         formatted: false,
         unformatted_files,
@@ -244,7 +260,7 @@ fn parse_format_output(stdout: &[u8], stderr: &[u8], success: bool) -> Result<Fo
 /// Apply formatting configuration
 pub async fn apply_rustfmt_config(project_path: &Path) -> Result<()> {
     let rustfmt_toml = project_path.join("rustfmt.toml");
-    
+
     if !rustfmt_toml.exists() {
         // Create default rustfmt.toml
         let config = r#"# Ferrous Forge rustfmt configuration
@@ -276,21 +292,21 @@ match_block_trailing_comma = false
 blank_lines_upper_bound = 1
 blank_lines_lower_bound = 0
 "#;
-        
+
         tokio::fs::write(&rustfmt_toml, config)
             .await
             .map_err(|e| Error::process(format!("Failed to create rustfmt.toml: {}", e)))?;
-        
+
         println!("✅ Created rustfmt.toml with Ferrous Forge standards");
     }
-    
+
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_format_result_formatted() {
         let result = FormatResult {
@@ -298,12 +314,12 @@ mod tests {
             unformatted_files: vec![],
             suggestions: vec![],
         };
-        
+
         assert!(result.formatted);
         assert!(result.unformatted_files.is_empty());
         assert!(result.suggestions.is_empty());
     }
-    
+
     #[test]
     fn test_format_result_unformatted() {
         let result = FormatResult {
@@ -315,7 +331,7 @@ mod tests {
                 description: "Formatting required".to_string(),
             }],
         };
-        
+
         assert!(!result.formatted);
         assert_eq!(result.unformatted_files.len(), 1);
         assert_eq!(result.suggestions.len(), 1);

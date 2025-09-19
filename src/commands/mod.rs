@@ -58,10 +58,10 @@ pub enum Commands {
     },
 }
 
-pub mod init;
-pub mod status;
-pub mod update;
 pub mod config;
-pub mod validate;
+pub mod init;
 pub mod rollback;
+pub mod status;
 pub mod uninstall;
+pub mod update;
+pub mod validate;

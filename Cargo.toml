@@ -1,8 +1,8 @@
 [package]
 name = "ferrous-forge"
 version = "1.0.0"
-edition = "2024"
-rust-version = "1.85"
+edition = "2021"
+rust-version = "1.82"
 authors = ["Ferrous Forge Contributors"]
 description = "System-wide Rust development standards enforcer"
 documentation = "https://docs.rs/ferrous-forge"
@@ -78,6 +78,7 @@ predicates = "3.1"
 rstest = "0.22"
 proptest = "1.5"
 insta = "1.40"
+criterion = "0.5"
 
 [build-dependencies]
 built = "0.7"
@@ -128,6 +129,10 @@ missing_errors_doc = "allow"
 [[bin]]
 name = "ferrous-forge"
 path = "src/main.rs"
+
+[[bench]]
+name = "validation_bench"
+harness = false
 
 [package.metadata.docs.rs]
 all-features = true

@@ -42,16 +42,19 @@ impl AuditReport {
     /// Generate a human-readable report
     pub fn report(&self) -> String {
         let mut report = String::new();
-        
+
         if self.passed {
             report.push_str("✅ Security audit passed - No vulnerabilities found!\n");
-            report.push_str(&format!("   Scanned {} dependencies\n", self.dependencies_count));
+            report.push_str(&format!(
+                "   Scanned {} dependencies\n",
+                self.dependencies_count
+            ));
         } else {
             report.push_str(&format!(
                 "🚨 Security audit failed - Found {} vulnerabilities\n\n",
                 self.vulnerabilities.len()
             ));
-            
+
             for vuln in &self.vulnerabilities {
                 let severity_emoji = match vuln.severity.to_lowercase().as_str() {
                     "critical" => "🔴",
@@ -60,7 +63,7 @@ impl AuditReport {
                     "low" => "🟢",
                     _ => "⚪",
                 };
-                
+
                 report.push_str(&format!(
                     "{} {} [{}] in {} v{}\n",
                     severity_emoji,
@@ -71,15 +74,15 @@ impl AuditReport {
                 ));
                 report.push_str(&format!("   {}\n", vuln.title));
                 report.push_str(&format!("   {}\n", vuln.description));
-                
+
                 if let Some(cvss) = vuln.cvss {
                     report.push_str(&format!("   CVSS Score: {:.1}\n", cvss));
                 }
-                
+
                 report.push('\n');
             }
         }
-        
+
         report
     }
 }
@@ -88,50 +91,51 @@ impl AuditReport {
 pub async fn run_security_audit(project_path: &Path) -> Result<AuditReport> {
     // Ensure cargo-audit is installed
     ensure_cargo_audit_installed().await?;
-    
+
     // Run cargo audit with JSON output
     let output = Command::new("cargo")
         .args(&["audit", "--json"])
         .current_dir(project_path)
         .output()
         .map_err(|e| Error::process(format!("Failed to run cargo audit: {}", e)))?;
-    
+
     // Parse the output
     parse_audit_output(&output.stdout)
 }
 
 /// Ensure cargo-audit is installed
 async fn ensure_cargo_audit_installed() -> Result<()> {
-    let check = Command::new("cargo")
-        .args(&["audit", "--version"])
-        .output();
-    
-    if check.as_ref().map_or(true, |output| !output.status.success()) {
+    let check = Command::new("cargo").args(&["audit", "--version"]).output();
+
+    if check
+        .as_ref()
+        .map_or(true, |output| !output.status.success())
+    {
         println!("📦 Installing cargo-audit for security scanning...");
-        
+
         let install = Command::new("cargo")
             .args(&["install", "cargo-audit", "--locked"])
             .output()
             .map_err(|e| Error::process(format!("Failed to install cargo-audit: {}", e)))?;
-        
+
         if !install.status.success() {
             return Err(Error::process("Failed to install cargo-audit"));
         }
-        
+
         println!("✅ cargo-audit installed successfully");
     }
-    
+
     Ok(())
 }
 
 /// Parse cargo audit JSON output
 fn parse_audit_output(output: &[u8]) -> Result<AuditReport> {
     let output_str = String::from_utf8_lossy(output);
-    
+
     // Try to parse as JSON
     if let Ok(json) = serde_json::from_str::<serde_json::Value>(&output_str) {
         let mut vulnerabilities = Vec::new();
-        
+
         // Extract vulnerabilities from the JSON structure
         if let Some(vulns) = json["vulnerabilities"]["list"].as_array() {
             for vuln in vulns {
@@ -163,11 +167,9 @@ fn parse_audit_output(output: &[u8]) -> Result<AuditReport> {
                 }
             }
         }
-        
-        let dependencies_count = json["dependencies"]["count"]
-            .as_u64()
-            .unwrap_or(0) as usize;
-        
+
+        let dependencies_count = json["dependencies"]["count"].as_u64().unwrap_or(0) as usize;
+
         Ok(AuditReport {
             passed: vulnerabilities.is_empty(),
             vulnerabilities,
@@ -188,7 +190,7 @@ fn parse_audit_output(output: &[u8]) -> Result<AuditReport> {
             } else {
                 0
             };
-            
+
             Ok(AuditReport {
                 vulnerabilities: vec![],
                 dependencies_count: 0,
@@ -205,7 +207,7 @@ pub async fn quick_security_check(project_path: &Path) -> Result<bool> {
     if !cargo_lock.exists() {
         return Ok(true); // No dependencies to check
     }
-    
+
     // Run quick audit check
     match run_security_audit(project_path).await {
         Ok(report) => Ok(report.passed),
@@ -216,7 +218,7 @@ pub async fn quick_security_check(project_path: &Path) -> Result<bool> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_vulnerability_severity_classification() {
         let vuln = Vulnerability {
@@ -228,11 +230,11 @@ mod tests {
             cve: Some("CVE-2024-0001".to_string()),
             cvss: Some(9.5),
         };
-        
+
         assert_eq!(vuln.severity, "critical");
         assert!(vuln.cvss.unwrap_or(0.0) > 9.0);
     }
-    
+
     #[test]
     fn test_audit_report_passed() {
         let report = AuditReport {
@@ -240,7 +242,7 @@ mod tests {
             dependencies_count: 10,
             passed: true,
         };
-        
+
         assert!(report.passed);
         assert!(report.vulnerabilities.is_empty());
     }

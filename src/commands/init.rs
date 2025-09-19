@@ -1,16 +1,22 @@
 //! Initialize command implementation
 
-use crate::{Result, config::Config};
+use crate::{config::Config, Result};
 use console::style;
 
 /// Execute the init command
 pub async fn execute(force: bool) -> Result<()> {
-    println!("{}", style("🔨 Initializing Ferrous Forge...").bold().cyan());
+    println!(
+        "{}",
+        style("🔨 Initializing Ferrous Forge...").bold().cyan()
+    );
 
     // Check if already initialized
     let config = Config::load_or_default().await?;
     if config.is_initialized() && !force {
-        println!("{}", style("✅ Ferrous Forge is already initialized!").green());
+        println!(
+            "{}",
+            style("✅ Ferrous Forge is already initialized!").green()
+        );
         println!("Use --force to reinitialize.");
         return Ok(());
     }
@@ -36,7 +42,12 @@ pub async fn execute(force: bool) -> Result<()> {
     config.mark_initialized();
     config.save().await?;
 
-    println!("{}", style("🎉 Ferrous Forge initialization complete!").bold().green());
+    println!(
+        "{}",
+        style("🎉 Ferrous Forge initialization complete!")
+            .bold()
+            .green()
+    );
     println!();
     println!("Next steps:");
     println!("• Restart your shell or run: source ~/.bashrc");
@@ -49,10 +60,10 @@ pub async fn execute(force: bool) -> Result<()> {
 async fn install_cargo_hijacking() -> Result<()> {
     // This will create wrapper scripts that intercept cargo commands
     // and apply our standards before delegating to the real cargo
-    
-    let home_dir = dirs::home_dir()
-        .ok_or_else(|| crate::Error::config("Could not find home directory"))?;
-    
+
+    let home_dir =
+        dirs::home_dir().ok_or_else(|| crate::Error::config("Could not find home directory"))?;
+
     let bin_dir = home_dir.join(".local").join("bin");
     tokio::fs::create_dir_all(&bin_dir).await?;
 
@@ -75,9 +86,9 @@ async fn install_cargo_hijacking() -> Result<()> {
 
 async fn install_clippy_config() -> Result<()> {
     // Copy our strict clippy.toml to the home directory
-    let home_dir = dirs::home_dir()
-        .ok_or_else(|| crate::Error::config("Could not find home directory"))?;
-    
+    let home_dir =
+        dirs::home_dir().ok_or_else(|| crate::Error::config("Could not find home directory"))?;
+
     let clippy_config = include_str!("../../templates/clippy.toml");
     let clippy_path = home_dir.join(".clippy.toml");
     tokio::fs::write(&clippy_path, clippy_config).await?;
@@ -87,9 +98,9 @@ async fn install_clippy_config() -> Result<()> {
 
 async fn install_shell_integration() -> Result<()> {
     // Add Ferrous Forge to PATH and setup completion
-    let home_dir = dirs::home_dir()
-        .ok_or_else(|| crate::Error::config("Could not find home directory"))?;
-    
+    let home_dir =
+        dirs::home_dir().ok_or_else(|| crate::Error::config("Could not find home directory"))?;
+
     let shell_config = format!(
         r#"
 # Ferrous Forge - Rust Development Standards Enforcer

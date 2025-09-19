@@ -1,6 +1,6 @@
 //! Status command implementation
 
-use crate::{Result, config::Config};
+use crate::{config::Config, Result};
 use console::style;
 
 /// Execute the status command
@@ -33,7 +33,10 @@ pub async fn execute() -> Result<()> {
     println!("  Max File Lines: {}", config.max_file_lines);
     println!("  Max Function Lines: {}", config.max_function_lines);
     println!("  Enforce Edition 2024: {}", config.enforce_edition_2024);
-    println!("  Ban Underscore Bandaid: {}", config.ban_underscore_bandaid);
+    println!(
+        "  Ban Underscore Bandaid: {}",
+        config.ban_underscore_bandaid
+    );
     println!("  Require Documentation: {}", config.require_documentation);
     println!();
 

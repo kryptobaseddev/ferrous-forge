@@ -3,7 +3,7 @@
 //! This module handles automatic updates of the Ferrous Forge binary and
 //! configuration rules from remote sources.
 
-use crate::{Result, Error};
+use crate::{Error, Result};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -91,10 +91,11 @@ impl UpdateManager {
     /// Check if an update is available
     pub async fn check_for_updates(&self) -> Result<Option<UpdateInfo>> {
         let url = self.get_releases_url();
-        
+
         tracing::info!("Checking for updates from: {}", url);
-        
-        let response = self._client
+
+        let response = self
+            ._client
             .get(&url)
             .header("Accept", "application/vnd.github.v3+json")
             .header("User-Agent", format!("ferrous-forge/{}", crate::VERSION))
@@ -103,7 +104,10 @@ impl UpdateManager {
             .map_err(|e| Error::update(format!("Failed to fetch releases: {}", e)))?;
 
         if !response.status().is_success() {
-            return Err(Error::update(format!("GitHub API returned status: {}", response.status())));
+            return Err(Error::update(format!(
+                "GitHub API returned status: {}",
+                response.status()
+            )));
         }
 
         let body = response
@@ -130,15 +134,19 @@ impl UpdateManager {
         {
             // Download the binary from the GitHub release
             tracing::info!("Downloading update from: {}", update_info.download_url);
-            
-            let response = self._client
+
+            let response = self
+                ._client
                 .get(&update_info.download_url)
                 .send()
                 .await
                 .map_err(|e| Error::update(format!("Failed to download update: {}", e)))?;
 
             if !response.status().is_success() {
-                return Err(Error::update(format!("Download failed with status: {}", response.status())));
+                return Err(Error::update(format!(
+                    "Download failed with status: {}",
+                    response.status()
+                )));
             }
 
             let binary_data = response
@@ -147,8 +155,9 @@ impl UpdateManager {
                 .map_err(|e| Error::update(format!("Failed to read binary data: {}", e)))?;
 
             // Get current executable path
-            let current_exe = std::env::current_exe()
-                .map_err(|e| Error::update(format!("Failed to get current executable path: {}", e)))?;
+            let current_exe = std::env::current_exe().map_err(|e| {
+                Error::update(format!("Failed to get current executable path: {}", e))
+            })?;
 
             // Create a temporary file for the new binary
             let temp_path = current_exe.with_extension("new");
@@ -196,7 +205,7 @@ impl UpdateManager {
     /// Get the URL for checking releases based on the channel
     fn get_releases_url(&self) -> String {
         let base_url = "https://api.github.com/repos/yourusername/ferrous-forge";
-        
+
         match self.channel {
             UpdateChannel::Stable => format!("{}/releases/latest", base_url),
             UpdateChannel::Beta => format!("{}/releases?prerelease=true", base_url),
@@ -208,14 +217,17 @@ impl UpdateManager {
     async fn _create_backup(&self) -> Result<PathBuf> {
         let config_dir = crate::config::Config::config_dir_path()?;
         let backup_dir = config_dir.join("backups");
-        let backup_path = backup_dir.join(format!("backup-{}", chrono::Utc::now().format("%Y%m%d-%H%M%S")));
+        let backup_path = backup_dir.join(format!(
+            "backup-{}",
+            chrono::Utc::now().format("%Y%m%d-%H%M%S")
+        ));
 
         tokio::fs::create_dir_all(&backup_path).await?;
 
         // Backup current binary
         let current_exe = std::env::current_exe()
             .map_err(|e| Error::update(format!("Failed to get current executable path: {}", e)))?;
-        
+
         let backup_exe = backup_path.join("ferrous-forge");
         tokio::fs::copy(&current_exe, &backup_exe).await?;
 
@@ -241,9 +253,10 @@ impl UpdateManager {
 
         // Restore binary
         if backup_exe.exists() {
-            let current_exe = std::env::current_exe()
-                .map_err(|e| Error::update(format!("Failed to get current executable path: {}", e)))?;
-            
+            let current_exe = std::env::current_exe().map_err(|e| {
+                Error::update(format!("Failed to get current executable path: {}", e))
+            })?;
+
             tokio::fs::copy(&backup_exe, &current_exe).await?;
             tracing::info!("Restored binary from backup");
         }
@@ -304,7 +317,10 @@ impl UpdateManager {
             return Ok(None); // Skip prereleases for stable channel
         }
 
-        let version_str = release.tag_name.strip_prefix('v').unwrap_or(&release.tag_name);
+        let version_str = release
+            .tag_name
+            .strip_prefix('v')
+            .unwrap_or(&release.tag_name);
         let version = Version::parse(version_str)
             .map_err(|e| Error::update(format!("Invalid version format: {}", e)))?;
 
@@ -315,10 +331,13 @@ impl UpdateManager {
 
         // Find the binary asset for current platform
         let platform_suffix = self.get_platform_suffix();
-        let asset = release.assets
+        let asset = release
+            .assets
             .iter()
             .find(|asset| asset.name.contains(&platform_suffix))
-            .ok_or_else(|| Error::update(format!("No binary found for platform: {}", platform_suffix)))?;
+            .ok_or_else(|| {
+                Error::update(format!("No binary found for platform: {}", platform_suffix))
+            })?;
 
         Ok(Some(UpdateInfo {
             version,
@@ -345,7 +364,9 @@ impl UpdateManager {
         for release_value in releases {
             if let Ok(release) = serde_json::from_value::<serde_json::Value>(release_value) {
                 if release["prerelease"].as_bool().unwrap_or(false) {
-                    return self.parse_latest_release(&serde_json::to_string(&release)?).await;
+                    return self
+                        .parse_latest_release(&serde_json::to_string(&release)?)
+                        .await;
                 }
             }
         }
@@ -366,7 +387,7 @@ impl UpdateManager {
     fn get_platform_suffix(&self) -> String {
         let arch = std::env::consts::ARCH;
         let os = std::env::consts::OS;
-        
+
         match (os, arch) {
             ("linux", "x86_64") => "x86_64-unknown-linux-gnu".to_string(),
             ("linux", "aarch64") => "aarch64-unknown-linux-gnu".to_string(),
@@ -381,7 +402,7 @@ impl UpdateManager {
 /// Check if automatic updates are enabled and perform update check
 pub async fn check_auto_update() -> Result<()> {
     let config = crate::config::Config::load_or_default().await?;
-    
+
     if !config.auto_update {
         return Ok(());
     }
@@ -391,7 +412,7 @@ pub async fn check_auto_update() -> Result<()> {
 
     if let Some(update_info) = updater.check_for_updates().await? {
         tracing::info!("Update available: {}", update_info.version);
-        
+
         if update_info.is_security_update {
             // Auto-install security updates
             updater.install_update(&update_info).await?;

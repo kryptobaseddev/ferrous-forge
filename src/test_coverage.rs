@@ -132,7 +132,7 @@ impl CoverageAnalyzer {
         }
 
         tracing::info!("Installing cargo-tarpaulin...");
-        
+
         let output = Command::new("cargo")
             .args(["install", "cargo-tarpaulin"])
             .output()
@@ -140,7 +140,10 @@ impl CoverageAnalyzer {
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(Error::process(format!("Failed to install cargo-tarpaulin: {}", stderr)));
+            return Err(Error::process(format!(
+                "Failed to install cargo-tarpaulin: {}",
+                stderr
+            )));
         }
 
         tracing::info!("cargo-tarpaulin installed successfully");
@@ -151,7 +154,7 @@ impl CoverageAnalyzer {
     pub async fn run_coverage(&self, project_path: &Path) -> Result<CoverageReport> {
         if !self.check_tarpaulin_installed()? {
             return Err(Error::validation(
-                "cargo-tarpaulin not installed. Run 'cargo install cargo-tarpaulin' first."
+                "cargo-tarpaulin not installed. Run 'cargo install cargo-tarpaulin' first.",
             ));
         }
 
@@ -161,9 +164,12 @@ impl CoverageAnalyzer {
         let mut args = vec![
             "tarpaulin",
             "--verbose",
-            "--timeout", "120",
-            "--out", "Json",
-            "--exclude-files", &exclude_files_str,
+            "--timeout",
+            "120",
+            "--out",
+            "Json",
+            "--exclude-files",
+            &exclude_files_str,
         ];
 
         // Add exclude directories
@@ -179,7 +185,10 @@ impl CoverageAnalyzer {
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(Error::process(format!("cargo tarpaulin failed: {}", stderr)));
+            return Err(Error::process(format!(
+                "cargo tarpaulin failed: {}",
+                stderr
+            )));
         }
 
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -224,24 +233,28 @@ impl CoverageAnalyzer {
         for (file_path, file_data) in tarpaulin_data.files {
             // Estimate function coverage (tarpaulin doesn't provide this directly)
             let estimated_functions = (file_data.lines_total / 10).max(1); // Rough estimate
-            let estimated_functions_tested = ((file_data.line_coverage / 100.0) * estimated_functions as f64) as u32;
-            
+            let estimated_functions_tested =
+                ((file_data.line_coverage / 100.0) * estimated_functions as f64) as u32;
+
             total_functions += estimated_functions;
             total_functions_tested += estimated_functions_tested;
 
-            file_coverage.insert(file_path.clone(), FileCoverage {
-                file_path,
-                line_coverage: file_data.line_coverage,
-                function_coverage: if estimated_functions > 0 {
-                    (estimated_functions_tested as f64 / estimated_functions as f64) * 100.0
-                } else {
-                    100.0
+            file_coverage.insert(
+                file_path.clone(),
+                FileCoverage {
+                    file_path,
+                    line_coverage: file_data.line_coverage,
+                    function_coverage: if estimated_functions > 0 {
+                        (estimated_functions_tested as f64 / estimated_functions as f64) * 100.0
+                    } else {
+                        100.0
+                    },
+                    lines_tested: file_data.lines_covered,
+                    total_lines: file_data.lines_total,
+                    functions_tested: estimated_functions_tested,
+                    total_functions: estimated_functions,
                 },
-                lines_tested: file_data.lines_covered,
-                total_lines: file_data.lines_total,
-                functions_tested: estimated_functions_tested,
-                total_functions: estimated_functions,
-            });
+            );
         }
 
         let function_coverage = if total_functions > 0 {
@@ -250,8 +263,10 @@ impl CoverageAnalyzer {
             100.0
         };
 
-        let branch_coverage = if let (Some(covered), Some(total)) = 
-            (tarpaulin_data.branches_covered, tarpaulin_data.branches_total) {
+        let branch_coverage = if let (Some(covered), Some(total)) = (
+            tarpaulin_data.branches_covered,
+            tarpaulin_data.branches_total,
+        ) {
             if total > 0 {
                 (covered as f64 / total as f64) * 100.0
             } else {
@@ -302,7 +317,7 @@ impl CoverageAnalyzer {
 
         if !violations.is_empty() {
             let message = format!("Coverage violations:\n  • {}", violations.join("\n  • "));
-            
+
             if self.config.fail_on_low_coverage {
                 return Err(Error::validation(message));
             }
@@ -315,33 +330,59 @@ impl CoverageAnalyzer {
     /// Generate a human-readable coverage report
     pub fn format_coverage_report(&self, report: &CoverageReport) -> String {
         let mut output = String::new();
-        
+
         output.push_str("📊 Test Coverage Report\n");
         output.push_str("═══════════════════════\n\n");
-        
+
         output.push_str(&format!("📈 Overall Coverage:\n"));
-        output.push_str(&format!("  • Lines:     {:.1}% ({}/{})\n", 
-            report.line_coverage, report.lines_tested, report.total_lines));
-        output.push_str(&format!("  • Functions: {:.1}% ({}/{})\n", 
-            report.function_coverage, report.functions_tested, report.total_functions));
-        output.push_str(&format!("  • Branches:  {:.1}% ({}/{})\n\n", 
-            report.branch_coverage, report.branches_tested, report.total_branches));
+        output.push_str(&format!(
+            "  • Lines:     {:.1}% ({}/{})\n",
+            report.line_coverage, report.lines_tested, report.total_lines
+        ));
+        output.push_str(&format!(
+            "  • Functions: {:.1}% ({}/{})\n",
+            report.function_coverage, report.functions_tested, report.total_functions
+        ));
+        output.push_str(&format!(
+            "  • Branches:  {:.1}% ({}/{})\n\n",
+            report.branch_coverage, report.branches_tested, report.total_branches
+        ));
 
         // Coverage status
-        let line_status = if report.line_coverage >= self.config.min_line_coverage { "✅" } else { "❌" };
-        let func_status = if report.function_coverage >= self.config.min_function_coverage { "✅" } else { "❌" };
-        let branch_status = if report.branch_coverage >= self.config.min_branch_coverage { "✅" } else { "❌" };
+        let line_status = if report.line_coverage >= self.config.min_line_coverage {
+            "✅"
+        } else {
+            "❌"
+        };
+        let func_status = if report.function_coverage >= self.config.min_function_coverage {
+            "✅"
+        } else {
+            "❌"
+        };
+        let branch_status = if report.branch_coverage >= self.config.min_branch_coverage {
+            "✅"
+        } else {
+            "❌"
+        };
 
         output.push_str("🎯 Threshold Status:\n");
-        output.push_str(&format!("  {} Lines:     {:.1}% (min: {:.1}%)\n", 
-            line_status, report.line_coverage, self.config.min_line_coverage));
-        output.push_str(&format!("  {} Functions: {:.1}% (min: {:.1}%)\n", 
-            func_status, report.function_coverage, self.config.min_function_coverage));
-        output.push_str(&format!("  {} Branches:  {:.1}% (min: {:.1}%)\n\n", 
-            branch_status, report.branch_coverage, self.config.min_branch_coverage));
+        output.push_str(&format!(
+            "  {} Lines:     {:.1}% (min: {:.1}%)\n",
+            line_status, report.line_coverage, self.config.min_line_coverage
+        ));
+        output.push_str(&format!(
+            "  {} Functions: {:.1}% (min: {:.1}%)\n",
+            func_status, report.function_coverage, self.config.min_function_coverage
+        ));
+        output.push_str(&format!(
+            "  {} Branches:  {:.1}% (min: {:.1}%)\n\n",
+            branch_status, report.branch_coverage, self.config.min_branch_coverage
+        ));
 
         // Top files with low coverage
-        let mut low_coverage_files: Vec<_> = report.file_coverage.values()
+        let mut low_coverage_files: Vec<_> = report
+            .file_coverage
+            .values()
             .filter(|file| file.line_coverage < self.config.min_line_coverage)
             .collect();
         low_coverage_files.sort_by(|a, b| a.line_coverage.partial_cmp(&b.line_coverage).unwrap());
@@ -349,10 +390,16 @@ impl CoverageAnalyzer {
         if !low_coverage_files.is_empty() {
             output.push_str("⚠️  Files Below Threshold:\n");
             for file in low_coverage_files.iter().take(5) {
-                output.push_str(&format!("  • {}: {:.1}%\n", file.file_path, file.line_coverage));
+                output.push_str(&format!(
+                    "  • {}: {:.1}%\n",
+                    file.file_path, file.line_coverage
+                ));
             }
             if low_coverage_files.len() > 5 {
-                output.push_str(&format!("  ... and {} more files\n", low_coverage_files.len() - 5));
+                output.push_str(&format!(
+                    "  ... and {} more files\n",
+                    low_coverage_files.len() - 5
+                ));
             }
             output.push('\n');
         }
@@ -369,13 +416,13 @@ impl CoverageAnalyzer {
     /// Check coverage for a project
     pub async fn check_project_coverage(&self, project_path: &Path) -> Result<()> {
         println!("🧪 Checking test coverage...");
-        
+
         let report = self.run_coverage(project_path).await?;
-        
+
         println!("{}", self.format_coverage_report(&report));
-        
+
         self.validate_coverage(&report)?;
-        
+
         println!("✅ Coverage check completed successfully");
         Ok(())
     }
