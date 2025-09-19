@@ -3,8 +3,8 @@
 use crate::safety::{PipelineStage, SafetyPipeline};
 use crate::Result;
 use console::style;
-use std::path::Path;
 use std::fs;
+use std::path::Path;
 
 /// Handle safety install command
 pub async fn handle_install(force: bool, project_path: &Path) -> Result<()> {
@@ -25,7 +25,7 @@ pub async fn handle_install(force: bool, project_path: &Path) -> Result<()> {
     // Pre-commit hook
     let pre_commit_path = hooks_dir.join("pre-commit");
     let pre_commit_exists = pre_commit_path.exists();
-    
+
     if pre_commit_exists && !force {
         println!("⚠️  Pre-commit hook already exists. Use --force to overwrite.");
     } else {
@@ -57,7 +57,7 @@ exit 0
     // Pre-push hook
     let pre_push_path = hooks_dir.join("pre-push");
     let pre_push_exists = pre_push_path.exists();
-    
+
     if pre_push_exists && !force {
         println!("⚠️  Pre-push hook already exists. Use --force to overwrite.");
     } else {

@@ -392,7 +392,7 @@ impl RustValidator {
         // Check for allow attributes at the top of the file
         let mut allow_unwrap = false;
         let mut allow_expect = false;
-        
+
         for line in &lines {
             let line_stripped = line.trim();
             if line_stripped.starts_with("#![allow(") {
@@ -411,7 +411,10 @@ impl RustValidator {
                 allow_expect = true;
             }
             // Stop checking after we hit the first non-attribute line (but allow doc comments)
-            if !line_stripped.starts_with("#") && !line_stripped.starts_with("//!") && !line_stripped.is_empty() {
+            if !line_stripped.starts_with("#")
+                && !line_stripped.starts_with("//!")
+                && !line_stripped.is_empty()
+            {
                 break;
             }
         }
