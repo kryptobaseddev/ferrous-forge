@@ -44,7 +44,9 @@ pub struct GitHubRelease {
 /// Simplified author information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Author {
+    /// GitHub username
     pub login: String,
+    /// GitHub user ID
     pub id: u64,
 }
 

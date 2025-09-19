@@ -48,21 +48,31 @@ pub enum UpdateRecommendation {
     UpToDate,
     /// Minor update available
     MinorUpdate {
+        /// Current Rust version
         current: Version,
+        /// Latest available version
         latest: Version,
+        /// URL to the release page
         release_url: String,
     },
     /// Major update available
     MajorUpdate {
+        /// Current Rust version
         current: Version,
+        /// Latest available version
         latest: Version,
+        /// URL to the release page
         release_url: String,
     },
     /// Security update available
     SecurityUpdate {
+        /// Current Rust version
         current: Version,
+        /// Latest available version
         latest: Version,
+        /// URL to the release page
         release_url: String,
+        /// Security update details
         details: String,
     },
 }

@@ -58,11 +58,13 @@ pub enum Commands {
     },
     /// Rust version management
     Rust {
+        /// Rust version management subcommand
         #[command(subcommand)]
         command: RustCommand,
     },
     /// Edition management
     Edition {
+        /// Edition management subcommand
         #[command(subcommand)]
         command: EditionCommand,
     },
