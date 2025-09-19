@@ -145,6 +145,15 @@ pub enum EditionCommand {
 pub enum SafetyCommand {
     /// Check safety pipeline status
     Status,
+    /// Install git hooks for safety pipeline
+    Install {
+        /// Force reinstall even if hooks already exist
+        #[arg(short, long)]
+        force: bool,
+        /// Project path
+        #[arg(default_value = ".")]
+        path: std::path::PathBuf,
+    },
     /// Run safety checks manually
     Check {
         /// Pipeline stage to check

@@ -61,6 +61,9 @@ async fn main() -> Result<()> {
         },
         commands::Commands::Safety { command } => match command {
             commands::SafetyCommand::Status => commands::safety::handle_status().await,
+            commands::SafetyCommand::Install { force, path } => {
+                commands::safety::handle_install(force, &path).await
+            }
             commands::SafetyCommand::Check {
                 stage,
                 path,

@@ -4,6 +4,97 @@ use crate::safety::{PipelineStage, SafetyPipeline};
 use crate::Result;
 use console::style;
 use std::path::Path;
+use std::fs;
+
+/// Handle safety install command
+pub async fn handle_install(force: bool, project_path: &Path) -> Result<()> {
+    println!("🔧 Installing Ferrous Forge Safety Pipeline Git Hooks");
+    println!("{}", "=".repeat(50));
+
+    // Check if it's a git repository
+    let git_dir = project_path.join(".git");
+    if !git_dir.exists() {
+        return Err(crate::error::Error::Config(
+            "Not a git repository. Run 'git init' first.".to_string(),
+        ));
+    }
+
+    let hooks_dir = git_dir.join("hooks");
+    fs::create_dir_all(&hooks_dir)?;
+
+    // Pre-commit hook
+    let pre_commit_path = hooks_dir.join("pre-commit");
+    let pre_commit_exists = pre_commit_path.exists();
+    
+    if pre_commit_exists && !force {
+        println!("⚠️  Pre-commit hook already exists. Use --force to overwrite.");
+    } else {
+        let pre_commit_content = r#"#!/bin/bash
+# Ferrous Forge Safety Pipeline - Pre-Commit Hook
+
+echo "🦀 Running Ferrous Forge safety checks..."
+ferrous-forge safety check --stage pre-commit
+
+if [ $? -ne 0 ]; then
+    echo "❌ Safety checks failed. Please fix the issues before committing."
+    exit 1
+fi
+
+echo "✅ All safety checks passed!"
+exit 0
+"#;
+        fs::write(&pre_commit_path, pre_commit_content)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = fs::metadata(&pre_commit_path)?.permissions();
+            perms.set_mode(0o755);
+            fs::set_permissions(&pre_commit_path, perms)?;
+        }
+        println!("✅ Installed pre-commit hook");
+    }
+
+    // Pre-push hook
+    let pre_push_path = hooks_dir.join("pre-push");
+    let pre_push_exists = pre_push_path.exists();
+    
+    if pre_push_exists && !force {
+        println!("⚠️  Pre-push hook already exists. Use --force to overwrite.");
+    } else {
+        let pre_push_content = r#"#!/bin/bash
+# Ferrous Forge Safety Pipeline - Pre-Push Hook
+
+echo "🦀 Running Ferrous Forge safety checks..."
+ferrous-forge safety check --stage pre-push
+
+if [ $? -ne 0 ]; then
+    echo "❌ Safety checks failed. Please fix the issues before pushing."
+    exit 1
+fi
+
+echo "✅ All safety checks passed!"
+exit 0
+"#;
+        fs::write(&pre_push_path, pre_push_content)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = fs::metadata(&pre_push_path)?.permissions();
+            perms.set_mode(0o755);
+            fs::set_permissions(&pre_push_path, perms)?;
+        }
+        println!("✅ Installed pre-push hook");
+    }
+
+    println!("\n🎉 Safety pipeline git hooks installed successfully!");
+    println!("\n📝 Next steps:");
+    println!("   1. The pre-commit hook will run before each commit");
+    println!("   2. The pre-push hook will run before each push");
+    println!("   3. To bypass temporarily: git commit --no-verify");
+    println!("   4. To uninstall: Remove .git/hooks/pre-commit and pre-push");
+
+    Ok(())
+}
 
 /// Handle safety check command
 pub async fn handle_check(stage_str: &str, project_path: &Path, verbose: bool) -> Result<()> {
