@@ -313,10 +313,11 @@ impl Default for MigrationStatus {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use tempfile::TempDir;
-
+    
     #[test]
     fn test_migration_options_default() {
         let options = MigrationOptions::default();

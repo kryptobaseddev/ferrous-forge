@@ -196,10 +196,11 @@ pub fn get_migration_recommendations(status: &EditionStatus) -> Vec<String> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use tempfile::TempDir;
-
+    
     #[test]
     fn test_edition_from_str() {
         assert_eq!(

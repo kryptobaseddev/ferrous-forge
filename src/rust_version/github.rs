@@ -181,9 +181,10 @@ impl GitHubClient {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-
+    
     #[test]
     fn test_parse_version_from_tag() {
         let client = GitHubClient::new(None).unwrap();
