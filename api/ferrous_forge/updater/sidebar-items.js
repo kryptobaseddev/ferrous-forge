@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["UpdateChannel"],"fn":["check_auto_update"],"struct":["UpdateInfo","UpdateManager"]};

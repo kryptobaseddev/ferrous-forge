@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["check_documentation_coverage","suggest_documentation"],"struct":["DocCoverage"]};

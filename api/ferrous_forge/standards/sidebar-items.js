@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["BannedPattern","BannedPatterns","CodingStandards","DependencyStandards","DocumentationStandards","EditionStandards","FileLimits","FunctionLimits","SecurityStandards"]};

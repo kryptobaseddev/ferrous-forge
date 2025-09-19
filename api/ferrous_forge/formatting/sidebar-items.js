@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["apply_rustfmt_config","auto_format","check_file_formatting","check_formatting","format_file","get_format_diff"],"struct":["FormatResult","FormatSuggestion"]};

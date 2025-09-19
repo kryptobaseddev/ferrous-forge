@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Commands"],"mod":["config","init","rollback","status","uninstall","update","validate"]};

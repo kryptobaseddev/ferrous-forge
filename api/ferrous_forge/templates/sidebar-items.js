@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["available_templates"],"struct":["ProjectTemplate","TemplateManager"]};
