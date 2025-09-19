@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Made validation methods public for benchmark access
   - Fixed cargo-nextest version compatibility by pinning to v0.9.72
   - Simplified benchmark CI to avoid criterion output path issues
+  - Fixed benchmark unused imports and missing documentation
+  - Removed unknown lint `unnecessary_map_or` (not available in older clippy)
+  - Updated upload-artifact action from v3 to v4 (v3 is deprecated)
+  - Fixed Codecov token passing with explicit token parameter
+  - Fixed rustup default toolchain setup in integration tests
 
 - **Rust Version Compatibility**
   - Downgraded minimum Rust version from 1.85 to 1.82 for wider compatibility

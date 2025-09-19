@@ -131,7 +131,6 @@ format_push_string = "allow"  # format! in tests is fine
 needless_borrows_for_generic_args = "allow"  # False positives with arrays
 needless_borrow = "allow"  # Style preference
 useless_format = "allow"  # Sometimes clearer
-unnecessary_map_or = "allow"  # Style preference
 manual_map = "allow"  # Sometimes clearer
 only_used_in_recursion = "allow"  # False positives
 
