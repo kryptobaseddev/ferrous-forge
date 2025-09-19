@@ -1,0 +1,558 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-19T19:08:20.444847003+00:00",
+    "project_path": ".",
+    "ferrous_forge_version": "1.3.0-dev",
+    "total_violations": 293,
+    "report_version": "1.0.0"
+  },
+  "summary": {
+    "compliance_percentage": 0.0,
+    "files_analyzed": 2,
+    "most_critical_issues": [
+      "UnderscoreBandaid violations (implement missing functionality)",
+      "Large files need splitting (validation.rs: 1133 lines)",
+      "Large functions need refactoring"
+    ],
+    "estimated_fix_time_hours": 73.25
+  },
+  "violations": [
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 12,
+      "message": "BANNED: .unwrap() in production code - use proper error handling with ?",
+      "code_snippet": "    let rt = Runtime::new().unwrap();",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 13,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "    let temp_dir = TempDir::new().expect(\"Failed to create temp directory\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 28,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "    .expect(\"Failed to write Cargo.toml\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 34,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "                    .expect(\"Failed to create validator\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 39,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "                    .expect(\"Failed to validate\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 47,
+      "message": "BANNED: .unwrap() in production code - use proper error handling with ?",
+      "code_snippet": "    let rt = Runtime::new().unwrap();",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 48,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "    let temp_dir = TempDir::new().expect(\"Failed to create temp directory\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 74,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "    .expect(\"Failed to write Rust file\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 80,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "                    .expect(\"Failed to create validator\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 85,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "                    .expect(\"Failed to validate\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 93,
+      "message": "BANNED: .unwrap() in production code - use proper error handling with ?",
+      "code_snippet": "    let rt = Runtime::new().unwrap();",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 94,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "    let temp_dir = TempDir::new().expect(\"Failed to create temp directory\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 98,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "    std::fs::create_dir(&src_dir).expect(\"Failed to create src dir\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 109,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "    .expect(\"Failed to write Cargo.toml\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 121,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "    .expect(\"Failed to write lib.rs\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 127,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "                    .expect(\"Failed to create validator\");",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "file": "./benches/validation_bench.rs",
+      "line": 131,
+      "message": "BANNED: .expect() in production code - use proper error handling with ?",
+      "code_snippet": "                    .expect(\"Failed to validate\")",
+      "suggested_fix": "Replace `.unwrap()` with `?` or proper error handling",
+      "auto_fixable": true,
+      "priority": 1
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/config.rs",
+      "line": 7,
+      "message": "Function has 80 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn execute(",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "FileTooLarge",
+      "file": "./src/commands/edition.rs",
+      "line": 334,
+      "message": "File has 334 lines, maximum allowed is 300",
+      "code_snippet": "}",
+      "suggested_fix": "Split file into smaller modules following single responsibility principle",
+      "auto_fixable": false,
+      "priority": 4
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/edition.rs",
+      "line": 13,
+      "message": "Function has 67 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn handle_check(path: &Path) -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/edition.rs",
+      "line": 80,
+      "message": "Function has 153 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn handle_migrate(",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "file": "./src/commands/edition.rs",
+      "line": 233,
+      "message": "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings",
+      "code_snippet": "pub async fn handle_analyze(path: &Path, edition_str: &str) -> Result<()> {",
+      "suggested_fix": "Remove unused parameter or implement missing functionality",
+      "auto_fixable": false,
+      "priority": 2
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/edition.rs",
+      "line": 233,
+      "message": "Function has 102 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn handle_analyze(path: &Path, edition_str: &str) -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/init.rs",
+      "line": 7,
+      "message": "Function has 53 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn execute(force: bool) -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/rust.rs",
+      "line": 9,
+      "message": "Function has 135 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn handle_check(verbose: bool) -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "file": "./src/commands/rust.rs",
+      "line": 144,
+      "message": "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings",
+      "code_snippet": "pub async fn handle_recommend(stable_only: bool) -> Result<()> {",
+      "suggested_fix": "Remove unused parameter or implement missing functionality",
+      "auto_fixable": false,
+      "priority": 2
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/rust.rs",
+      "line": 144,
+      "message": "Function has 88 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn handle_recommend(stable_only: bool) -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/rust.rs",
+      "line": 232,
+      "message": "Function has 59 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn handle_list(count: usize) -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "file": "./src/commands/safety.rs",
+      "line": 9,
+      "message": "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings",
+      "code_snippet": "pub async fn handle_check(stage_str: &str, project_path: &Path, verbose: bool) -> Result<()> {",
+      "suggested_fix": "Remove unused parameter or implement missing functionality",
+      "auto_fixable": false,
+      "priority": 2
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/safety.rs",
+      "line": 45,
+      "message": "Function has 91 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn handle_status() -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "file": "./src/commands/safety.rs",
+      "line": 136,
+      "message": "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings",
+      "code_snippet": "pub async fn test_individual_checks(project_path: &Path) -> Result<()> {",
+      "suggested_fix": "Remove unused parameter or implement missing functionality",
+      "auto_fixable": false,
+      "priority": 2
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/uninstall.rs",
+      "line": 11,
+      "message": "Line has 112 characters, maximum allowed is 100",
+      "code_snippet": "            \"Are you sure you want to uninstall Ferrous Forge? This will remove all system integration. [y/N]: \"",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/uninstall.rs",
+      "line": 8,
+      "message": "Function has 53 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn execute(confirm: bool) -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "file": "./src/commands/update.rs",
+      "line": 7,
+      "message": "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings",
+      "code_snippet": "pub async fn execute(channel: String, rules_only: bool, dry_run: bool) -> Result<()> {",
+      "suggested_fix": "Remove unused parameter or implement missing functionality",
+      "auto_fixable": false,
+      "priority": 2
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "file": "./src/commands/update.rs",
+      "line": 33,
+      "message": "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings",
+      "code_snippet": "async fn update_binary(channel: &str, dry_run: bool) -> Result<()> {",
+      "suggested_fix": "Remove unused parameter or implement missing functionality",
+      "auto_fixable": false,
+      "priority": 2
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "file": "./src/commands/update.rs",
+      "line": 49,
+      "message": "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings",
+      "code_snippet": "async fn update_rules(channel: &str, dry_run: bool) -> Result<()> {",
+      "suggested_fix": "Remove unused parameter or implement missing functionality",
+      "auto_fixable": false,
+      "priority": 2
+    },
+    {
+      "violation_type": "FileTooLarge",
+      "file": "./src/commands/validate.rs",
+      "line": 391,
+      "message": "File has 391 lines, maximum allowed is 300",
+      "code_snippet": "}",
+      "suggested_fix": "Split file into smaller modules following single responsibility principle",
+      "auto_fixable": false,
+      "priority": 4
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 58,
+      "message": "Line has 101 characters, maximum allowed is 100",
+      "code_snippet": "pub async fn execute(path: Option<PathBuf>, ai_report: bool, _compare_previous: bool) -> Result<()> {",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 202,
+      "message": "Line has 104 characters, maximum allowed is 100",
+      "code_snippet": "                    (\"Remove unused parameter or implement missing functionality\".to_string(), false, 2)",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 211,
+      "message": "Line has 115 characters, maximum allowed is 100",
+      "code_snippet": "                (\"Split file into smaller modules following single responsibility principle\".to_string(), false, 4)",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 214,
+      "message": "Line has 107 characters, maximum allowed is 100",
+      "code_snippet": "                (\"Extract helper functions or split into smaller, focused functions\".to_string(), false, 3)",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 236,
+      "message": "Line has 195 characters, maximum allowed is 100",
+      "code_snippet": "                \"1. Identify what functionality the parameter should provide\\n2. Either implement the functionality or remove the parameter\\n3. Update function signature and callers\".to_string(),",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 237,
+      "message": "Line has 149 characters, maximum allowed is 100",
+      "code_snippet": "                \"// Before: fn process(_unused: String, data: Data)\\n// After: fn process(data: Data) or implement the unused parameter\".to_string(),",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 241,
+      "message": "Line has 137 characters, maximum allowed is 100",
+      "code_snippet": "                \"1. Change function to return Result<T, Error>\\n2. Replace .unwrap() with ?\\n3. Handle errors at call sites\".to_string(),",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 246,
+      "message": "Line has 155 characters, maximum allowed is 100",
+      "code_snippet": "                \"1. Identify logical boundaries in the file\\n2. Create new module directory\\n3. Split into focused modules\\n4. Update imports\".to_string(),",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 247,
+      "message": "Line has 117 characters, maximum allowed is 100",
+      "code_snippet": "                \"// Split validation.rs into validation/mod.rs, validation/core.rs, validation/types.rs\".to_string(),",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 292,
+      "message": "Line has 105 characters, maximum allowed is 100",
+      "code_snippet": "            estimated_fix_time_hours: violations.len() as f64 * 0.25, // 15 minutes per violation average",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "LineTooLong",
+      "file": "./src/commands/validate.rs",
+      "line": 385,
+      "message": "Line has 105 characters, maximum allowed is 100",
+      "code_snippet": "        md.push_str(&format!(\"### {} ({} violations)\\n\", instruction.violation_type, instruction.count));",
+      "suggested_fix": "Review and fix according to Ferrous Forge standards",
+      "auto_fixable": false,
+      "priority": 3
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "file": "./src/commands/validate.rs",
+      "line": 58,
+      "message": "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings",
+      "code_snippet": "pub async fn execute(path: Option<PathBuf>, ai_report: bool, _compare_previous: bool) -> Result<()> {",
+      "suggested_fix": "Remove unused parameter or implement missing functionality",
+      "auto_fixable": false,
+      "priority": 2
+    },
+    {
+      "violation_type": "FunctionTooLarge",
+      "file": "./src/commands/validate.rs",
+      "line": 58,
+      "message": "Function has 117 lines, maximum allowed is 50",
+      "code_snippet": "pub async fn execute(path: Option<PathBuf>, ai_report: bool, _compare_previous: bool) -> Result<()> {",
+      "suggested_fix": "Extract helper functions or split into smaller, focused functions",
+      "auto_fixable": false,
+      "priority": 3
+    }
+  ],
+  "fix_instructions": [
+    {
+      "violation_type": "FunctionTooLarge",
+      "count": 42,
+      "fix_strategy": "Review and fix manually",
+      "example_fix": "",
+      "effort_level": "Moderate"
+    },
+    {
+      "violation_type": "UnderscoreBandaid",
+      "count": 88,
+      "fix_strategy": "1. Identify what functionality the parameter should provide\n2. Either implement the functionality or remove the parameter\n3. Update function signature and callers",
+      "example_fix": "// Before: fn process(_unused: String, data: Data)\n// After: fn process(data: Data) or implement the unused parameter",
+      "effort_level": "Moderate"
+    },
+    {
+      "violation_type": "LineTooLong",
+      "count": 17,
+      "fix_strategy": "Review and fix manually",
+      "example_fix": "",
+      "effort_level": "Moderate"
+    },
+    {
+      "violation_type": "UnwrapInProduction",
+      "count": 135,
+      "fix_strategy": "1. Change function to return Result<T, Error>\n2. Replace .unwrap() with ?\n3. Handle errors at call sites",
+      "example_fix": "// Before: value.unwrap()\n// After: value?",
+      "effort_level": "Easy"
+    },
+    {
+      "violation_type": "FileTooLarge",
+      "count": 11,
+      "fix_strategy": "1. Identify logical boundaries in the file\n2. Create new module directory\n3. Split into focused modules\n4. Update imports",
+      "example_fix": "// Split validation.rs into validation/mod.rs, validation/core.rs, validation/types.rs",
+      "effort_level": "Hard"
+    }
+  ]
+}
