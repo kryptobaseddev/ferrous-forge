@@ -79,6 +79,7 @@ rstest = "0.22"
 proptest = "1.5"
 insta = "1.40"
 criterion = "0.5"
+# Note: Dogfooding via external binary, not as dependency to avoid conflicts
 
 [build-dependencies]
 built = "0.7"

@@ -68,6 +68,12 @@ pub enum Commands {
         #[command(subcommand)]
         command: EditionCommand,
     },
+    /// Safety pipeline management
+    Safety {
+        /// Safety pipeline subcommand
+        #[command(subcommand)]
+        command: SafetyCommand,
+    },
 }
 
 /// Rust version management subcommands
@@ -128,11 +134,37 @@ pub enum EditionCommand {
     },
 }
 
+/// Safety pipeline management subcommands
+#[derive(Subcommand)]
+pub enum SafetyCommand {
+    /// Check safety pipeline status
+    Status,
+    /// Run safety checks manually
+    Check {
+        /// Pipeline stage to check
+        #[arg(long, default_value = "pre-commit")]
+        stage: String,
+        /// Project path
+        #[arg(default_value = ".")]
+        path: std::path::PathBuf,
+        /// Show verbose output
+        #[arg(short, long)]
+        verbose: bool,
+    },
+    /// Test individual safety checks
+    Test {
+        /// Project path
+        #[arg(default_value = ".")]
+        path: std::path::PathBuf,
+    },
+}
+
 pub mod config;
 pub mod edition;
 pub mod init;
 pub mod rollback;
 pub mod rust;
+pub mod safety;
 pub mod status;
 pub mod uninstall;
 pub mod update;

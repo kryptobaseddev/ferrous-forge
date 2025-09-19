@@ -45,6 +45,12 @@ Ferrous Forge is a **system-wide Rust development standards enforcer** that auto
 - **Compatibility Analysis** - Pre-migration compatibility checking
 - **Automated Fixes** - Integration with `cargo fix --edition`
 
+### 🛡️ **Enhanced Safety Pipeline** (New in v1.3.0)
+- **Pre-Commit Protection** - Block commits that would fail CI
+- **Pre-Push Validation** - Comprehensive checks before GitHub
+- **Publish Safety** - Prevent broken crates from reaching crates.io
+- **Emergency Bypass** - Hotfix capability with audit logging
+
 ### 🔧 **Standards Enforcement**
 - 🚫 **Zero Underscore Bandaid Coding** - Completely eliminates `_parameter` lazy patterns
 - 📐 **Edition 2024 Enforcement** - Automatically upgrades and enforces latest Rust edition
@@ -179,6 +185,18 @@ ferrous-forge edition analyze
 
 # Migrate your project to Edition 2024
 ferrous-forge edition migrate 2024 --test
+```
+
+### Safety Pipeline Commands (New in v1.3.0)
+```bash
+# Check if your code would pass CI
+ferrous-forge safety check --stage=pre-commit
+
+# Test all safety checks
+ferrous-forge safety test
+
+# View safety pipeline status
+ferrous-forge safety status
 ```
 
 ## 🔄 Tool Version Management

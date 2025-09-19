@@ -14,11 +14,11 @@ impl SafetyCheck for DocCheck {
     async fn run(project_path: &Path) -> Result<CheckResult> {
         run(project_path).await
     }
-    
+
     fn name() -> &'static str {
         "doc"
     }
-    
+
     fn description() -> &'static str {
         "Builds project documentation"
     }

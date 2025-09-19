@@ -55,5 +55,16 @@ async fn main() -> Result<()> {
                 commands::edition::handle_analyze(&path, &edition).await
             }
         },
+        commands::Commands::Safety { command } => match command {
+            commands::SafetyCommand::Status => commands::safety::handle_status().await,
+            commands::SafetyCommand::Check {
+                stage,
+                path,
+                verbose,
+            } => commands::safety::handle_check(&stage, &path, verbose).await,
+            commands::SafetyCommand::Test { path } => {
+                commands::safety::test_individual_checks(&path).await
+            }
+        },
     }
 }

@@ -14,11 +14,11 @@ impl SafetyCheck for StandardsCheck {
     async fn run(project_path: &Path) -> Result<CheckResult> {
         run(project_path).await
     }
-    
+
     fn name() -> &'static str {
         "standards"
     }
-    
+
     fn description() -> &'static str {
         "Validates Ferrous Forge coding standards"
     }
@@ -28,37 +28,30 @@ impl SafetyCheck for StandardsCheck {
 pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Standards);
-    
-    // Use the existing validation module  
+
+    // Use the existing validation module
     let validator = crate::validation::RustValidator::new(project_path.to_path_buf())?;
-    match validator.validate_project(project_path).await {
-        Ok(validation_result) => {
+    match validator.validate_project().await {
+        Ok(violations) => {
             result.set_duration(start.elapsed());
-            
-            if validation_result.violations.is_empty() {
+
+            if violations.is_empty() {
                 result.add_context("All Ferrous Forge standards met");
             } else {
-                result.add_error(format!(
-                    "Found {} standards violations",
-                    validation_result.violations.len()
-                ));
-                
+                result.add_error(format!("Found {} standards violations", violations.len()));
+
                 // Add specific violations (limit to first 5)
-                for violation in validation_result.violations.iter().take(5) {
+                for violation in violations.iter().take(5) {
                     result.add_error(format!(
-                        "{}: {}",
-                        violation.violation_type,
-                        violation.message
+                        "{:?}: {}",
+                        violation.violation_type, violation.message
                     ));
                 }
-                
-                if validation_result.violations.len() > 5 {
-                    result.add_error(format!(
-                        "... and {} more violations",
-                        validation_result.violations.len() - 5
-                    ));
+
+                if violations.len() > 5 {
+                    result.add_error(format!("... and {} more violations", violations.len() - 5));
                 }
-                
+
                 result.add_suggestion("Run 'ferrous-forge validate' for detailed report");
                 result.add_suggestion("Fix standards violations before proceeding");
             }
@@ -69,7 +62,7 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
             result.add_suggestion("Ensure project has valid Cargo.toml and Rust files");
         }
     }
-    
+
     Ok(result)
 }
 
@@ -77,7 +70,7 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_standards_check_struct() {
         assert_eq!(StandardsCheck::name(), "standards");

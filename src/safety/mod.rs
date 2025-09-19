@@ -6,8 +6,7 @@
 
 use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 pub mod bypass;
 pub mod checks;
@@ -40,7 +39,7 @@ impl PipelineStage {
             Self::Publish => "publish",
         }
     }
-    
+
     /// Get the display name for the stage
     pub fn display_name(&self) -> &'static str {
         match self {
@@ -49,20 +48,20 @@ impl PipelineStage {
             Self::Publish => "Publish",
         }
     }
-    
+
     /// Get the timeout for this stage
     pub fn default_timeout(&self) -> Duration {
         match self {
-            Self::PreCommit => Duration::from_secs(300),  // 5 minutes
-            Self::PrePush => Duration::from_secs(600),    // 10 minutes
-            Self::Publish => Duration::from_secs(900),    // 15 minutes
+            Self::PreCommit => Duration::from_secs(300), // 5 minutes
+            Self::PrePush => Duration::from_secs(600),   // 10 minutes
+            Self::Publish => Duration::from_secs(900),   // 15 minutes
         }
     }
 }
 
 impl std::str::FromStr for PipelineStage {
     type Err = Error;
-    
+
     fn from_str(s: &str) -> Result<Self> {
         match s.to_lowercase().as_str() {
             "pre-commit" | "precommit" | "commit" => Ok(Self::PreCommit),
@@ -123,7 +122,7 @@ impl CheckType {
             Self::Semver => "semver",
         }
     }
-    
+
     /// Get the display name for the check
     pub fn display_name(&self) -> &'static str {
         match self {
@@ -140,16 +139,13 @@ impl CheckType {
             Self::Semver => "Semver Check",
         }
     }
-    
+
     /// Get the checks for a specific pipeline stage
     pub fn for_stage(stage: PipelineStage) -> Vec<Self> {
         match stage {
-            PipelineStage::PreCommit => vec![
-                Self::Format,
-                Self::Clippy,
-                Self::Build,
-                Self::Standards,
-            ],
+            PipelineStage::PreCommit => {
+                vec![Self::Format, Self::Clippy, Self::Build, Self::Standards]
+            }
             PipelineStage::PrePush => vec![
                 Self::Format,
                 Self::Clippy,
@@ -182,7 +178,7 @@ pub enum SafetyResult {
     /// All checks passed - operation allowed
     Passed,
     /// Checks failed - operation blocked
-    Blocked { 
+    Blocked {
         /// Failed checks
         failures: Vec<String>,
         /// Suggestions for fixes
@@ -202,32 +198,38 @@ impl SafetyResult {
     pub fn is_allowed(&self) -> bool {
         matches!(self, Self::Passed | Self::Bypassed { .. })
     }
-    
+
     /// Get a user-friendly message
     pub fn message(&self) -> String {
         match self {
             Self::Passed => "🎉 All safety checks passed! Operation allowed.".to_string(),
-            Self::Blocked { failures, suggestions } => {
+            Self::Blocked {
+                failures,
+                suggestions,
+            } => {
                 let mut msg = "🚨 Safety checks FAILED - operation blocked!\n\n".to_string();
-                
+
                 if !failures.is_empty() {
                     msg.push_str("Failures:\n");
                     for failure in failures {
                         msg.push_str(&format!("  • {}\n", failure));
                     }
                 }
-                
+
                 if !suggestions.is_empty() {
                     msg.push_str("\nSuggestions:\n");
                     for suggestion in suggestions {
                         msg.push_str(&format!("  • {}\n", suggestion));
                     }
                 }
-                
+
                 msg
             }
             Self::Bypassed { reason, user } => {
-                format!("⚠️  Safety checks bypassed by {} - reason: {}", user, reason)
+                format!(
+                    "⚠️  Safety checks bypassed by {} - reason: {}",
+                    user, reason
+                )
             }
         }
     }
@@ -237,37 +239,48 @@ impl SafetyResult {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_pipeline_stage_from_str() {
-        assert_eq!("pre-commit".parse::<PipelineStage>().unwrap(), PipelineStage::PreCommit);
-        assert_eq!("pre-push".parse::<PipelineStage>().unwrap(), PipelineStage::PrePush);
-        assert_eq!("publish".parse::<PipelineStage>().unwrap(), PipelineStage::Publish);
+        assert_eq!(
+            "pre-commit".parse::<PipelineStage>().unwrap(),
+            PipelineStage::PreCommit
+        );
+        assert_eq!(
+            "pre-push".parse::<PipelineStage>().unwrap(),
+            PipelineStage::PrePush
+        );
+        assert_eq!(
+            "publish".parse::<PipelineStage>().unwrap(),
+            PipelineStage::Publish
+        );
         assert!("invalid".parse::<PipelineStage>().is_err());
     }
-    
+
     #[test]
     fn test_check_type_for_stage() {
         let pre_commit_checks = CheckType::for_stage(PipelineStage::PreCommit);
         assert!(pre_commit_checks.contains(&CheckType::Format));
         assert!(pre_commit_checks.contains(&CheckType::Clippy));
         assert!(!pre_commit_checks.contains(&CheckType::Test)); // Not in pre-commit
-        
+
         let publish_checks = CheckType::for_stage(PipelineStage::Publish);
         assert!(publish_checks.contains(&CheckType::PublishDryRun));
         assert!(publish_checks.contains(&CheckType::Semver));
     }
-    
+
     #[test]
     fn test_safety_result_is_allowed() {
         assert!(SafetyResult::Passed.is_allowed());
-        assert!(SafetyResult::Bypassed { 
-            reason: "test".to_string(), 
-            user: "test".to_string() 
-        }.is_allowed());
-        assert!(!SafetyResult::Blocked { 
-            failures: vec![], 
-            suggestions: vec![] 
-        }.is_allowed());
+        assert!(SafetyResult::Bypassed {
+            reason: "test".to_string(),
+            user: "test".to_string()
+        }
+        .is_allowed());
+        assert!(!SafetyResult::Blocked {
+            failures: vec![],
+            suggestions: vec![]
+        }
+        .is_allowed());
     }
 }

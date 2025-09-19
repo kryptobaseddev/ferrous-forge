@@ -101,45 +101,45 @@ impl SafetyConfig {
             Err(_) => Ok(Self::default()),
         }
     }
-    
+
     /// Load configuration from file
     pub async fn load() -> Result<Self> {
         let config_path = Self::config_file_path()?;
         let contents = fs::read_to_string(&config_path)
             .await
             .map_err(|e| Error::config(format!("Failed to read safety config: {}", e)))?;
-        
+
         let config: Self = toml::from_str(&contents)
             .map_err(|e| Error::config(format!("Failed to parse safety config: {}", e)))?;
-        
+
         Ok(config)
     }
-    
+
     /// Save configuration to file
     pub async fn save(&self) -> Result<()> {
         let config_path = Self::config_file_path()?;
-        
+
         // Ensure parent directory exists
         if let Some(parent) = config_path.parent() {
             fs::create_dir_all(parent).await?;
         }
-        
+
         let contents = toml::to_string_pretty(self)
             .map_err(|e| Error::config(format!("Failed to serialize safety config: {}", e)))?;
-        
+
         fs::write(&config_path, contents)
             .await
             .map_err(|e| Error::config(format!("Failed to write safety config: {}", e)))?;
-        
+
         Ok(())
     }
-    
+
     /// Get the path to the safety configuration file
     pub fn config_file_path() -> Result<PathBuf> {
         let config_dir = crate::config::Config::config_dir_path()?;
         Ok(config_dir.join("safety.toml"))
     }
-    
+
     /// Get configuration for a specific stage
     pub fn get_stage_config(&self, stage: PipelineStage) -> &StageConfig {
         match stage {
@@ -148,7 +148,7 @@ impl SafetyConfig {
             PipelineStage::Publish => &self.publish,
         }
     }
-    
+
     /// Get mutable configuration for a specific stage
     pub fn get_stage_config_mut(&mut self, stage: PipelineStage) -> &mut StageConfig {
         match stage {
@@ -157,71 +157,82 @@ impl SafetyConfig {
             PipelineStage::Publish => &mut self.publish,
         }
     }
-    
+
     /// Check if a specific check is enabled for a stage
     pub fn is_check_enabled(&self, stage: PipelineStage, check: CheckType) -> bool {
         let stage_config = self.get_stage_config(stage);
         stage_config.enabled && stage_config.checks.contains(&check)
     }
-    
+
     /// Get timeout for a specific stage
     pub fn get_timeout(&self, stage: PipelineStage) -> Duration {
         Duration::from_secs(self.get_stage_config(stage).timeout_seconds)
     }
-    
+
     /// Set a configuration value
     pub fn set(&mut self, key: &str, value: &str) -> Result<()> {
         match key {
             "enabled" => {
-                self.enabled = value.parse()
+                self.enabled = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid boolean value for enabled"))?;
             }
             "strict_mode" => {
-                self.strict_mode = value.parse()
+                self.strict_mode = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid boolean value for strict_mode"))?;
             }
             "show_progress" => {
-                self.show_progress = value.parse()
+                self.show_progress = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid boolean value for show_progress"))?;
             }
             "parallel_checks" => {
-                self.parallel_checks = value.parse()
+                self.parallel_checks = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid boolean value for parallel_checks"))?;
             }
             "pre_commit.enabled" => {
-                self.pre_commit.enabled = value.parse()
+                self.pre_commit.enabled = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid boolean value for pre_commit.enabled"))?;
             }
             "pre_commit.timeout_seconds" => {
-                self.pre_commit.timeout_seconds = value.parse()
+                self.pre_commit.timeout_seconds = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid number for pre_commit.timeout_seconds"))?;
             }
             "pre_push.enabled" => {
-                self.pre_push.enabled = value.parse()
+                self.pre_push.enabled = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid boolean value for pre_push.enabled"))?;
             }
             "pre_push.timeout_seconds" => {
-                self.pre_push.timeout_seconds = value.parse()
+                self.pre_push.timeout_seconds = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid number for pre_push.timeout_seconds"))?;
             }
             "publish.enabled" => {
-                self.publish.enabled = value.parse()
+                self.publish.enabled = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid boolean value for publish.enabled"))?;
             }
             "publish.timeout_seconds" => {
-                self.publish.timeout_seconds = value.parse()
+                self.publish.timeout_seconds = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid number for publish.timeout_seconds"))?;
             }
             "bypass.enabled" => {
-                self.bypass.enabled = value.parse()
+                self.bypass.enabled = value
+                    .parse()
                     .map_err(|_| Error::config("Invalid boolean value for bypass.enabled"))?;
             }
             _ => return Err(Error::config(format!("Unknown safety config key: {}", key))),
         }
-        
+
         Ok(())
     }
-    
+
     /// Get a configuration value
     pub fn get(&self, key: &str) -> Option<String> {
         match key {
@@ -245,52 +256,52 @@ impl SafetyConfig {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_safety_config_default() {
         let config = SafetyConfig::default();
-        
+
         assert!(config.enabled);
         assert!(config.strict_mode);
         assert!(config.show_progress);
         assert!(config.parallel_checks);
-        
+
         assert!(config.pre_commit.enabled);
         assert_eq!(config.pre_commit.timeout_seconds, 300);
-        
+
         assert!(config.pre_push.enabled);
         assert_eq!(config.pre_push.timeout_seconds, 600);
-        
+
         assert!(config.publish.enabled);
         assert_eq!(config.publish.timeout_seconds, 900);
-        
+
         assert!(!config.bypass.enabled); // Disabled by default
     }
-    
+
     #[test]
     fn test_stage_config_checks() {
         let config = SafetyConfig::default();
-        
+
         let pre_commit_checks = &config.pre_commit.checks;
         assert!(pre_commit_checks.contains(&CheckType::Format));
         assert!(pre_commit_checks.contains(&CheckType::Clippy));
         assert!(!pre_commit_checks.contains(&CheckType::Test)); // Not in pre-commit
-        
+
         let publish_checks = &config.publish.checks;
         assert!(publish_checks.contains(&CheckType::PublishDryRun));
         assert!(publish_checks.contains(&CheckType::Semver));
     }
-    
+
     #[test]
     fn test_config_get_set() {
         let mut config = SafetyConfig::default();
-        
+
         assert_eq!(config.get("enabled"), Some("true".to_string()));
-        
+
         config.set("enabled", "false").unwrap();
         assert!(!config.enabled);
         assert_eq!(config.get("enabled"), Some("false".to_string()));
-        
+
         config.set("pre_commit.timeout_seconds", "600").unwrap();
         assert_eq!(config.pre_commit.timeout_seconds, 600);
     }

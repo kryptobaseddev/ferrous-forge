@@ -18,15 +18,17 @@ pub mod publish;
 pub mod semver;
 pub mod standards;
 pub mod test;
+pub mod test_runner;
 
 /// Trait for implementing safety checks
+#[allow(async_fn_in_trait)]
 pub trait SafetyCheck {
     /// Run the safety check
     async fn run(project_path: &Path) -> Result<CheckResult>;
-    
+
     /// Get the name of this check
     fn name() -> &'static str;
-    
+
     /// Get a description of what this check does
     fn description() -> &'static str;
 }
@@ -51,7 +53,7 @@ impl CheckRegistry {
             super::CheckType::Semver,
         ]
     }
-    
+
     /// Get description for a check type
     pub fn get_description(check_type: super::CheckType) -> &'static str {
         match check_type {
