@@ -286,6 +286,7 @@ pub async fn check_hooks_installed(project_path: &Path) -> Result<bool> {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::unwrap_used)]
 mod tests {
     use super::*;
     use tempfile::TempDir;

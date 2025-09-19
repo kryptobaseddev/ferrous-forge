@@ -233,6 +233,7 @@ pub fn suggest_documentation(item_type: &str, item_name: &str) -> String {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::unwrap_used)]
 mod tests {
     use super::*;
 
@@ -249,7 +250,7 @@ pub struct DocStruct {}
 
 pub struct UndocStruct {}
 ";
-        let (total, documented) = count_items_in_file(content).unwrap();
+        let (total, documented) = count_items_in_file(content).expect("Should count items");
         assert_eq!(total, 4);
         assert_eq!(documented, 2);
     }

@@ -385,7 +385,11 @@ impl CoverageAnalyzer {
             .values()
             .filter(|file| file.line_coverage < self.config.min_line_coverage)
             .collect();
-        low_coverage_files.sort_by(|a, b| a.line_coverage.partial_cmp(&b.line_coverage).unwrap());
+        low_coverage_files.sort_by(|a, b| {
+            a.line_coverage
+                .partial_cmp(&b.line_coverage)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
 
         if !low_coverage_files.is_empty() {
             output.push_str("⚠️  Files Below Threshold:\n");
@@ -435,6 +439,7 @@ impl Default for CoverageAnalyzer {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::unwrap_used)]
 mod tests {
     use super::*;
 

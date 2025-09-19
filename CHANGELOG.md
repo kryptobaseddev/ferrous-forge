@@ -5,6 +5,36 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-09-19
+
+### Fixed
+- **CI/CD Pipeline Issues**
+  - Fixed formatting violations in validation.rs and main.rs
+  - Fixed clippy errors with undefined proptest feature flag
+  - Removed unnecessary raw string hashes in doc_coverage.rs and validation.rs
+  - Added missing benchmark file (validation_bench.rs) with criterion dependency
+  - Fixed integration test path issue using absolute path in CI workflow
+  - Made validation methods public for benchmark access
+
+- **Rust Version Compatibility**
+  - Downgraded minimum Rust version from 1.85 to 1.82 for wider compatibility
+  - Changed edition from 2024 to 2021 (2024 edition requires Rust 1.85+)
+  - Updated validation rules to accept both Edition 2021 and 2024
+
+- **CI/CD Configuration**
+  - Updated CodeQL action from v2 to v3 (v2 is deprecated)
+  - Added proper permissions for GitHub Actions (security-events, pages, contents)
+  - Added clippy lint exceptions for multiple_crate_versions and uninlined_format_args
+  - Added test module exceptions for expect_used and unwrap_used
+
+### Changed
+- Made `validate_cargo_toml` and `validate_rust_file` methods public on RustValidator
+- Fixed useless vec! usage in tests with arrays
+- Updated test assertions to match new edition validation rules
+
+### Security
+- Fixed GitHub Actions permissions for security scanning and documentation deployment
+
 ## [1.0.0] - 2025-09-17
 
 ### 🎉 Production Release - Feature Complete

@@ -249,9 +249,10 @@ impl RustValidator {
         let version_line = String::from_utf8_lossy(&output.stdout);
 
         // Extract version (e.g., "rustc 1.85.0" -> "1.85.0")
-        if let Some(captures) = Regex::new(r"rustc (\d+)\.(\d+)\.(\d+)")
-            .unwrap()
-            .captures(&version_line)
+        let version_regex = Regex::new(r"rustc (\d+)\.(\d+)\.(\d+)")
+            .map_err(|e| Error::validation(format!("Invalid regex: {}", e)))?;
+        
+        if let Some(captures) = version_regex.captures(&version_line)
         {
             let major: u32 = captures[1].parse().unwrap_or(0);
             let minor: u32 = captures[2].parse().unwrap_or(0);
@@ -335,7 +336,7 @@ impl RustValidator {
         Ok(())
     }
 
-    async fn validate_cargo_toml(
+    pub async fn validate_cargo_toml(
         &self,
         cargo_file: &Path,
         violations: &mut Vec<Violation>,
@@ -374,7 +375,7 @@ impl RustValidator {
         Ok(())
     }
 
-    async fn validate_rust_file(
+    pub async fn validate_rust_file(
         &self,
         rust_file: &Path,
         violations: &mut Vec<Violation>,
@@ -511,6 +512,8 @@ impl RustValidator {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used)]  // expect() is fine in tests
+#[allow(clippy::unwrap_used)]  // unwrap() is fine in tests
 mod tests {
     use super::*;
     use tempfile::TempDir;
@@ -518,7 +521,7 @@ mod tests {
 
     #[test]
     fn test_violation_type_variants() {
-        let types = vec![
+        let types = [
             ViolationType::UnderscoreBandaid,
             ViolationType::WrongEdition,
             ViolationType::FileTooLarge,
@@ -547,18 +550,9 @@ mod tests {
         let info = Severity::Info;
 
         // Just test that we can create instances
-        match error {
-            Severity::Error => {}
-            _ => panic!("Should be error"),
-        }
-        match warning {
-            Severity::Warning => {}
-            _ => panic!("Should be warning"),
-        }
-        match info {
-            Severity::Info => {}
-            _ => panic!("Should be info"),
-        }
+        assert!(matches!(error, Severity::Error));
+        assert!(matches!(warning, Severity::Warning));
+        assert!(matches!(info, Severity::Info));
     }
 
     #[test]
@@ -910,13 +904,13 @@ fn test_code() {
         assert_eq!(rust_files.len(), 3);
         assert!(rust_files
             .iter()
-            .any(|f| f.file_name().unwrap() == "main.rs"));
+            .any(|f| f.file_name().expect("file name") == "main.rs"));
         assert!(rust_files
             .iter()
-            .any(|f| f.file_name().unwrap() == "lib.rs"));
+            .any(|f| f.file_name().expect("file name") == "lib.rs"));
         assert!(rust_files
             .iter()
-            .any(|f| f.file_name().unwrap() == "build.rs"));
+            .any(|f| f.file_name().expect("file name") == "build.rs"));
     }
 
     #[tokio::test]
@@ -947,7 +941,7 @@ fn test_code() {
         assert_eq!(cargo_files.len(), 2);
         assert!(cargo_files
             .iter()
-            .all(|f| f.file_name().unwrap() == "Cargo.toml"));
+            .all(|f| f.file_name().expect("file name") == "Cargo.toml"));
     }
 
     #[tokio::test]
