@@ -44,6 +44,12 @@ pub enum Commands {
     Validate {
         /// Path to the project to validate (defaults to current directory)
         path: Option<std::path::PathBuf>,
+        /// Generate AI-friendly compliance report
+        #[arg(long)]
+        ai_report: bool,
+        /// Compare with previous report
+        #[arg(long)]
+        compare_previous: bool,
     },
     /// Rollback to a previous version
     Rollback {

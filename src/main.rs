@@ -31,7 +31,9 @@ async fn main() -> Result<()> {
             list,
             reset,
         } => commands::config::execute(set, get, list, reset).await,
-        commands::Commands::Validate { path } => commands::validate::execute(path).await,
+        commands::Commands::Validate { path, ai_report, compare_previous } => {
+            commands::validate::execute(path, ai_report, compare_previous).await
+        }
         commands::Commands::Rollback { version } => commands::rollback::execute(version).await,
         commands::Commands::Uninstall { confirm } => commands::uninstall::execute(confirm).await,
         commands::Commands::Rust { command } => match command {
