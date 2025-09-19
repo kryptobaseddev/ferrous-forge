@@ -5,6 +5,56 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-09-19
+
+### Added
+- **Rust Version Management** 🦀
+  - `rust check` - Check current Rust version against latest GitHub releases
+  - `rust recommend` - Get intelligent update recommendations (minor/major/security)
+  - `rust list` - List recent Rust releases with dates and links
+  - Real-time GitHub API integration with 1-hour caching
+  - Support for security update detection and warnings
+
+- **Edition Management** 📚
+  - `edition check` - Check project edition compliance against Edition 2024
+  - `edition migrate` - Guided migration assistant with backup support
+  - `edition analyze` - Comprehensive compatibility analysis before migration
+  - Integration with `cargo fix --edition` for automated fixes
+  - Migration path recommendations (2015→2018→2021→2024)
+
+- **New Modules**
+  - `rust_version` module with GitHub API client and caching
+  - `edition` module with analyzer and migrator components
+  - Enhanced error handling for network and parsing operations
+  - Comprehensive test coverage for new functionality
+
+### Changed
+- Extended CLI with new `rust` and `edition` subcommands
+- Enhanced error types to support network operations and API failures
+- Improved version detection with better host platform identification
+
+### Technical Details
+- GitHub API integration: `https://api.github.com/repos/rust-lang/rust/releases`
+- Response caching with configurable TTL (default: 1 hour)
+- Semver-compliant version parsing and comparison
+- Graceful handling of rate limits and network failures
+- 86+ passing tests including new module coverage
+
+### Examples
+```bash
+# Check your Rust version status
+ferrous-forge rust check
+
+# Get update recommendations
+ferrous-forge rust recommend
+
+# Check edition compliance
+ferrous-forge edition check
+
+# Migrate to Edition 2024
+ferrous-forge edition migrate 2024
+```
+
 ## [1.1.0] - 2025-09-19
 
 ### Added

@@ -47,11 +47,43 @@ pub enum Error {
 
     /// Network/HTTP errors
     #[error("Network error: {0}")]
-    Network(#[from] reqwest::Error),
+    Network(String),
 
     /// Semver parsing errors
     #[error("Version error: {0}")]
     Version(#[from] semver::Error),
+    
+    /// Parse errors
+    #[error("Parse error: {0}")]
+    Parse(String),
+    
+    /// Rust not found
+    #[error("Rust not found: {0}")]
+    RustNotFound(String),
+    
+    /// Command execution error
+    #[error("Command error: {0}")]
+    Command(String),
+    
+    /// File not found
+    #[error("File not found: {0}")]
+    FileNotFound(String),
+    
+    /// Rate limited
+    #[error("Rate limited: retry after {0} seconds")]
+    RateLimited(u64),
+    
+    /// Migration error
+    #[error("Migration error: {0}")]
+    Migration(String),
+    
+    /// Regex error
+    #[error("Regex error: {0}")]
+    Regex(#[from] regex::Error),
+    
+    /// UTF-8 conversion error
+    #[error("UTF-8 error: {0}")]
+    Utf8(#[from] std::str::Utf8Error),
 }
 
 /// Result type alias for Ferrous Forge operations
@@ -92,11 +124,53 @@ impl Error {
     pub fn process(msg: impl Into<String>) -> Self {
         Self::Process(msg.into())
     }
+    
+    /// Create a new parse error
+    pub fn parse(msg: impl Into<String>) -> Self {
+        Self::Parse(msg.into())
+    }
+    
+    /// Create a new rust not found error
+    pub fn rust_not_found(msg: impl Into<String>) -> Self {
+        Self::RustNotFound(msg.into())
+    }
+    
+    /// Create a new command error
+    pub fn command(msg: impl Into<String>) -> Self {
+        Self::Command(msg.into())
+    }
+    
+    /// Create a new file not found error
+    pub fn file_not_found(msg: impl Into<String>) -> Self {
+        Self::FileNotFound(msg.into())
+    }
+    
+    /// Create a new rate limited error
+    pub fn rate_limited(retry_after: u64) -> Self {
+        Self::RateLimited(retry_after)
+    }
+    
+    /// Create a new migration error
+    pub fn migration(msg: impl Into<String>) -> Self {
+        Self::Migration(msg.into())
+    }
+    
+    /// Create a new network error
+    pub fn network(msg: impl Into<String>) -> Self {
+        Self::Network(msg.into())
+    }
 }
 
 /// Convert anyhow errors to our error type
 impl From<anyhow::Error> for Error {
     fn from(err: anyhow::Error) -> Self {
         Self::Process(err.to_string())
+    }
+}
+
+/// Convert reqwest errors to our error type
+impl From<reqwest::Error> for Error {
+    fn from(err: reqwest::Error) -> Self {
+        Self::Network(err.to_string())
     }
 }

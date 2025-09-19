@@ -33,6 +33,19 @@ Ferrous Forge is a **system-wide Rust development standards enforcer** that auto
 
 ## ✨ Features
 
+### 🦀 **Rust Version Management** (New in v1.2.0)
+- **Version Checking** - Check your Rust installation against latest GitHub releases
+- **Update Recommendations** - Get intelligent update suggestions (security/major/minor)
+- **Release Tracking** - List recent Rust releases with dates and release notes
+- **GitHub Integration** - Real-time data from rust-lang/rust repository
+
+### 📚 **Edition Management** (New in v1.2.0)  
+- **Compliance Checking** - Verify your project uses the latest Rust edition
+- **Migration Assistant** - Guided migration from older editions to Edition 2024
+- **Compatibility Analysis** - Pre-migration compatibility checking
+- **Automated Fixes** - Integration with `cargo fix --edition`
+
+### 🔧 **Standards Enforcement**
 - 🚫 **Zero Underscore Bandaid Coding** - Completely eliminates `_parameter` lazy patterns
 - 📐 **Edition 2024 Enforcement** - Automatically upgrades and enforces latest Rust edition
 - 📏 **Size Limits** - Enforces 300-line files, 50-line functions
@@ -51,6 +64,12 @@ cargo install ferrous-forge
 
 # Initialize system-wide standards (one-time setup)
 ferrous-forge init
+
+# Check your Rust version and get update recommendations
+ferrous-forge rust check
+
+# Check if your project uses the latest edition
+ferrous-forge edition check
 
 # That's it! All your Rust development now follows professional standards
 cargo new my-project  # Automatically uses Edition 2024 + standards
@@ -134,7 +153,35 @@ The repository includes comprehensive CI/CD workflows. To use them in your fork:
 - [**Troubleshooting**](docs/troubleshooting.md) - Common issues and solutions
 - [**Migration Guide**](docs/migration.md) - Upgrading existing projects
 
-## 🔄 Version Management
+## 🦀 Rust Version & Edition Management (New in v1.2.0)
+
+Ferrous Forge now helps you stay current with Rust versions and editions!
+
+### Rust Version Commands
+```bash
+# Check your current Rust version vs latest
+ferrous-forge rust check
+
+# Get intelligent update recommendations  
+ferrous-forge rust recommend
+
+# List recent Rust releases
+ferrous-forge rust list --count 5
+```
+
+### Edition Management Commands
+```bash
+# Check if your project uses the latest edition
+ferrous-forge edition check
+
+# Analyze compatibility before migrating
+ferrous-forge edition analyze
+
+# Migrate your project to Edition 2024
+ferrous-forge edition migrate 2024 --test
+```
+
+## 🔄 Tool Version Management
 
 Ferrous Forge follows semantic versioning and provides automatic updates:
 

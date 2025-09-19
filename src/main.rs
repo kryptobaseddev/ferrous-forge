@@ -34,5 +34,30 @@ async fn main() -> Result<()> {
         commands::Commands::Validate { path } => commands::validate::execute(path).await,
         commands::Commands::Rollback { version } => commands::rollback::execute(version).await,
         commands::Commands::Uninstall { confirm } => commands::uninstall::execute(confirm).await,
+        commands::Commands::Rust { command } => match command {
+            commands::RustCommand::Check { verbose } => {
+                commands::rust::handle_check(verbose).await
+            }
+            commands::RustCommand::Recommend { stable_only } => {
+                commands::rust::handle_recommend(stable_only).await
+            }
+            commands::RustCommand::List { count } => {
+                commands::rust::handle_list(count).await
+            }
+        },
+        commands::Commands::Edition { command } => match command {
+            commands::EditionCommand::Check { path } => {
+                commands::edition::handle_check(&path).await
+            }
+            commands::EditionCommand::Migrate {
+                edition,
+                no_backup,
+                test,
+                idioms,
+            } => commands::edition::handle_migrate(&edition, no_backup, test, idioms).await,
+            commands::EditionCommand::Analyze { path, edition } => {
+                commands::edition::handle_analyze(&path, &edition).await
+            }
+        },
     }
 }
