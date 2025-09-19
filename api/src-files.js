@@ -1,2 +1,2 @@
-createSrcSidebar('[["ferrous_forge",["",[["commands",[],["config.rs","init.rs","mod.rs","rollback.rs","status.rs","uninstall.rs","update.rs","validate.rs"]]],["cli.rs","config.rs","doc_coverage.rs","error.rs","formatting.rs","git_hooks.rs","lib.rs","security.rs","standards.rs","templates.rs","test_coverage.rs","updater.rs","validation.rs"]]]]');
-//{"start":19,"fragment_lengths":[324]}
+createSrcSidebar('[["ferrous_forge",["",[["commands",[],["config.rs","edition.rs","init.rs","mod.rs","rollback.rs","rust.rs","status.rs","uninstall.rs","update.rs","validate.rs"]],["edition",[],["analyzer.rs","migrator.rs","mod.rs"]],["rust_version",[],["cache.rs","detector.rs","github.rs","mod.rs"]]],["cli.rs","config.rs","doc_coverage.rs","error.rs","formatting.rs","git_hooks.rs","lib.rs","security.rs","standards.rs","templates.rs","test_coverage.rs","updater.rs","validation.rs"]]]]');
+//{"start":19,"fragment_lengths":[469]}

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Channel","UpdateRecommendation"],"mod":["cache","detector","github"],"struct":["VersionManager"]};

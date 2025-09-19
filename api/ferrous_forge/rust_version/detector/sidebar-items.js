@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["detect_rust_version","get_active_toolchain","get_installed_toolchains","is_rustup_available"],"struct":["RustVersion"]};

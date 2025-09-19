@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Edition"],"fn":["check_compliance","detect_edition","get_migration_recommendations"],"mod":["analyzer","migrator"],"struct":["EditionStatus"]};

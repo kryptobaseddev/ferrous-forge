@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["handle_analyze","handle_check","handle_migrate"]};
