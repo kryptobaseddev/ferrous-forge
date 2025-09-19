@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Commands","EditionCommand","RustCommand"],"mod":["config","edition","init","rollback","rust","status","uninstall","update","validate"]};
+window.SIDEBAR_ITEMS = {"enum":["Commands","EditionCommand","RustCommand","SafetyCommand"],"mod":["config","edition","init","rollback","rust","safety","status","uninstall","update","validate"]};

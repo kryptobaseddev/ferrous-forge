@@ -84,11 +84,11 @@
 <a href=#84 id=84 data-nosnippet>84</a>    <span class="doccomment">/// UTF-8 conversion error
 <a href=#85 id=85 data-nosnippet>85</a>    </span><span class="attr">#[error(<span class="string">"UTF-8 error: {0}"</span>)]
 <a href=#86 id=86 data-nosnippet>86</a>    </span>Utf8(<span class="attr">#[from] </span>std::str::Utf8Error),
-<a href=#87 id=87 data-nosnippet>87</a>    
+<a href=#87 id=87 data-nosnippet>87</a>
 <a href=#88 id=88 data-nosnippet>88</a>    <span class="doccomment">/// Safety pipeline error
 <a href=#89 id=89 data-nosnippet>89</a>    </span><span class="attr">#[error(<span class="string">"Safety error: {0}"</span>)]
 <a href=#90 id=90 data-nosnippet>90</a>    </span>Safety(String),
-<a href=#91 id=91 data-nosnippet>91</a>    
+<a href=#91 id=91 data-nosnippet>91</a>
 <a href=#92 id=92 data-nosnippet>92</a>    <span class="doccomment">/// Safety pipeline blocked operation
 <a href=#93 id=93 data-nosnippet>93</a>    </span><span class="attr">#[error(<span class="string">"Safety blocked: {0}"</span>)]
 <a href=#94 id=94 data-nosnippet>94</a>    </span>SafetyBlocked(String),
@@ -167,12 +167,12 @@
 <a href=#167 id=167 data-nosnippet>167</a>    </span><span class="kw">pub fn </span>network(msg: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
 <a href=#168 id=168 data-nosnippet>168</a>        <span class="self">Self</span>::Network(msg.into())
 <a href=#169 id=169 data-nosnippet>169</a>    }
-<a href=#170 id=170 data-nosnippet>170</a>    
+<a href=#170 id=170 data-nosnippet>170</a>
 <a href=#171 id=171 data-nosnippet>171</a>    <span class="doccomment">/// Create a new safety error
 <a href=#172 id=172 data-nosnippet>172</a>    </span><span class="kw">pub fn </span>safety(msg: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
 <a href=#173 id=173 data-nosnippet>173</a>        <span class="self">Self</span>::Safety(msg.into())
 <a href=#174 id=174 data-nosnippet>174</a>    }
-<a href=#175 id=175 data-nosnippet>175</a>    
+<a href=#175 id=175 data-nosnippet>175</a>
 <a href=#176 id=176 data-nosnippet>176</a>    <span class="doccomment">/// Create a new safety blocked error
 <a href=#177 id=177 data-nosnippet>177</a>    </span><span class="kw">pub fn </span>safety_blocked(msg: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
 <a href=#178 id=178 data-nosnippet>178</a>        <span class="self">Self</span>::SafetyBlocked(msg.into())

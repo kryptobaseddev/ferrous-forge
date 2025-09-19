@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["audit","build","clippy","doc","format","license","publish","semver","standards","test"],"struct":["CheckRegistry"],"trait":["SafetyCheck"]};
+window.SIDEBAR_ITEMS = {"mod":["audit","build","clippy","doc","format","license","publish","semver","standards","test","test_runner"],"struct":["CheckRegistry"],"trait":["SafetyCheck"]};
