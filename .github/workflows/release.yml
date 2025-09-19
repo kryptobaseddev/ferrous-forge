@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: write
     outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
       version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout
@@ -30,55 +31,54 @@ jobs:
       - name: Generate changelog
         id: changelog
         run: |
-          # Extract changelog for this version from CHANGELOG.md
-          VERSION="${{ steps.get_version.outputs.version }}"
+          # Generate changelog from git log (original behavior)
           echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
-          
-          # Try to extract from CHANGELOG.md first
-          if grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | head -n -1 | tail -n +2
-          else
-            # Fallback to git log
-            git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^)..HEAD
-          fi >> $GITHUB_OUTPUT
-          
+          git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           
       - name: Create Release
+        id: create_release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
           name: Ferrous Forge v${{ steps.get_version.outputs.version }}
           body: |
-            ## Ferrous Forge v${{ steps.get_version.outputs.version }}
+            ## Changes in v${{ steps.get_version.outputs.version }}
             
             ${{ steps.changelog.outputs.CHANGELOG }}
             
-            ## 🚀 Installation
+            ## Installation
             
-            ### Cargo (Recommended)
+            ### Cargo
             ```bash
-            cargo install ferrous-forge
+            cargo install ferrous-forge --version ${{ steps.get_version.outputs.version }}
             ```
             
             ### Binary Downloads
             Download the appropriate binary for your platform from the assets below.
             
-            ## 🔄 Upgrading
+            ### Package Managers
+            - **Homebrew**: `brew install ferrous-forge`
+            - **AUR**: `yay -S ferrous-forge`
+            - **Nix**: `nix-env -iA nixpkgs.ferrous-forge`
+            
+            ## Upgrading
             
             ```bash
             ferrous-forge update
             ```
             
-            ## 📚 Documentation
+            ## Documentation
             
-            - [📖 API Documentation](https://docs.rs/ferrous-forge/${{ steps.get_version.outputs.version }})
-            - [🏠 Project Homepage](https://github.com/kryptobaseddev/ferrous-forge)
-            - [📋 Full Changelog](https://github.com/kryptobaseddev/ferrous-forge/blob/main/CHANGELOG.md)
+            - [Installation Guide](https://ferrous-forge.dev/docs/installation)
+            - [Configuration Reference](https://ferrous-forge.dev/docs/configuration)
+            - [API Documentation](https://docs.rs/ferrous-forge/${{ steps.get_version.outputs.version }})
           draft: false
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          generateReleaseNotes: false
 
   # Build Release Binaries
   build:
@@ -95,9 +95,10 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             name: ferrous-forge-linux-x86_64-musl
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            name: ferrous-forge-linux-aarch64
+          # Disabled due to OpenSSL cross-compilation issues:
+          # - os: ubuntu-latest
+          #   target: aarch64-unknown-linux-gnu
+          #   name: ferrous-forge-linux-aarch64
           
           # macOS targets
           - os: macos-latest
@@ -224,93 +225,93 @@ jobs:
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
 
-  # Build and Push Docker Image
-  docker:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-    needs: create-release
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ferrousforge/ferrous-forge
-            ghcr.io/${{ github.repository }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+  # Build and Push Docker Image (disabled - no Docker credentials configured)
+  # docker:
+  #   name: Build Docker Image
+  #   runs-on: ubuntu-latest
+  #   needs: create-release
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #       
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
+  #         
+  #     - name: Login to GitHub Container Registry
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #         
+  #     - name: Extract metadata
+  #       id: meta
+  #       uses: docker/metadata-action@v5
+  #       with:
+  #         images: |
+  #           ferrousforge/ferrous-forge
+  #           ghcr.io/${{ github.repository }}
+  #         tags: |
+  #           type=ref,event=branch
+  #           type=ref,event=pr
+  #           type=semver,pattern={{version}}
+  #           type=semver,pattern={{major}}.{{minor}}
+  #           type=semver,pattern={{major}}
+  #           
+  #     - name: Build and push
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         platforms: linux/amd64,linux/arm64
+  #         push: true
+  #         tags: ${{ steps.meta.outputs.tags }}
+  #         labels: ${{ steps.meta.outputs.labels }}
+  #         cache-from: type=gha
+  #         cache-to: type=gha,mode=max
 
-  # Update Documentation
-  docs:
-    name: Update Documentation
-    runs-on: ubuntu-latest
-    needs: create-release
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-        
-      - name: Install mdbook
-        run: cargo install mdbook mdbook-linkcheck
-        
-      - name: Build book
-        run: mdbook build docs/book
-        
-      - name: Build API docs
-        run: cargo doc --no-deps --all-features
-        
-      - name: Deploy documentation
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/book
-          destination_dir: docs
-          
-      - name: Deploy API documentation
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: target/doc
-          destination_dir: api
+  # Update Documentation (disabled - no mdbook structure configured)
+  # docs:
+  #   name: Update Documentation
+  #   runs-on: ubuntu-latest
+  #   needs: create-release
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       
+  #     - name: Setup Rust
+  #       uses: dtolnay/rust-toolchain@stable
+  #       
+  #     - name: Cache dependencies
+  #       uses: Swatinem/rust-cache@v2
+  #       
+  #     - name: Install mdbook
+  #       run: cargo install mdbook mdbook-linkcheck
+  #       
+  #     - name: Build book
+  #       run: mdbook build docs/book
+  #       
+  #     - name: Build API docs
+  #       run: cargo doc --no-deps --all-features
+  #       
+  #     - name: Deploy documentation
+  #       uses: peaceiris/actions-gh-pages@v3
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         publish_dir: docs/book
+  #         destination_dir: docs
+  #         
+  #     - name: Deploy API documentation
+  #       uses: peaceiris/actions-gh-pages@v3
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         publish_dir: target/doc
+  #         destination_dir: api
 
   # Notify Release (Discord disabled until webhook configured)
   # notify:
