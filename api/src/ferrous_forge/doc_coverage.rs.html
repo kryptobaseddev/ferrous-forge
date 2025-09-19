@@ -131,7 +131,7 @@
 <a href=#131 id=131 data-nosnippet>131</a>        .into_iter()
 <a href=#132 id=132 data-nosnippet>132</a>        .filter_map(|e| e.ok())
 <a href=#133 id=133 data-nosnippet>133</a>        .filter(|e| {
-<a href=#134 id=134 data-nosnippet>134</a>            e.path().extension().map_or(<span class="bool-val">false</span>, |ext| ext == <span class="string">"rs"</span>)
+<a href=#134 id=134 data-nosnippet>134</a>            e.path().extension().is_some_and(|ext| ext == <span class="string">"rs"</span>)
 <a href=#135 id=135 data-nosnippet>135</a>                &amp;&amp; !e.path().to_string_lossy().contains(<span class="string">"target"</span>)
 <a href=#136 id=136 data-nosnippet>136</a>        });
 <a href=#137 id=137 data-nosnippet>137</a>

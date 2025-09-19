@@ -29,7 +29,7 @@
 <a href=#29 id=29 data-nosnippet>29</a>
 <a href=#30 id=30 data-nosnippet>30</a><span class="kw">impl </span>Edition {
 <a href=#31 id=31 data-nosnippet>31</a>    <span class="doccomment">/// Parse edition from string
-<a href=#32 id=32 data-nosnippet>32</a>    </span><span class="kw">pub fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+<a href=#32 id=32 data-nosnippet>32</a>    </span><span class="kw">pub fn </span>parse_edition(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
 <a href=#33 id=33 data-nosnippet>33</a>        <span class="kw">match </span>s {
 <a href=#34 id=34 data-nosnippet>34</a>            <span class="string">"2015" </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Edition2015),
 <a href=#35 id=35 data-nosnippet>35</a>            <span class="string">"2018" </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Edition2018),
@@ -150,7 +150,7 @@
 <a href=#150 id=150 data-nosnippet>150</a>        .and_then(|e| e.as_str())
 <a href=#151 id=151 data-nosnippet>151</a>        .unwrap_or(<span class="string">"2015"</span>); <span class="comment">// Default to 2015 if not specified
 <a href=#152 id=152 data-nosnippet>152</a>    
-<a href=#153 id=153 data-nosnippet>153</a>    </span>Edition::from_str(edition_str)
+<a href=#153 id=153 data-nosnippet>153</a>    </span>Edition::parse_edition(edition_str)
 <a href=#154 id=154 data-nosnippet>154</a>}
 <a href=#155 id=155 data-nosnippet>155</a>
 <a href=#156 id=156 data-nosnippet>156</a><span class="doccomment">/// Check edition compliance for a project
@@ -202,11 +202,11 @@
 <a href=#202 id=202 data-nosnippet>202</a>    
 <a href=#203 id=203 data-nosnippet>203</a>    <span class="attr">#[test]
 <a href=#204 id=204 data-nosnippet>204</a>    </span><span class="kw">fn </span>test_edition_from_str() {
-<a href=#205 id=205 data-nosnippet>205</a>        <span class="macro">assert_eq!</span>(Edition::from_str(<span class="string">"2015"</span>).unwrap(), Edition::Edition2015);
-<a href=#206 id=206 data-nosnippet>206</a>        <span class="macro">assert_eq!</span>(Edition::from_str(<span class="string">"2018"</span>).unwrap(), Edition::Edition2018);
-<a href=#207 id=207 data-nosnippet>207</a>        <span class="macro">assert_eq!</span>(Edition::from_str(<span class="string">"2021"</span>).unwrap(), Edition::Edition2021);
-<a href=#208 id=208 data-nosnippet>208</a>        <span class="macro">assert_eq!</span>(Edition::from_str(<span class="string">"2024"</span>).unwrap(), Edition::Edition2024);
-<a href=#209 id=209 data-nosnippet>209</a>        <span class="macro">assert!</span>(Edition::from_str(<span class="string">"2027"</span>).is_err());
+<a href=#205 id=205 data-nosnippet>205</a>        <span class="macro">assert_eq!</span>(Edition::parse_edition(<span class="string">"2015"</span>).unwrap(), Edition::Edition2015);
+<a href=#206 id=206 data-nosnippet>206</a>        <span class="macro">assert_eq!</span>(Edition::parse_edition(<span class="string">"2018"</span>).unwrap(), Edition::Edition2018);
+<a href=#207 id=207 data-nosnippet>207</a>        <span class="macro">assert_eq!</span>(Edition::parse_edition(<span class="string">"2021"</span>).unwrap(), Edition::Edition2021);
+<a href=#208 id=208 data-nosnippet>208</a>        <span class="macro">assert_eq!</span>(Edition::parse_edition(<span class="string">"2024"</span>).unwrap(), Edition::Edition2024);
+<a href=#209 id=209 data-nosnippet>209</a>        <span class="macro">assert!</span>(Edition::parse_edition(<span class="string">"2027"</span>).is_err());
 <a href=#210 id=210 data-nosnippet>210</a>    }
 <a href=#211 id=211 data-nosnippet>211</a>    
 <a href=#212 id=212 data-nosnippet>212</a>    <span class="attr">#[test]
