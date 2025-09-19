@@ -178,7 +178,7 @@ pub fn get_active_toolchain() -> Result<String> {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_parse_stable_version() {
         let output = "rustc 1.90.0 (4b06a43a1 2025-08-07)";

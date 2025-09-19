@@ -200,7 +200,7 @@ pub fn get_migration_recommendations(status: &EditionStatus) -> Vec<String> {
 mod tests {
     use super::*;
     use tempfile::TempDir;
-    
+
     #[test]
     fn test_edition_from_str() {
         assert_eq!(

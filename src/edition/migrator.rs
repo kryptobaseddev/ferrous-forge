@@ -317,7 +317,7 @@ impl Default for MigrationStatus {
 mod tests {
     use super::*;
     use tempfile::TempDir;
-    
+
     #[test]
     fn test_migration_options_default() {
         let options = MigrationOptions::default();

@@ -229,7 +229,7 @@ pub enum Severity {
 mod tests {
     use super::*;
     use tempfile::TempDir;
-    
+
     #[tokio::test]
     async fn test_analyzer_creation() {
         let temp_dir = TempDir::new().unwrap();
