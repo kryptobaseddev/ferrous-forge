@@ -71,7 +71,7 @@ pub async fn handle_migrate(
     test: bool,
     idioms: bool,
 ) -> Result<()> {
-    let target_edition = Edition::from_str(edition_str)?;
+    let target_edition = Edition::parse_edition(edition_str)?;
     let project_path = std::env::current_dir()?;
     
     println!("🚀 Edition Migration Assistant\n");
@@ -106,10 +106,12 @@ pub async fn handle_migrate(
     
     let migrator = EditionMigrator::new(&project_path);
     
-    let mut options = MigrationOptions::default();
-    options.create_backup = !no_backup;
-    options.run_tests = test;
-    options.fix_idioms = idioms;
+    let options = MigrationOptions {
+        create_backup: !no_backup,
+        run_tests: test,
+        fix_idioms: idioms,
+        ..Default::default()
+    };
     
     let spinner = ProgressBar::new_spinner();
     spinner.set_style(
@@ -182,7 +184,7 @@ pub async fn handle_migrate(
 
 /// Handle edition analyze command
 pub async fn handle_analyze(path: &Path, edition_str: &str) -> Result<()> {
-    let target_edition = Edition::from_str(edition_str)?;
+    let target_edition = Edition::parse_edition(edition_str)?;
     
     println!("🔍 Edition Compatibility Analysis\n");
     println!("  Project:  {}", style(path.display()).dim());

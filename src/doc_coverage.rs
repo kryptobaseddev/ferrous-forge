@@ -131,7 +131,7 @@ async fn count_documentation_items(project_path: &Path) -> Result<(usize, usize)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| {
-            e.path().extension().map_or(false, |ext| ext == "rs")
+            e.path().extension().is_some_and(|ext| ext == "rs")
                 && !e.path().to_string_lossy().contains("target")
         });
 

@@ -74,7 +74,7 @@ impl EditionMigrator {
     
     /// Create backup of the project
     async fn create_backup(&self, result: &mut MigrationResult) -> Result<()> {
-        let backup_dir = self.backup_dir.as_ref().map(|p| p.clone())
+        let backup_dir = self.backup_dir.clone()
             .unwrap_or_else(|| self.project_path.join(".ferrous-forge-backup"));
         
         // Create backup directory

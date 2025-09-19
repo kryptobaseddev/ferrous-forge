@@ -186,11 +186,6 @@ impl VersionManager {
     }
 }
 
-impl Default for VersionManager {
-    fn default() -> Self {
-        Self::new().expect("Failed to create version manager")
-    }
-}
 
 #[cfg(test)]
 mod tests {

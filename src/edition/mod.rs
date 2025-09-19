@@ -29,7 +29,7 @@ pub enum Edition {
 
 impl Edition {
     /// Parse edition from string
-    pub fn from_str(s: &str) -> Result<Self> {
+    pub fn parse_edition(s: &str) -> Result<Self> {
         match s {
             "2015" => Ok(Self::Edition2015),
             "2018" => Ok(Self::Edition2018),
@@ -150,7 +150,7 @@ pub async fn detect_edition(manifest_path: &Path) -> Result<Edition> {
         .and_then(|e| e.as_str())
         .unwrap_or("2015"); // Default to 2015 if not specified
     
-    Edition::from_str(edition_str)
+    Edition::parse_edition(edition_str)
 }
 
 /// Check edition compliance for a project
@@ -202,11 +202,11 @@ mod tests {
     
     #[test]
     fn test_edition_from_str() {
-        assert_eq!(Edition::from_str("2015").unwrap(), Edition::Edition2015);
-        assert_eq!(Edition::from_str("2018").unwrap(), Edition::Edition2018);
-        assert_eq!(Edition::from_str("2021").unwrap(), Edition::Edition2021);
-        assert_eq!(Edition::from_str("2024").unwrap(), Edition::Edition2024);
-        assert!(Edition::from_str("2027").is_err());
+        assert_eq!(Edition::parse_edition("2015").unwrap(), Edition::Edition2015);
+        assert_eq!(Edition::parse_edition("2018").unwrap(), Edition::Edition2018);
+        assert_eq!(Edition::parse_edition("2021").unwrap(), Edition::Edition2021);
+        assert_eq!(Edition::parse_edition("2024").unwrap(), Edition::Edition2024);
+        assert!(Edition::parse_edition("2027").is_err());
     }
     
     #[test]
