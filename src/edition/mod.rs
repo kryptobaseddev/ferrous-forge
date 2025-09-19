@@ -38,7 +38,7 @@ impl Edition {
             _ => Err(Error::parse(format!("Unknown edition: {}", s))),
         }
     }
-    
+
     /// Get the edition as a string
     pub fn as_str(&self) -> &'static str {
         match self {
@@ -48,17 +48,17 @@ impl Edition {
             Self::Edition2024 => "2024",
         }
     }
-    
+
     /// Get the latest stable edition
     pub fn latest() -> Self {
         Self::Edition2024
     }
-    
+
     /// Check if this edition is the latest
     pub fn is_latest(&self) -> bool {
         *self == Self::latest()
     }
-    
+
     /// Get the next edition after this one
     pub fn next(&self) -> Option<Self> {
         match self {
@@ -68,7 +68,7 @@ impl Edition {
             Self::Edition2024 => None,
         }
     }
-    
+
     /// Get edition-specific lints for migration
     pub fn migration_lints(&self) -> Vec<String> {
         match self {
@@ -106,11 +106,11 @@ impl EditionStatus {
     pub fn new(current: Edition, manifest_path: PathBuf) -> Self {
         let latest = Edition::latest();
         let is_latest = current == latest;
-        
+
         // Build migration path
         let mut migration_path = Vec::new();
         let mut current_edition = current;
-        
+
         while let Some(next) = current_edition.next() {
             if next <= latest {
                 migration_path.push(next);
@@ -119,7 +119,7 @@ impl EditionStatus {
                 break;
             }
         }
-        
+
         Self {
             current,
             latest,
@@ -138,18 +138,18 @@ pub async fn detect_edition(manifest_path: &Path) -> Result<Edition> {
             manifest_path.display()
         )));
     }
-    
+
     let contents = fs::read_to_string(manifest_path).await?;
     let manifest: toml::Value = toml::from_str(&contents)
         .map_err(|e| Error::parse(format!("Failed to parse Cargo.toml: {}", e)))?;
-    
+
     // Get edition from [package] section
     let edition_str = manifest
         .get("package")
         .and_then(|p| p.get("edition"))
         .and_then(|e| e.as_str())
         .unwrap_or("2015"); // Default to 2015 if not specified
-    
+
     Edition::parse_edition(edition_str)
 }
 
@@ -157,41 +157,41 @@ pub async fn detect_edition(manifest_path: &Path) -> Result<Edition> {
 pub async fn check_compliance(project_path: &Path) -> Result<EditionStatus> {
     let manifest_path = project_path.join("Cargo.toml");
     let edition = detect_edition(&manifest_path).await?;
-    
+
     Ok(EditionStatus::new(edition, manifest_path))
 }
 
 /// Get edition migration recommendations
 pub fn get_migration_recommendations(status: &EditionStatus) -> Vec<String> {
     let mut recommendations = Vec::new();
-    
+
     if !status.is_latest {
         recommendations.push(format!(
             "Your project is using {}, but {} is now available",
             status.current, status.latest
         ));
-        
+
         if !status.migration_path.is_empty() {
             recommendations.push(format!(
                 "Recommended migration path: {}",
-                status.migration_path
+                status
+                    .migration_path
                     .iter()
                     .map(|e| e.to_string())
                     .collect::<Vec<_>>()
                     .join(" → ")
             ));
         }
-        
-        recommendations.push(
-            "Run `ferrous-forge edition migrate` to start the migration process".to_string()
-        );
+
+        recommendations
+            .push("Run `ferrous-forge edition migrate` to start the migration process".to_string());
     } else {
         recommendations.push(format!(
             "✅ Your project is already using the latest edition ({})",
             status.latest
         ));
     }
-    
+
     recommendations
 }
 
@@ -199,23 +199,35 @@ pub fn get_migration_recommendations(status: &EditionStatus) -> Vec<String> {
 mod tests {
     use super::*;
     use tempfile::TempDir;
-    
+
     #[test]
     fn test_edition_from_str() {
-        assert_eq!(Edition::parse_edition("2015").unwrap(), Edition::Edition2015);
-        assert_eq!(Edition::parse_edition("2018").unwrap(), Edition::Edition2018);
-        assert_eq!(Edition::parse_edition("2021").unwrap(), Edition::Edition2021);
-        assert_eq!(Edition::parse_edition("2024").unwrap(), Edition::Edition2024);
+        assert_eq!(
+            Edition::parse_edition("2015").unwrap(),
+            Edition::Edition2015
+        );
+        assert_eq!(
+            Edition::parse_edition("2018").unwrap(),
+            Edition::Edition2018
+        );
+        assert_eq!(
+            Edition::parse_edition("2021").unwrap(),
+            Edition::Edition2021
+        );
+        assert_eq!(
+            Edition::parse_edition("2024").unwrap(),
+            Edition::Edition2024
+        );
         assert!(Edition::parse_edition("2027").is_err());
     }
-    
+
     #[test]
     fn test_edition_ordering() {
         assert!(Edition::Edition2015 < Edition::Edition2018);
         assert!(Edition::Edition2018 < Edition::Edition2021);
         assert!(Edition::Edition2021 < Edition::Edition2024);
     }
-    
+
     #[test]
     fn test_edition_next() {
         assert_eq!(Edition::Edition2015.next(), Some(Edition::Edition2018));
@@ -223,7 +235,7 @@ mod tests {
         assert_eq!(Edition::Edition2021.next(), Some(Edition::Edition2024));
         assert_eq!(Edition::Edition2024.next(), None);
     }
-    
+
     #[test]
     fn test_migration_path() {
         let status = EditionStatus::new(Edition::Edition2015, PathBuf::from("Cargo.toml"));
@@ -232,21 +244,21 @@ mod tests {
         assert_eq!(status.migration_path[1], Edition::Edition2021);
         assert_eq!(status.migration_path[2], Edition::Edition2024);
     }
-    
+
     #[tokio::test]
     async fn test_detect_edition() {
         let temp_dir = TempDir::new().unwrap();
         let manifest_path = temp_dir.path().join("Cargo.toml");
-        
+
         let manifest_content = r#"
 [package]
 name = "test"
 version = "0.1.0"
 edition = "2021"
 "#;
-        
+
         fs::write(&manifest_path, manifest_content).await.unwrap();
-        
+
         let edition = detect_edition(&manifest_path).await.unwrap();
         assert_eq!(edition, Edition::Edition2021);
     }

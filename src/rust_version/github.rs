@@ -61,33 +61,34 @@ impl GitHubClient {
     pub fn new(auth_token: Option<String>) -> Result<Self> {
         let client = Client::builder()
             .timeout(std::time::Duration::from_secs(30))
-            .user_agent(format!(
-                "ferrous-forge/{}",
-                env!("CARGO_PKG_VERSION")
-            ))
+            .user_agent(format!("ferrous-forge/{}", env!("CARGO_PKG_VERSION")))
             .build()
             .map_err(|e| Error::network(format!("Failed to create HTTP client: {}", e)))?;
-        
+
         Ok(Self { client, auth_token })
     }
-    
+
     /// Get the latest stable release
     pub async fn get_latest_release(&self) -> Result<GitHubRelease> {
         let url = format!(
             "{}/repos/{}/{}/releases/latest",
             GITHUB_API_BASE, RUST_REPO_OWNER, RUST_REPO_NAME
         );
-        
-        let mut request = self.client.get(&url)
+
+        let mut request = self
+            .client
+            .get(&url)
             .header("Accept", "application/vnd.github.v3+json");
-        
+
         if let Some(token) = &self.auth_token {
             request = request.header("Authorization", format!("token {}", token));
         }
-        
-        let response = request.send().await
+
+        let response = request
+            .send()
+            .await
             .map_err(|e| Error::network(format!("Failed to fetch release: {}", e)))?;
-        
+
         // Check for rate limiting
         if response.status() == 429 {
             let retry_after = response
@@ -96,43 +97,49 @@ impl GitHubClient {
                 .and_then(|v| v.to_str().ok())
                 .and_then(|s| s.parse::<u64>().ok())
                 .unwrap_or(60);
-            
+
             return Err(Error::rate_limited(retry_after));
         }
-        
+
         if !response.status().is_success() {
             return Err(Error::network(format!(
                 "GitHub API returned status: {}",
                 response.status()
             )));
         }
-        
-        let mut release: GitHubRelease = response.json().await
+
+        let mut release: GitHubRelease = response
+            .json()
+            .await
             .map_err(|e| Error::parse(format!("Failed to parse release JSON: {}", e)))?;
-        
+
         // Parse version from tag
         release.version = self.parse_version_from_tag(&release.tag_name)?;
-        
+
         Ok(release)
     }
-    
+
     /// Get multiple recent releases
     pub async fn get_releases(&self, count: usize) -> Result<Vec<GitHubRelease>> {
         let url = format!(
             "{}/repos/{}/{}/releases?per_page={}",
             GITHUB_API_BASE, RUST_REPO_OWNER, RUST_REPO_NAME, count
         );
-        
-        let mut request = self.client.get(&url)
+
+        let mut request = self
+            .client
+            .get(&url)
             .header("Accept", "application/vnd.github.v3+json");
-        
+
         if let Some(token) = &self.auth_token {
             request = request.header("Authorization", format!("token {}", token));
         }
-        
-        let response = request.send().await
+
+        let response = request
+            .send()
+            .await
             .map_err(|e| Error::network(format!("Failed to fetch releases: {}", e)))?;
-        
+
         if response.status() == 429 {
             let retry_after = response
                 .headers()
@@ -140,32 +147,31 @@ impl GitHubClient {
                 .and_then(|v| v.to_str().ok())
                 .and_then(|s| s.parse::<u64>().ok())
                 .unwrap_or(60);
-            
+
             return Err(Error::rate_limited(retry_after));
         }
-        
+
         if !response.status().is_success() {
             return Err(Error::network(format!(
                 "GitHub API returned status: {}",
                 response.status()
             )));
         }
-        
-        let mut releases: Vec<GitHubRelease> = response.json().await
+
+        let mut releases: Vec<GitHubRelease> = response
+            .json()
+            .await
             .map_err(|e| Error::parse(format!("Failed to parse releases JSON: {}", e)))?;
-        
+
         // Parse versions for all releases
         for release in &mut releases {
             release.version = self.parse_version_from_tag(&release.tag_name)?;
         }
-        
+
         // Filter out pre-releases from stable channel
-        Ok(releases
-            .into_iter()
-            .filter(|r| !r.prerelease)
-            .collect())
+        Ok(releases.into_iter().filter(|r| !r.prerelease).collect())
     }
-    
+
     /// Parse semantic version from tag name
     fn parse_version_from_tag(&self, tag: &str) -> Result<Version> {
         let version_str = tag.strip_prefix('v').unwrap_or(tag);
@@ -177,28 +183,28 @@ impl GitHubClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_parse_version_from_tag() {
         let client = GitHubClient::new(None).unwrap();
-        
+
         assert_eq!(
             client.parse_version_from_tag("1.90.0").unwrap(),
             Version::new(1, 90, 0)
         );
-        
+
         assert_eq!(
             client.parse_version_from_tag("v1.90.0").unwrap(),
             Version::new(1, 90, 0)
         );
     }
-    
+
     #[tokio::test]
     #[ignore] // Requires network access
     async fn test_get_latest_release() {
         let client = GitHubClient::new(None).unwrap();
         let release = client.get_latest_release().await.unwrap();
-        
+
         assert!(!release.tag_name.is_empty());
         assert!(release.version.major >= 1);
     }

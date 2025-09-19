@@ -35,15 +35,11 @@ async fn main() -> Result<()> {
         commands::Commands::Rollback { version } => commands::rollback::execute(version).await,
         commands::Commands::Uninstall { confirm } => commands::uninstall::execute(confirm).await,
         commands::Commands::Rust { command } => match command {
-            commands::RustCommand::Check { verbose } => {
-                commands::rust::handle_check(verbose).await
-            }
+            commands::RustCommand::Check { verbose } => commands::rust::handle_check(verbose).await,
             commands::RustCommand::Recommend { stable_only } => {
                 commands::rust::handle_recommend(stable_only).await
             }
-            commands::RustCommand::List { count } => {
-                commands::rust::handle_list(count).await
-            }
+            commands::RustCommand::List { count } => commands::rust::handle_list(count).await,
         },
         commands::Commands::Edition { command } => match command {
             commands::EditionCommand::Check { path } => {

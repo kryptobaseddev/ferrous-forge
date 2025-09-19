@@ -32,22 +32,22 @@ impl RustVersion {
     pub fn parse(version_output: &str) -> Result<Self> {
         // Example: rustc 1.90.0 (4b06a43a1 2025-08-07)
         let regex = Regex::new(
-            r"rustc (\d+\.\d+\.\d+(?:-[\w.]+)?)\s*\(([a-f0-9]+)\s+(\d{4}-\d{2}-\d{2})\)"
+            r"rustc (\d+\.\d+\.\d+(?:-[\w.]+)?)\s*\(([a-f0-9]+)\s+(\d{4}-\d{2}-\d{2})\)",
         )?;
-        
+
         let captures = regex
             .captures(version_output)
             .ok_or_else(|| Error::parse("Invalid rustc version output"))?;
-        
+
         let version_str = &captures[1];
         let version = Version::parse(version_str)?;
         let commit_hash = captures[2].to_string();
         let commit_date = NaiveDate::parse_from_str(&captures[3], "%Y-%m-%d")
             .map_err(|e| Error::parse(format!("Failed to parse date: {}", e)))?;
-        
+
         let channel = detect_channel(version_str);
         let host = detect_host();
-        
+
         Ok(Self {
             version,
             commit_hash,
@@ -68,23 +68,24 @@ impl std::fmt::Display for RustVersion {
 /// Detect the currently installed Rust version
 pub fn detect_rust_version() -> Result<RustVersion> {
     // Check if rustc is available
-    let rustc_path = which::which("rustc")
-        .map_err(|_| Error::rust_not_found("rustc not found. Please install Rust from https://rustup.rs"))?;
-    
+    let rustc_path = which::which("rustc").map_err(|_| {
+        Error::rust_not_found("rustc not found. Please install Rust from https://rustup.rs")
+    })?;
+
     // Get version output
     let output = Command::new(rustc_path)
         .arg("--version")
         .output()
         .map_err(|e| Error::command(format!("Failed to run rustc: {}", e)))?;
-    
+
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(Error::command(format!("rustc failed: {}", stderr)));
     }
-    
+
     let stdout = str::from_utf8(&output.stdout)
         .map_err(|e| Error::parse(format!("Invalid UTF-8 in rustc output: {}", e)))?;
-    
+
     RustVersion::parse(stdout)
 }
 
@@ -112,37 +113,34 @@ fn detect_host() -> String {
             }
         }
     }
-    
+
     // Fallback to a generic target string
     "unknown".to_string()
 }
 
 /// Get installed toolchains via rustup
 pub fn get_installed_toolchains() -> Result<Vec<String>> {
-    let rustup_path = which::which("rustup")
-        .map_err(|_| Error::rust_not_found("rustup not found"))?;
-    
+    let rustup_path =
+        which::which("rustup").map_err(|_| Error::rust_not_found("rustup not found"))?;
+
     let output = Command::new(rustup_path)
         .args(&["toolchain", "list"])
         .output()
         .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
-    
+
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(Error::command(format!("rustup failed: {}", stderr)));
     }
-    
+
     let stdout = str::from_utf8(&output.stdout)?;
-    
+
     Ok(stdout
         .lines()
         .filter(|line| !line.is_empty())
         .map(|line| {
             // Remove " (default)" suffix if present
-            line.split_whitespace()
-                .next()
-                .unwrap_or(line)
-                .to_string()
+            line.split_whitespace().next().unwrap_or(line).to_string()
         })
         .collect())
 }
@@ -154,21 +152,21 @@ pub fn is_rustup_available() -> bool {
 
 /// Get the active toolchain
 pub fn get_active_toolchain() -> Result<String> {
-    let rustup_path = which::which("rustup")
-        .map_err(|_| Error::rust_not_found("rustup not found"))?;
-    
+    let rustup_path =
+        which::which("rustup").map_err(|_| Error::rust_not_found("rustup not found"))?;
+
     let output = Command::new(rustup_path)
         .args(&["show", "active-toolchain"])
         .output()
         .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
-    
+
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(Error::command(format!("rustup failed: {}", stderr)));
     }
-    
+
     let stdout = str::from_utf8(&output.stdout)?;
-    
+
     Ok(stdout
         .split_whitespace()
         .next()
@@ -179,37 +177,37 @@ pub fn get_active_toolchain() -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_parse_stable_version() {
         let output = "rustc 1.90.0 (4b06a43a1 2025-08-07)";
         let version = RustVersion::parse(output).unwrap();
-        
+
         assert_eq!(version.version, Version::new(1, 90, 0));
         assert_eq!(version.commit_hash, "4b06a43a1");
         assert_eq!(version.commit_date.to_string(), "2025-08-07");
         assert_eq!(version.channel, Channel::Stable);
     }
-    
+
     #[test]
     fn test_parse_beta_version() {
         let output = "rustc 1.91.0-beta.1 (5c8a0cafe 2025-09-01)";
         let version = RustVersion::parse(output).unwrap();
-        
+
         assert_eq!(version.version.major, 1);
         assert_eq!(version.version.minor, 91);
         assert_eq!(version.version.patch, 0);
         assert_eq!(version.channel, Channel::Beta);
     }
-    
+
     #[test]
     fn test_parse_nightly_version() {
         let output = "rustc 1.92.0-nightly (abc123def 2025-09-15)";
         let version = RustVersion::parse(output).unwrap();
-        
+
         assert_eq!(version.channel, Channel::Nightly);
     }
-    
+
     #[test]
     fn test_detect_channel() {
         assert_eq!(detect_channel("1.90.0"), Channel::Stable);

@@ -88,23 +88,23 @@ impl VersionManager {
     pub fn new() -> Result<Self> {
         let github_client = GitHubClient::new(None)?;
         let cache = Arc::new(RwLock::new(cache::Cache::new(Duration::from_secs(3600))));
-        
+
         Ok(Self {
             github_client,
             cache,
         })
     }
-    
+
     /// Check current Rust installation
     pub async fn check_current(&self) -> Result<RustVersion> {
         detector::detect_rust_version()
     }
-    
+
     /// Get latest stable release
     pub async fn get_latest_stable(&self) -> Result<GitHubRelease> {
         // Check cache first
         let cache_key = "latest_stable";
-        
+
         {
             let cache = self.cache.read().await;
             if let Some(cached_bytes) = cache.get(&cache_key.to_string()) {
@@ -113,33 +113,33 @@ impl VersionManager {
                 }
             }
         }
-        
+
         // Fetch from GitHub
         let release = self.github_client.get_latest_release().await?;
-        
+
         // Cache the result
         if let Ok(bytes) = serde_json::to_vec(&release) {
             let mut cache = self.cache.write().await;
             cache.insert(cache_key.to_string(), bytes);
         }
-        
+
         Ok(release)
     }
-    
+
     /// Get update recommendation
     pub async fn get_recommendation(&self) -> Result<UpdateRecommendation> {
         let current = self.check_current().await?;
         let latest = self.get_latest_stable().await?;
-        
+
         // Compare versions
         if latest.version <= current.version {
             return Ok(UpdateRecommendation::UpToDate);
         }
-        
+
         // Check if it's a security update
-        let is_security = latest.body.to_lowercase().contains("security") ||
-                         latest.name.to_lowercase().contains("security");
-        
+        let is_security = latest.body.to_lowercase().contains("security")
+            || latest.name.to_lowercase().contains("security");
+
         if is_security {
             return Ok(UpdateRecommendation::SecurityUpdate {
                 current: current.version.clone(),
@@ -148,7 +148,7 @@ impl VersionManager {
                 details: self.extract_security_details(&latest.body),
             });
         }
-        
+
         // Check if it's a major update
         if latest.version.major > current.version.major {
             return Ok(UpdateRecommendation::MajorUpdate {
@@ -157,7 +157,7 @@ impl VersionManager {
                 release_url: latest.html_url.clone(),
             });
         }
-        
+
         // It's a minor/patch update
         Ok(UpdateRecommendation::MinorUpdate {
             current: current.version.clone(),
@@ -165,20 +165,20 @@ impl VersionManager {
             release_url: latest.html_url.clone(),
         })
     }
-    
+
     /// Get multiple recent releases
     pub async fn get_recent_releases(&self, count: usize) -> Result<Vec<GitHubRelease>> {
         self.github_client.get_releases(count).await
     }
-    
+
     fn extract_security_details(&self, body: &str) -> String {
         // Extract security-related information from release notes
         body.lines()
             .filter(|line| {
                 let lower = line.to_lowercase();
-                lower.contains("security") || 
-                lower.contains("vulnerability") ||
-                lower.contains("cve-")
+                lower.contains("security")
+                    || lower.contains("vulnerability")
+                    || lower.contains("cve-")
             })
             .take(3)
             .collect::<Vec<_>>()
@@ -186,11 +186,10 @@ impl VersionManager {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_channel_display() {
         assert_eq!(Channel::Stable.to_string(), "stable");
