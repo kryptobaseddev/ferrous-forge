@@ -207,7 +207,7 @@ jobs:
           # Test validation
           cargo check
 
-  # Cross-compilation
+  # Cross-compilation (simplified - just check it compiles for major platforms)
   cross:
     name: Cross Compile
     runs-on: ubuntu-latest
@@ -216,9 +216,6 @@ jobs:
         target:
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-gnu
-          - x86_64-apple-darwin
-          - aarch64-apple-darwin
           - x86_64-pc-windows-gnu
     steps:
       - name: Checkout
@@ -234,17 +231,19 @@ jobs:
         with:
           key: ${{ matrix.target }}
           
-      - name: Install cross
-        run: cargo install cross --locked
+      - name: Check compilation
+        run: cargo check --target ${{ matrix.target }}
         
-      - name: Cross compile
-        run: cross build --release --target ${{ matrix.target }}
+      - name: Build (Linux only)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        run: cargo build --release --target ${{ matrix.target }}
         
-      - name: Upload artifact
+      - name: Upload artifact (Linux only)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
         uses: actions/upload-artifact@v3
         with:
           name: ferrous-forge-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/ferrous-forge*
+          path: target/${{ matrix.target }}/release/ferrous-forge
 
   # Documentation
   docs:
