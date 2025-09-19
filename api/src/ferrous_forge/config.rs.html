@@ -444,7 +444,7 @@
 <a href=#444 id=444 data-nosnippet>444</a>            ) {
 <a href=#445 id=445 data-nosnippet>445</a>                <span class="kw">let </span><span class="kw-2">mut </span>config = Config::default();
 <a href=#446 id=446 data-nosnippet>446</a>
-<a href=#447 id=447 data-nosnippet>447</a>                <span class="macro">prop_assert!</span>(config.set(<span class="string">"update_channel"</span>, <span class="kw-2">&amp;</span>channel).is_ok());
+<a href=#447 id=447 data-nosnippet>447</a>                <span class="macro">prop_assert!</span>(config.set(<span class="string">"update_channel"</span>, channel).is_ok());
 <a href=#448 id=448 data-nosnippet>448</a>                <span class="macro">prop_assert_eq!</span>(config.get(<span class="string">"update_channel"</span>), <span class="prelude-val">Some</span>(channel.to_string()));
 <a href=#449 id=449 data-nosnippet>449</a>
 <a href=#450 id=450 data-nosnippet>450</a>                <span class="macro">prop_assert!</span>(config.set(<span class="string">"auto_update"</span>, <span class="kw-2">&amp;</span>auto_update.to_string()).is_ok());
