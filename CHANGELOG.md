@@ -5,7 +5,29 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1] - 2025-09-19
+## [1.1.0] - 2025-09-19
+
+### Added
+- Comprehensive CI/CD setup documentation
+- Benchmark suite for validation performance testing
+- CI/CD setup guide in docs/ci-setup.md
+
+### Changed
+- Simplified cross-compilation to build verification only
+- Removed Windows target (tool is Unix/Linux/macOS specific)
+- Made validation methods public for benchmark access
+- CI now uses cargo-nextest@0.9.72 for compatibility
+
+### Fixed
+- All CI/CD pipeline issues resolved
+- Clippy linting errors across entire codebase
+- Rust version compatibility (supports 1.82+)
+- Edition compatibility (supports both 2021 and 2024)
+- Codecov integration with explicit token passing
+- GitHub Actions deprecated artifact upload (v3 → v4)
+- Integration test rustup configuration
+
+## [1.0.1] - 2025-09-19 [DEPRECATED - Use 1.1.0]
 
 ### Fixed
 - **CI/CD Pipeline Issues**
