@@ -335,6 +335,9 @@ impl RustValidator {
         Ok(())
     }
 
+    /// Validates a Cargo.toml file for standards compliance
+    ///
+    /// Checks that the Cargo.toml uses Edition 2021 or 2024.
     pub async fn validate_cargo_toml(
         &self,
         cargo_file: &Path,
@@ -374,6 +377,10 @@ impl RustValidator {
         Ok(())
     }
 
+    /// Validates a Rust source file for standards compliance
+    ///
+    /// Checks for file size limits, line length, function size,
+    /// underscore bandaids, and unwrap/expect usage.
     pub async fn validate_rust_file(
         &self,
         rust_file: &Path,

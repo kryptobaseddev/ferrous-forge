@@ -444,7 +444,7 @@ mod tests {
             ) {
                 let mut config = Config::default();
 
-                prop_assert!(config.set("update_channel", &channel).is_ok());
+                prop_assert!(config.set("update_channel", channel).is_ok());
                 prop_assert_eq!(config.get("update_channel"), Some(channel.to_string()));
 
                 prop_assert!(config.set("auto_update", &auto_update.to_string()).is_ok());
