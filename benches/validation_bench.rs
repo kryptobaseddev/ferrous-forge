@@ -1,7 +1,7 @@
 //! Benchmarks for the validation module
 
-#![allow(clippy::expect_used, clippy::unwrap_used)] // expect()/unwrap() are fine in benchmarks
 #![allow(missing_docs)] // Benchmarks don't need docs
+#![allow(clippy::expect_used, clippy::unwrap_used)] // Benchmarks need unwrap/expect for setup
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use ferrous_forge::validation::RustValidator;

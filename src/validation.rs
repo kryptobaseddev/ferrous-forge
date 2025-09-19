@@ -389,6 +389,33 @@ impl RustValidator {
         let content = fs::read_to_string(rust_file).await?;
         let lines: Vec<&str> = content.lines().collect();
 
+        // Check for allow attributes at the top of the file
+        let mut allow_unwrap = false;
+        let mut allow_expect = false;
+        
+        for line in &lines {
+            let line_stripped = line.trim();
+            if line_stripped.starts_with("#![allow(") {
+                if line_stripped.contains("clippy::unwrap_used") {
+                    allow_unwrap = true;
+                }
+                if line_stripped.contains("clippy::expect_used") {
+                    allow_expect = true;
+                }
+            }
+            // Also check for allow attributes that might be split across lines
+            if line_stripped.contains("clippy::unwrap_used") {
+                allow_unwrap = true;
+            }
+            if line_stripped.contains("clippy::expect_used") {
+                allow_expect = true;
+            }
+            // Stop checking after we hit the first non-attribute line (but allow doc comments)
+            if !line_stripped.starts_with("#") && !line_stripped.starts_with("//!") && !line_stripped.is_empty() {
+                break;
+            }
+        }
+
         // Check file size limit (300 lines)
         if lines.len() > 300 {
             violations.push(Violation {
@@ -467,8 +494,8 @@ impl RustValidator {
                 });
             }
 
-            // Check for .unwrap() in production code (not in tests)
-            if !in_test_block && self.patterns.unwrap_call.is_match(line) {
+            // Check for .unwrap() in production code (not in tests or if allowed)
+            if !in_test_block && !allow_unwrap && self.patterns.unwrap_call.is_match(line) {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),
@@ -480,8 +507,8 @@ impl RustValidator {
                 });
             }
 
-            // Check for .expect() in production code
-            if !in_test_block && self.patterns.expect_call.is_match(line) {
+            // Check for .expect() in production code (not in tests or if allowed)
+            if !in_test_block && !allow_expect && self.patterns.expect_call.is_match(line) {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),
