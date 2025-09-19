@@ -73,5 +73,12 @@ async fn main() -> Result<()> {
                 commands::safety::test_individual_checks(&path).await
             }
         },
+        commands::Commands::Fix {
+            path,
+            only,
+            skip,
+            dry_run,
+            limit,
+        } => commands::fix::execute(path, only, skip, dry_run, limit).await,
     }
 }

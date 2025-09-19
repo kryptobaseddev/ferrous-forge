@@ -268,7 +268,7 @@ async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) ->
                 "Moderate".to_string(),
             ),
             "UnwrapInProduction" => (
-                "1. Change function to return Result<T, Error>\n2. Replace .unwrap() with ?\n3. Handle errors at call sites".to_string(),
+                "1. Change function to return Result<T, Error>\n2. Replace ? with ?\n3. Handle errors at call sites".to_string(),
                 "// Before: value.unwrap()\n// After: value?".to_string(),
                 "Easy".to_string(),
             ),

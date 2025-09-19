@@ -80,6 +80,23 @@ pub enum Commands {
         #[command(subcommand)]
         command: SafetyCommand,
     },
+    /// Automatically fix code violations
+    Fix {
+        /// Path to the project to fix (defaults to current directory)
+        path: Option<std::path::PathBuf>,
+        /// Only fix specific violation types (comma-separated)
+        #[arg(long)]
+        only: Option<String>,
+        /// Skip specific violation types (comma-separated)
+        #[arg(long)]
+        skip: Option<String>,
+        /// Show what would be fixed without making changes
+        #[arg(long)]
+        dry_run: bool,
+        /// Fix at most this many violations (for testing)
+        #[arg(long)]
+        limit: Option<usize>,
+    },
 }
 
 /// Rust version management subcommands
@@ -176,6 +193,7 @@ pub enum SafetyCommand {
 
 pub mod config;
 pub mod edition;
+pub mod fix;
 pub mod init;
 pub mod rollback;
 pub mod rust;
