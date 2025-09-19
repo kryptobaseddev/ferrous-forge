@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added missing benchmark file (validation_bench.rs) with criterion dependency
   - Fixed integration test path issue using absolute path in CI workflow
   - Made validation methods public for benchmark access
+  - Fixed cargo-nextest version compatibility by pinning to v0.9.72
+  - Simplified benchmark CI to avoid criterion output path issues
 
 - **Rust Version Compatibility**
   - Downgraded minimum Rust version from 1.85 to 1.82 for wider compatibility
