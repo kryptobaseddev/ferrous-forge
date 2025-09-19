@@ -5,6 +5,31 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] - 2025-09-19
+
+### Added
+- Enhanced Safety Pipeline design document for v1.3.0
+- CI/CD compatibility check script (`scripts/ci-check.sh`)
+- Complete design for mandatory pre-commit/pre-push validation
+
+### Fixed
+- All clippy lints for CI/CD compatibility (18 unwrap() calls in tests)
+- All rustfmt formatting violations
+- All documentation warnings (14 missing docs)
+- GitHub release workflow (updated to ncipollo/release-action@v1)
+- Disabled Discord notifications (no webhook configured)
+
+### Changed
+- Enhanced error handling with additional error types
+- Improved git hooks and release automation
+- Updated release workflow for better GitHub integration
+
+### Technical
+- Zero clippy warnings with `-D warnings`
+- Zero rustfmt violations with `cargo fmt --check`
+- 86 passing tests across all modules
+- Clean crates.io publication process
+
 ## [1.2.0] - 2025-09-19
 
 ### Added

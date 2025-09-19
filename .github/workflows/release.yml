@@ -13,8 +13,9 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
       version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout
@@ -29,53 +30,55 @@ jobs:
       - name: Generate changelog
         id: changelog
         run: |
-          # Generate changelog from git log
+          # Extract changelog for this version from CHANGELOG.md
+          VERSION="${{ steps.get_version.outputs.version }}"
           echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
-          git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> $GITHUB_OUTPUT
+          
+          # Try to extract from CHANGELOG.md first
+          if grep -q "## \[$VERSION\]" CHANGELOG.md; then
+            sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | head -n -1 | tail -n +2
+          else
+            # Fallback to git log
+            git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^)..HEAD
+          fi >> $GITHUB_OUTPUT
+          
           echo "" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Ferrous Forge v${{ steps.get_version.outputs.version }}
+          tag: ${{ github.ref_name }}
+          name: Ferrous Forge v${{ steps.get_version.outputs.version }}
           body: |
-            ## Changes in v${{ steps.get_version.outputs.version }}
+            ## Ferrous Forge v${{ steps.get_version.outputs.version }}
             
             ${{ steps.changelog.outputs.CHANGELOG }}
             
-            ## Installation
+            ## 🚀 Installation
             
-            ### Cargo
+            ### Cargo (Recommended)
             ```bash
-            cargo install ferrous-forge --version ${{ steps.get_version.outputs.version }}
+            cargo install ferrous-forge
             ```
             
             ### Binary Downloads
             Download the appropriate binary for your platform from the assets below.
             
-            ### Package Managers
-            - **Homebrew**: `brew install ferrous-forge`
-            - **AUR**: `yay -S ferrous-forge`
-            - **Nix**: `nix-env -iA nixpkgs.ferrous-forge`
-            
-            ## Upgrading
+            ## 🔄 Upgrading
             
             ```bash
             ferrous-forge update
             ```
             
-            ## Documentation
+            ## 📚 Documentation
             
-            - [Installation Guide](https://ferrous-forge.dev/docs/installation)
-            - [Configuration Reference](https://ferrous-forge.dev/docs/configuration)
-            - [API Documentation](https://docs.rs/ferrous-forge/${{ steps.get_version.outputs.version }})
+            - [📖 API Documentation](https://docs.rs/ferrous-forge/${{ steps.get_version.outputs.version }})
+            - [🏠 Project Homepage](https://github.com/kryptobaseddev/ferrous-forge)
+            - [📋 Full Changelog](https://github.com/kryptobaseddev/ferrous-forge/blob/main/CHANGELOG.md)
           draft: false
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   # Build Release Binaries
   build:
@@ -309,23 +312,23 @@ jobs:
           publish_dir: target/doc
           destination_dir: api
 
-  # Notify Release
-  notify:
-    name: Notify Release
-    runs-on: ubuntu-latest
-    needs: [publish-crates, update-packages, docker, docs]
-    if: always()
-    steps:
-      - name: Discord notification
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: |
-            🔨 **Ferrous Forge v${{ needs.create-release.outputs.version }} Released!**
-            
-            📦 Available on crates.io: `cargo install ferrous-forge`
-            🐳 Docker: `docker pull ferrousforge/ferrous-forge:${{ needs.create-release.outputs.version }}`
-            📖 Docs: https://ferrous-forge.dev/docs
-            
-            🚀 **Upgrade**: `ferrous-forge update`
+  # Notify Release (Discord disabled until webhook configured)
+  # notify:
+  #   name: Notify Release
+  #   runs-on: ubuntu-latest
+  #   needs: [publish-crates, update-packages, docker, docs]
+  #   if: always()
+  #   steps:
+  #     - name: Discord notification
+  #       uses: Ilshidur/action-discord@master
+  #       env:
+  #         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+  #       with:
+  #         args: |
+  #           🔨 **Ferrous Forge v${{ needs.create-release.outputs.version }} Released!**
+  #           
+  #           📦 Available on crates.io: `cargo install ferrous-forge`
+  #           🐳 Docker: `docker pull ferrousforge/ferrous-forge:${{ needs.create-release.outputs.version }}`
+  #           📖 Docs: https://ferrous-forge.dev/docs
+  #           
+  #           🚀 **Upgrade**: `ferrous-forge update`
