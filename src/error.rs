@@ -84,6 +84,14 @@ pub enum Error {
     /// UTF-8 conversion error
     #[error("UTF-8 error: {0}")]
     Utf8(#[from] std::str::Utf8Error),
+    
+    /// Safety pipeline error
+    #[error("Safety error: {0}")]
+    Safety(String),
+    
+    /// Safety pipeline blocked operation
+    #[error("Safety blocked: {0}")]
+    SafetyBlocked(String),
 }
 
 /// Result type alias for Ferrous Forge operations
@@ -158,6 +166,16 @@ impl Error {
     /// Create a new network error
     pub fn network(msg: impl Into<String>) -> Self {
         Self::Network(msg.into())
+    }
+    
+    /// Create a new safety error
+    pub fn safety(msg: impl Into<String>) -> Self {
+        Self::Safety(msg.into())
+    }
+    
+    /// Create a new safety blocked error
+    pub fn safety_blocked(msg: impl Into<String>) -> Self {
+        Self::SafetyBlocked(msg.into())
     }
 }
 

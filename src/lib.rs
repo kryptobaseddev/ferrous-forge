@@ -45,6 +45,7 @@ pub mod error;
 pub mod formatting;
 pub mod git_hooks;
 pub mod rust_version;
+pub mod safety;
 pub mod security;
 pub mod standards;
 pub mod templates;
