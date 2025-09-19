@@ -104,6 +104,26 @@ edition = "2021"                     // Wrong edition
 - Automatic security and quality checks
 - Professional-grade code without the overhead
 
+## 🔧 CI/CD Setup
+
+### GitHub Actions
+The repository includes comprehensive CI/CD workflows. To use them in your fork:
+
+1. **Codecov Integration** (optional):
+   - Sign up at [codecov.io](https://codecov.io)
+   - Add your repository
+   - Add `CODECOV_TOKEN` to your repository secrets
+
+2. **GitHub Pages** (for documentation):
+   - Go to Settings → Pages
+   - Enable GitHub Pages
+   - Set source to "GitHub Actions"
+
+### Known CI Limitations
+- **cargo-nextest**: Pinned to v0.9.72 for Rust 1.82 compatibility
+- **Code coverage**: Requires Codecov token to avoid rate limits
+- **Benchmarks**: Run in non-failing mode for stability
+
 ## 📖 Documentation
 
 - [**🦀 Rust Ecosystem Guide**](docs/rust-ecosystem-guide.md) - **New to Rust? Start here!**

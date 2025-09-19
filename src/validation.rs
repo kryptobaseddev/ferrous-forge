@@ -251,9 +251,8 @@ impl RustValidator {
         // Extract version (e.g., "rustc 1.85.0" -> "1.85.0")
         let version_regex = Regex::new(r"rustc (\d+)\.(\d+)\.(\d+)")
             .map_err(|e| Error::validation(format!("Invalid regex: {}", e)))?;
-        
-        if let Some(captures) = version_regex.captures(&version_line)
-        {
+
+        if let Some(captures) = version_regex.captures(&version_line) {
             let major: u32 = captures[1].parse().unwrap_or(0);
             let minor: u32 = captures[2].parse().unwrap_or(0);
 
@@ -512,8 +511,8 @@ impl RustValidator {
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used)]  // expect() is fine in tests
-#[allow(clippy::unwrap_used)]  // unwrap() is fine in tests
+#[allow(clippy::expect_used)] // expect() is fine in tests
+#[allow(clippy::unwrap_used)] // unwrap() is fine in tests
 mod tests {
     use super::*;
     use tempfile::TempDir;
