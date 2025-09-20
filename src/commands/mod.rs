@@ -96,6 +96,9 @@ pub enum Commands {
         /// Fix at most this many violations (for testing)
         #[arg(long)]
         limit: Option<usize>,
+        /// Enable AI-powered analysis for complex violations
+        #[arg(long)]
+        ai_analysis: bool,
     },
 }
 

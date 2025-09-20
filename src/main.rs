@@ -79,6 +79,7 @@ async fn main() -> Result<()> {
             skip,
             dry_run,
             limit,
-        } => commands::fix::execute(path, only, skip, dry_run, limit).await,
+            ai_analysis,
+        } => commands::fix::execute_with_ai(path, only, skip, dry_run, limit, ai_analysis).await,
     }
 }
