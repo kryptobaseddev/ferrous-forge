@@ -187,7 +187,7 @@ pub async fn execute_with_ai(
         // Get all violations that weren't fixed
         let unfixed_violations: Vec<Violation> = violations_to_fix
             .into_iter()
-            .filter(|v| {
+            .filter(|_v| {
                 // This is simplified - real implementation would track which were fixed
                 true
             })
@@ -352,7 +352,7 @@ fn group_violations_by_file(violations: &[Violation]) -> HashMap<PathBuf, Vec<Vi
     for violation in violations {
         grouped
             .entry(violation.file.clone())
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(violation.clone());
     }
 
@@ -429,7 +429,9 @@ struct FileContext {
 
 #[derive(Debug)]
 struct FunctionSignature {
+    #[allow(dead_code)]
     line: usize,
+    #[allow(dead_code)]
     name: String,
     returns_result: bool,
     returns_option: bool,
@@ -450,12 +452,18 @@ fn analyze_file_context(content: &str) -> FileContext {
     let has_thiserror_import =
         content.contains("use thiserror::") || content.contains("thiserror::");
 
-    // Analyze function signatures
+    // Analyze function signatures - handle multi-line signatures
     let mut function_signatures = Vec::new();
-    for (idx, line) in lines.iter().enumerate() {
-        if let Some(sig) = parse_function_signature(line, idx) {
+    let mut i = 0;
+    while i < lines.len() {
+        if let Some(sig) = parse_function_signature_multiline(&lines, i) {
             function_signatures.push(sig);
+            // Skip to the end of this function signature
+            while i < lines.len() && !lines[i].contains('{') {
+                i += 1;
+            }
         }
+        i += 1;
     }
 
     FileContext {
@@ -468,12 +476,18 @@ fn analyze_file_context(content: &str) -> FileContext {
     }
 }
 
-fn parse_function_signature(line: &str, line_num: usize) -> Option<FunctionSignature> {
-    let trimmed = line.trim();
+fn parse_function_signature_multiline(
+    lines: &[&str], 
+    start_idx: usize
+) -> Option<FunctionSignature> {
+    let start_line = lines.get(start_idx)?;
+    let trimmed = start_line.trim();
 
+    // Check if this is a function declaration
     if !trimmed.starts_with("fn ")
         && !trimmed.starts_with("pub fn ")
         && !trimmed.starts_with("async fn ")
+        && !trimmed.starts_with("pub async fn ")
     {
         return None;
     }
@@ -483,14 +497,36 @@ fn parse_function_signature(line: &str, line_num: usize) -> Option<FunctionSigna
     let fn_end = trimmed[fn_start..].find('(')?;
     let name = trimmed[fn_start..fn_start + fn_end].trim().to_string();
 
-    // Check return type
-    let returns_result = line.contains("-> Result") || line.contains("-> anyhow::Result");
-    let returns_option = line.contains("-> Option");
-    let is_test = line.contains("#[test]");
+    // Collect the full signature (might span multiple lines)
+    let mut full_signature = String::new();
+    let mut idx = start_idx;
+    let mut found_open_brace = false;
+    
+    // Check if there's a #[test] attribute above
+    let is_test = if start_idx > 0 {
+        lines[start_idx - 1].contains("#[test]")
+    } else {
+        false
+    };
+    
+    while idx < lines.len() && !found_open_brace {
+        full_signature.push_str(lines[idx]);
+        full_signature.push(' ');
+        if lines[idx].contains('{') {
+            found_open_brace = true;
+        }
+        idx += 1;
+    }
+
+    // Check return type in the full signature
+    let returns_result = full_signature.contains("-> Result") 
+        || full_signature.contains("-> anyhow::Result")
+        || full_signature.contains("-> std::result::Result");
+    let returns_option = full_signature.contains("-> Option");
     let is_main = name == "main";
 
     Some(FunctionSignature {
-        line: line_num,
+        line: start_idx,
         name,
         returns_result,
         returns_option,
@@ -515,42 +551,84 @@ fn fix_violation_in_line(line: &str, violation: &Violation, context: &FileContex
 
 fn fix_unwrap_in_line(line: &str, _violation: &Violation, context: &FileContext) -> FixResult {
     // Skip fixes in test code
-    if context.is_test_file && line.contains("#[test]") {
-        return FixResult::Skipped("Test code can use unwrap".to_string());
+    if context.is_test_file {
+        return FixResult::Skipped("Test file - manual review needed".to_string());
     }
 
     if line.contains(".unwrap()") {
+        // Don't fix if it's in a string literal
+        if line.contains("\".unwrap()\"") || line.contains(r#"'.unwrap()'"#) {
+            return FixResult::Skipped("String literal, not actual code".to_string());
+        }
+        
         // Check if we're in a function that can use ?
         let can_use_question_mark = check_can_use_question_mark(line, context);
 
-        if !can_use_question_mark {
-            // Try to use expect with a meaningful message instead
-            if context.is_example_file || context.is_bin_file {
-                let fixed = line.replace(".unwrap()", ".expect(\"Failed to process\")");
+        if can_use_question_mark {
+            // Safe to replace with ?
+            return FixResult::Fixed(line.replace(".unwrap()", "?"));
+        } else {
+            // For main functions or examples, use expect
+            if context.is_bin_file || context.is_example_file {
+                let fixed = line.replace(".unwrap()", r#".expect("Failed to complete operation")"#);
                 return FixResult::Fixed(fixed);
             }
-            return FixResult::Skipped("Cannot use ? operator in this context".to_string());
+            // For other cases where we can't use ?, suggest manual review
+            return FixResult::Skipped("Cannot use ? - needs manual review".to_string());
         }
-
-        // Safe to replace with ?
-        return FixResult::Fixed(line.replace(".unwrap()", "?"));
     }
 
     if line.contains(".expect(") {
-        // Only fix if we have anyhow for context
-        if !context.has_anyhow_import {
-            return FixResult::Skipped("No anyhow import for .context()".to_string());
+        // Don't fix if it's in a string literal
+        if line.contains("\".expect(") || line.contains("'.expect(") {
+            return FixResult::Skipped("String literal, not actual code".to_string());
         }
+        
+        // Check if we can use ?
+        let can_use_question_mark = check_can_use_question_mark(line, context);
+        
+        if can_use_question_mark {
+            // If we have anyhow, use .context()
+            if context.has_anyhow_import {
+                // Extract the expect message and convert to context
+                if let Some(start) = line.find(".expect(\"") {
+                    if let Some(end) = line[start + 9..].find("\")") {
+                        let message = &line[start + 9..start + 9 + end];
+                        let before = &line[..start];
+                        let after = &line[start + 9 + end + 2..];
 
-        // Extract the expect message and convert to context
-        if let Some(start) = line.find(".expect(\"") {
-            if let Some(end) = line[start + 9..].find("\")") {
-                let message = &line[start + 9..start + 9 + end];
-                let before = &line[..start];
-                let after = &line[start + 9 + end + 2..];
-
-                let fixed = format!("{}.context(\"{}\")?{}", before, message, after);
-                return FixResult::Fixed(fixed);
+                        let fixed = format!("{}.context(\"{}\")?{}", before, message, after);
+                        return FixResult::Fixed(fixed);
+                    }
+                }
+            } else {
+                // Without anyhow, just replace with ?
+                // Find the expect call and replace it
+                if let Some(start) = line.find(".expect(") {
+                    // Find the matching closing paren
+                    let rest = &line[start + 8..];
+                    let mut depth = 1;
+                    let mut end_pos = 0;
+                    for (i, ch) in rest.chars().enumerate() {
+                        match ch {
+                            '(' => depth += 1,
+                            ')' => {
+                                depth -= 1;
+                                if depth == 0 {
+                                    end_pos = i;
+                                    break;
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    if depth == 0 {
+                        let before = &line[..start];
+                        let after = &line[start + 8 + end_pos + 1..];
+                        let fixed = format!("{}?{}", before, after);
+                        return FixResult::Fixed(fixed);
+                    }
+                }
             }
         }
     }
@@ -558,30 +636,34 @@ fn fix_unwrap_in_line(line: &str, _violation: &Violation, context: &FileContext)
     FixResult::NotApplicable
 }
 
-fn check_can_use_question_mark(line: &str, context: &FileContext) -> bool {
-    // Can't use ? in main without Result return type
-    if line.contains("fn main") && !line.contains("-> Result") {
+fn check_can_use_question_mark(_line: &str, context: &FileContext) -> bool {
+    // In test files, don't use ? in tests
+    if context.is_test_file {
         return false;
     }
 
-    // Can't use ? in tests typically
-    if line.contains("#[test]") {
-        return false;
+    // Check if ANY function in the file returns Result or Option
+    // This is still conservative but better than before
+    let has_result_returning_functions = context.function_signatures.iter()
+        .any(|sig| !sig.is_test && !sig.is_main && (sig.returns_result || sig.returns_option));
+    
+    if has_result_returning_functions {
+        return true;
+    }
+    
+    // Check if main returns Result (common pattern)
+    let main_returns_result = context.function_signatures.iter()
+        .any(|sig| sig.is_main && sig.returns_result);
+        
+    if main_returns_result {
+        return true;
     }
 
-    // Check if we're likely in a function that returns Result
-    // This is a heuristic - proper fix would need full AST analysis
-    for sig in &context.function_signatures {
-        if sig.returns_result || sig.returns_option {
-            return true;
-        }
-    }
-
-    // Conservative: if we have error handling imports, assume we can use ?
+    // If we have error handling imports, we likely have Result-returning functions
     context.has_anyhow_import || context.has_thiserror_import
 }
 
-fn fix_underscore_in_line(line: &str, violation: &Violation, context: &FileContext) -> FixResult {
+fn fix_underscore_in_line(line: &str, _violation: &Violation, context: &FileContext) -> FixResult {
     // Fix underscore parameters in function signatures
     if line.contains("fn ") && line.contains('_') {
         // Check if this is a trait implementation where we can't change signature
@@ -610,8 +692,7 @@ fn fix_underscore_in_line(line: &str, violation: &Violation, context: &FileConte
                 return FixResult::Skipped("Expression likely doesn't return Result".to_string());
             }
 
-            if rest.ends_with(';') {
-                let expr = &rest[..rest.len() - 1];
+            if let Some(expr) = rest.strip_suffix(';') {
                 let indent = &line[..line.find("let").unwrap_or(0)];
 
                 // Check if we can use ?
