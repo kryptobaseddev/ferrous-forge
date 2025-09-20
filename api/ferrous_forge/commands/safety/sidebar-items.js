@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["handle_check","handle_status","test_individual_checks"]};
+window.SIDEBAR_ITEMS = {"fn":["handle_check","handle_install","handle_status","test_individual_checks"]};

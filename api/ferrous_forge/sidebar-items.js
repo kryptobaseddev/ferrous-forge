@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["MIN_RUST_VERSION","REQUIRED_EDITION","VERSION"],"mod":["cli","commands","config","doc_coverage","edition","error","formatting","git_hooks","rust_version","safety","security","standards","templates","test_coverage","updater","validation"]};
+window.SIDEBAR_ITEMS = {"constant":["MIN_RUST_VERSION","REQUIRED_EDITION","VERSION"],"mod":["ai_analyzer","cli","commands","config","doc_coverage","edition","error","formatting","git_hooks","rust_version","safety","security","standards","templates","test_coverage","updater","validation"]};

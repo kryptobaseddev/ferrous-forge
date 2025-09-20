@@ -203,7 +203,7 @@
 <a href=#203 id=203 data-nosnippet>203</a>    <span class="attr">#[tokio::test]
 <a href=#204 id=204 data-nosnippet>204</a>    #[ignore] </span><span class="comment">// Requires network access
 <a href=#205 id=205 data-nosnippet>205</a>    </span><span class="kw">async fn </span>test_get_latest_release() {
-<a href=#206 id=206 data-nosnippet>206</a>        <span class="kw">let </span>client = GitHubClient::new(<span class="prelude-val">None</span>).unwrap();
+<a href=#206 id=206 data-nosnippet>206</a>        <span class="kw">let </span>client = GitHubClient::new(<span class="prelude-val">None</span>)<span class="question-mark">?</span>;
 <a href=#207 id=207 data-nosnippet>207</a>        <span class="kw">let </span>release = client.get_latest_release().<span class="kw">await</span>.unwrap();
 <a href=#208 id=208 data-nosnippet>208</a>
 <a href=#209 id=209 data-nosnippet>209</a>        <span class="macro">assert!</span>(!release.tag_name.is_empty());
