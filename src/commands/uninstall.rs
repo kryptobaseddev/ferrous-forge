@@ -8,7 +8,8 @@ use std::io::{self, Write};
 pub async fn execute(confirm: bool) -> Result<()> {
     if !confirm {
         print!(
-            "Are you sure you want to uninstall Ferrous Forge? This will remove all system integration. [y/N]: "
+            "Are you sure you want to uninstall Ferrous Forge? \
+            This will remove all system integration. [y/N]: "
         );
         io::stdout()
             .flush()

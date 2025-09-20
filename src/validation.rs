@@ -388,6 +388,14 @@ impl RustValidator {
     ) -> Result<()> {
         let content = fs::read_to_string(rust_file).await?;
         let lines: Vec<&str> = content.lines().collect();
+        
+        // Check if this is a test or benchmark file
+        let path_str = rust_file.to_string_lossy();
+        let is_test_file = path_str.contains("/tests/") 
+            || path_str.contains("/benches/") 
+            || path_str.contains("/test_")
+            || path_str.ends_with("_test.rs")
+            || path_str.ends_with("_bench.rs");
 
         // Check for allow attributes at the top of the file
         let mut allow_unwrap = false;
@@ -498,7 +506,7 @@ impl RustValidator {
             }
 
             // Check for .unwrap() in production code (not in tests or if allowed)
-            if !in_test_block && !allow_unwrap && self.patterns.unwrap_call.is_match(line) {
+            if !in_test_block && !is_test_file && !allow_unwrap && self.patterns.unwrap_call.is_match(line) {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),
@@ -511,7 +519,7 @@ impl RustValidator {
             }
 
             // Check for .expect() in production code (not in tests or if allowed)
-            if !in_test_block && !allow_expect && self.patterns.expect_call.is_match(line) {
+            if !in_test_block && !is_test_file && !allow_expect && self.patterns.expect_call.is_match(line) {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),

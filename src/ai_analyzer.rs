@@ -8,8 +8,8 @@ use crate::validation::{Violation, ViolationType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path, PathBuf};
-use syn::{parse_file, Item, ItemFn, ReturnType, Type};
+use std::path::Path;
+use syn::{parse_file, Item, ReturnType};
 
 /// Comprehensive AI analysis report for violations
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -26,138 +26,231 @@ pub struct AIAnalysisReport {
     pub ai_instructions: AIInstructions,
 }
 
+/// Metadata about the AI analysis run
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnalysisMetadata {
+    /// Timestamp when the analysis was performed
     pub timestamp: String,
+    /// Total number of violations analyzed
     pub total_violations: usize,
+    /// Number of violations that could be analyzed by AI
     pub analyzable_violations: usize,
+    /// Path to the project being analyzed
     pub project_path: String,
+    /// Depth of analysis performed
     pub analysis_depth: AnalysisDepth,
 }
 
+/// Depth level of AI analysis performed
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AnalysisDepth {
-    Surface,    // Basic text analysis
-    Semantic,   // AST-based analysis
-    Contextual, // Full project context
-    Behavioral, // Runtime behavior inference
+    /// Basic text-level analysis
+    Surface,
+    /// AST-based semantic analysis
+    Semantic,
+    /// Full project context analysis
+    Contextual,
+    /// Runtime behavior inference
+    Behavioral,
 }
 
+/// Detailed analysis of a single violation
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ViolationAnalysis {
+    /// The violation being analyzed
     pub violation: Violation,
+    /// Context of the code where violation occurred
     pub code_context: CodeContext,
+    /// Semantic analysis of the violation
     pub semantic_analysis: SemanticAnalysis,
+    /// Estimated complexity of fixing the violation
     pub fix_complexity: FixComplexity,
+    /// Dependencies that might be affected
     pub dependencies: Vec<String>,
+    /// Potential side effects of fixing
     pub side_effects: Vec<String>,
+    /// Confidence score for automated fix (0.0-1.0)
     pub confidence_score: f32,
 }
 
+/// Context information about code where violation occurred
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CodeContext {
+    /// Name of the function containing violation
     pub function_name: Option<String>,
+    /// Full function signature
     pub function_signature: Option<String>,
+    /// Return type of the function
     pub return_type: Option<String>,
+    /// Whether the function is async
     pub is_async: bool,
+    /// Whether the function has generic parameters
     pub is_generic: bool,
+    /// Trait being implemented if applicable
     pub trait_impl: Option<String>,
+    /// Lines of code surrounding the violation
     pub surrounding_code: Vec<String>,
+    /// Import statements in the file
     pub imports: Vec<String>,
+    /// Error handling style used in the code
     pub error_handling_style: ErrorHandlingStyle,
 }
 
+/// Style of error handling used in the codebase
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ErrorHandlingStyle {
+    /// Uses anyhow crate for error handling
     Anyhow,
+    /// Uses thiserror with custom error types
     ThiserrorCustom,
+    /// Uses standard library Result
     StdResult,
+    /// Primarily uses Option for error handling
     OptionBased,
+    /// Uses panic for error conditions
     Panic,
+    /// Unknown or mixed error handling style
     Unknown,
 }
 
+/// Semantic analysis results for code understanding
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SemanticAnalysis {
+    /// Actual type being used in the violation
     pub actual_type: Option<String>,
+    /// Expected type for proper handling
     pub expected_type: Option<String>,
+    /// Data flow analysis results
     pub data_flow: Vec<String>,
+    /// Control flow analysis results
     pub control_flow: Vec<String>,
+    /// Variable usage tracking across lines
     pub variable_usage: HashMap<String, Vec<usize>>,
+    /// Function calls made in the context
     pub function_calls: Vec<String>,
+    /// Path of error propagation in the code
     pub error_propagation_path: Vec<String>,
 }
 
+/// Complexity level of fixing a violation
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum FixComplexity {
-    Trivial,       // Simple text replacement
-    Simple,        // Single-line change with type checking
-    Moderate,      // Multi-line changes, needs context
-    Complex,       // Requires refactoring
-    Architectural, // Needs design changes
+    /// Simple text replacement
+    Trivial,
+    /// Single-line change with type checking
+    Simple,
+    /// Multi-line changes, needs context
+    Moderate,
+    /// Requires refactoring
+    Complex,
+    /// Needs design changes
+    Architectural,
 }
 
+/// Patterns detected in the codebase
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CodePatterns {
+    /// Commonly used patterns in the code
     pub common_patterns: Vec<Pattern>,
+    /// Anti-patterns detected
     pub anti_patterns: Vec<Pattern>,
+    /// Overall architectural style
     pub architectural_style: ArchitecturalStyle,
+    /// Error handling pattern used
     pub error_handling_pattern: ErrorPattern,
 }
 
+/// A code pattern detected in the codebase
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Pattern {
+    /// Name of the pattern
     pub name: String,
+    /// Number of occurrences
     pub occurrences: usize,
+    /// Locations where pattern is found
     pub locations: Vec<String>,
+    /// Description of the pattern
     pub description: String,
 }
 
+/// Architectural style of the codebase
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ArchitecturalStyle {
+    /// Service-oriented architecture
     ServiceOriented,
+    /// Monolithic architecture
     Monolithic,
+    /// Modular architecture
     Modular,
+    /// Functional programming style
     Functional,
+    /// Object-oriented programming style
     ObjectOriented,
+    /// Mixed architectural style
     Mixed,
 }
 
+/// Error handling pattern in the codebase
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ErrorPattern {
+    /// Uses Result for all error handling
     ResultEverywhere,
+    /// Mixed error handling approaches
     MixedErrorHandling,
+    /// Heavy use of panic for errors
     PanicHeavy,
+    /// Heavy use of Option for errors
     OptionHeavy,
+    /// Uses custom error types
     CustomErrors,
 }
 
+/// Strategy for fixing a type of violation
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FixStrategy {
+    /// Type of violation this strategy addresses
     pub violation_type: String,
+    /// Name of the strategy
     pub strategy_name: String,
+    /// Description of the strategy
     pub description: String,
+    /// Steps to implement the fix
     pub steps: Vec<String>,
+    /// Prerequisites for applying the strategy
     pub prerequisites: Vec<String>,
+    /// Potential risks of applying the strategy
     pub risks: Vec<String>,
+    /// Confidence score for the strategy
     pub confidence: f32,
+    /// Estimated time to implement in minutes
     pub estimated_time_minutes: u32,
 }
 
+/// Instructions for AI/LLM agents to fix violations
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AIInstructions {
+    /// System prompt for the AI agent
     pub system_prompt: String,
+    /// Violation-specific prompts
     pub violation_specific_prompts: Vec<ViolationPrompt>,
+    /// Required context for fixing
     pub context_requirements: Vec<String>,
+    /// Criteria for validating fixes
     pub validation_criteria: Vec<String>,
+    /// Instructions for rolling back changes
     pub rollback_instructions: String,
 }
 
+/// Specific prompt for handling a violation
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ViolationPrompt {
+    /// ID of the violation
     pub violation_id: String,
+    /// Prompt text for the AI
     pub prompt: String,
+    /// Knowledge required to fix the violation
     pub required_knowledge: Vec<String>,
+    /// Expected format of the fix
     pub expected_output_format: String,
 }
 
@@ -200,7 +293,7 @@ pub async fn analyze_violations_for_ai(
 
 async fn analyze_single_violation(
     violation: &Violation,
-    project_path: &Path,
+    _project_path: &Path,
 ) -> anyhow::Result<ViolationAnalysis> {
     let file_content = fs::read_to_string(&violation.file)?;
 
@@ -272,7 +365,7 @@ fn extract_code_context(
 
 fn extract_function_info(
     ast: &syn::File,
-    line: usize,
+    _line: usize,
 ) -> (Option<String>, Option<String>, Option<String>, bool, bool) {
     for item in &ast.items {
         if let Item::Fn(func) = item {
@@ -323,7 +416,7 @@ fn detect_trait_impl(content: &str, line: usize) -> Option<String> {
 fn perform_semantic_analysis(
     content: &str,
     violation: &Violation,
-    ast: Option<&syn::File>,
+    _ast: Option<&syn::File>,
 ) -> anyhow::Result<SemanticAnalysis> {
     // This is a simplified version - real implementation would use full AST analysis
     let lines: Vec<&str> = content.lines().collect();
@@ -388,7 +481,7 @@ fn trace_data_flow(lines: &[&str], line_idx: usize) -> Vec<String> {
     flow
 }
 
-fn trace_control_flow(lines: &[&str], line_idx: usize) -> Vec<String> {
+fn trace_control_flow(lines: &[&str], _line_idx: usize) -> Vec<String> {
     // Simplified control flow tracing
     let mut flow = Vec::new();
     for (i, line) in lines.iter().enumerate() {
@@ -416,7 +509,7 @@ fn extract_variable_name(line: &str) -> Option<String> {
     // Very simplified variable extraction
     if let Some(start) = line.find("let ") {
         let rest = &line[start + 4..];
-        if let Some(end) = rest.find(|c: char| c == ' ' || c == ':' || c == '=') {
+        if let Some(end) = rest.find([' ', ':', '=']) {
             return Some(rest[..end].trim().to_string());
         }
     }
@@ -436,7 +529,7 @@ fn extract_function_calls(line: &str) -> Vec<String> {
     calls
 }
 
-fn trace_error_propagation(lines: &[&str], line_idx: usize) -> Vec<String> {
+fn trace_error_propagation(lines: &[&str], _line_idx: usize) -> Vec<String> {
     // Simplified error propagation tracing
     let mut path = Vec::new();
     for (i, line) in lines.iter().enumerate() {
@@ -450,14 +543,14 @@ fn trace_error_propagation(lines: &[&str], line_idx: usize) -> Vec<String> {
 fn assess_fix_complexity(
     violation: &Violation,
     context: &CodeContext,
-    semantic: &SemanticAnalysis,
+    _semantic: &SemanticAnalysis,
 ) -> FixComplexity {
     match violation.violation_type {
         ViolationType::UnwrapInProduction => {
             if context
                 .return_type
                 .as_ref()
-                .map_or(false, |t| t.contains("Result"))
+                .is_some_and(|t| t.contains("Result"))
             {
                 FixComplexity::Simple
             } else if context.trait_impl.is_some() {
@@ -550,11 +643,11 @@ fn calculate_confidence(context: &CodeContext, semantic: &SemanticAnalysis) -> f
 }
 
 fn detect_code_patterns(
-    project_path: &Path,
+    _project_path: &Path,
     violations: &[Violation],
 ) -> anyhow::Result<CodePatterns> {
     // Analyze patterns across the codebase
-    let mut common_patterns = Vec::new();
+    let common_patterns = Vec::new();
     let mut anti_patterns = Vec::new();
 
     // Count unwrap patterns
@@ -595,11 +688,13 @@ fn detect_code_patterns(
     })
 }
 
-fn generate_fix_strategies(violations: &[Violation], patterns: &CodePatterns) -> Vec<FixStrategy> {
-    let mut strategies = Vec::new();
-
-    // Strategy for UnwrapInProduction
-    strategies.push(FixStrategy {
+fn generate_fix_strategies(
+    _violations: &[Violation], 
+    _patterns: &CodePatterns
+) -> Vec<FixStrategy> {
+    vec![
+        // Strategy for UnwrapInProduction
+        FixStrategy {
         violation_type: "UnwrapInProduction".to_string(),
         strategy_name: "Progressive Error Handling Migration".to_string(),
         description: "Gradually replace unwrap() with proper error handling".to_string(),
@@ -620,10 +715,9 @@ fn generate_fix_strategies(violations: &[Violation], patterns: &CodePatterns) ->
         ],
         confidence: 0.8,
         estimated_time_minutes: 15,
-    });
-
+    },
     // Strategy for UnderscoreBandaid
-    strategies.push(FixStrategy {
+    FixStrategy {
         violation_type: "UnderscoreBandaid".to_string(),
         strategy_name: "Implement Missing Functionality".to_string(),
         description: "Either use parameters properly or remove them".to_string(),
@@ -644,16 +738,15 @@ fn generate_fix_strategies(violations: &[Violation], patterns: &CodePatterns) ->
         ],
         confidence: 0.6,
         estimated_time_minutes: 30,
-    });
-
-    strategies
+    }]
 }
 
 fn generate_ai_instructions(
     analyses: &[ViolationAnalysis],
-    strategies: &[FixStrategy],
+    _strategies: &[FixStrategy],
 ) -> AIInstructions {
-    let system_prompt = r#"You are an expert Rust developer tasked with fixing code violations identified by Ferrous Forge.
+    let system_prompt = 
+        r#"You are an expert Rust developer tasked with fixing code violations identified by Ferrous Forge.
 
 Your goals:
 1. Fix violations while maintaining code functionality
@@ -726,7 +819,7 @@ The fix should:
 4. Be idiomatic Rust code
 
 Confidence in automated fix: {:.1}%"#,
-        format!("{:?}", analysis.violation.violation_type),
+        format_args!("{:?}", analysis.violation.violation_type),
         analysis.violation.file.display(),
         analysis.violation.line,
         analysis

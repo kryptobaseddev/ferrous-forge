@@ -263,18 +263,30 @@ async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) ->
     for (vtype, count) in violation_counts {
         let (strategy, example, effort) = match vtype.as_str() {
             "UnderscoreBandaid" => (
-                "1. Identify what functionality the parameter should provide\n2. Either implement the functionality or remove the parameter\n3. Update function signature and callers".to_string(),
-                "// Before: fn process(_unused: String, data: Data)\n// After: fn process(data: Data) or implement the unused parameter".to_string(),
+                "1. Identify what functionality the parameter should provide\n\
+                2. Either implement the functionality or remove the parameter\n\
+                3. Update function signature and callers"
+                    .to_string(),
+                "// Before: fn process(_unused: String, data: Data)\n\
+                // After: fn process(data: Data) or implement the unused parameter"
+                    .to_string(),
                 "Moderate".to_string(),
             ),
             "UnwrapInProduction" => (
-                "1. Change function to return Result<T, Error>\n2. Replace ? with ?\n3. Handle errors at call sites".to_string(),
+                "1. Change function to return Result<T, Error>\n\
+                2. Replace ? with ?\n3. Handle errors at call sites"
+                    .to_string(),
                 "// Before: value.unwrap()\n// After: value?".to_string(),
                 "Easy".to_string(),
             ),
             "FileTooLarge" => (
-                "1. Identify logical boundaries in the file\n2. Create new module directory\n3. Split into focused modules\n4. Update imports".to_string(),
-                "// Split validation.rs into validation/mod.rs, validation/core.rs, validation/types.rs".to_string(),
+                "1. Identify logical boundaries in the file\n\
+                2. Create new module directory\n3. Split into focused modules\n\
+                4. Update imports"
+                    .to_string(),
+                "// Split validation.rs into validation/mod.rs, \
+                validation/core.rs, validation/types.rs"
+                    .to_string(),
                 "Hard".to_string(),
             ),
             _ => ("Review and fix manually".to_string(), "".to_string(), "Moderate".to_string()),
