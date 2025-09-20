@@ -204,8 +204,8 @@ pub async fn execute_with_ai(
                         analysis_report.metadata.analyzable_violations
                     );
                     println!(
-                        "  Architectural issues found: {}",
-                        analysis_report.code_patterns.anti_patterns.len()
+                        "  Error patterns found: {}",
+                        analysis_report.code_patterns.error_patterns.len()
                     );
                     println!(
                         "  Fix strategies generated: {}",
@@ -225,13 +225,21 @@ pub async fn execute_with_ai(
                     println!("\n{}", style("📝 AI Analysis Report saved to:").green());
                     println!("  {}", report_path.display());
 
-                    // Generate orchestrator instructions
-                    let orchestrator_instructions =
-                        ai_analyzer::generate_orchestrator_instructions(&analysis_report).await?;
+                    // Save orchestrator instructions
+                    ai_analyzer::generate_orchestrator_instructions(&analysis_report).await?;
 
+                    // Create instructions markdown from the report
+                    let mut instructions = String::new();
+                    instructions.push_str("# AI Orchestrator Instructions\n\n");
+                    instructions.push_str(&format!("## Summary\n{}\n\n", analysis_report.ai_instructions.summary));
+                    instructions.push_str("## Prioritized Fixes\n");
+                    for fix in &analysis_report.ai_instructions.prioritized_fixes {
+                        instructions.push_str(&format!("- {}\n", fix));
+                    }
+                    
                     let instructions_path =
                         reports_dir.join(format!("orchestrator_instructions_{}.md", timestamp));
-                    tokio::fs::write(&instructions_path, &orchestrator_instructions).await?;
+                    tokio::fs::write(&instructions_path, instructions.as_bytes()).await?;
 
                     println!(
                         "\n{}",

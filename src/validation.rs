@@ -354,7 +354,7 @@ impl RustValidator {
                     violations.push(Violation {
                         violation_type: ViolationType::WrongEdition,
                         file: cargo_file.to_path_buf(),
-                        line: i,
+                        line: i + 1,
                         message: "Must use Edition 2021 or 2024".to_string(),
                         severity: Severity::Error,
                     });
@@ -444,7 +444,7 @@ impl RustValidator {
                 violations.push(Violation {
                     violation_type: ViolationType::LineTooLong,
                     file: rust_file.to_path_buf(),
-                    line: i,
+                    line: i + 1,
                     message: format!("Line has {} characters, maximum allowed is 100", line.len()),
                     severity: Severity::Warning,
                 });
@@ -471,7 +471,7 @@ impl RustValidator {
                         violations.push(Violation {
                             violation_type: ViolationType::FunctionTooLarge,
                             file: rust_file.to_path_buf(),
-                            line: start,
+                            line: start + 1,
                             message: format!(
                                 "Function has {} lines, maximum allowed is 50",
                                 func_lines
@@ -488,7 +488,7 @@ impl RustValidator {
                 violations.push(Violation {
                     violation_type: ViolationType::UnderscoreBandaid,
                     file: rust_file.to_path_buf(),
-                    line: i,
+                    line: i + 1,
                     message: "BANNED: Underscore parameter (_param) - \
                              fix the design instead of hiding warnings".to_string(),
                     severity: Severity::Error,
@@ -499,7 +499,7 @@ impl RustValidator {
                 violations.push(Violation {
                     violation_type: ViolationType::UnderscoreBandaid,
                     file: rust_file.to_path_buf(),
-                    line: i,
+                    line: i + 1,
                     message: "BANNED: Underscore assignment (let _ =) - handle errors properly"
                         .to_string(),
                     severity: Severity::Error,
@@ -512,7 +512,7 @@ impl RustValidator {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),
-                    line: i,
+                    line: i + 1,
                     message:
                         "BANNED: .unwrap() in production code - use proper error handling with ?"
                             .to_string(),
@@ -526,7 +526,7 @@ impl RustValidator {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),
-                    line: i,
+                    line: i + 1,
                     message:
                         "BANNED: .expect() in production code - use proper error handling with ?"
                             .to_string(),
