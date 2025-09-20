@@ -107,7 +107,8 @@ COMMIT_MSG_FILE=$1
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
 
 # Check for conventional commit format
-if ! echo "$COMMIT_MSG" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\([a-z0-9-]+\))?: .+'; then
+if ! echo "$COMMIT_MSG" | grep -qE \
+   '^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\([a-z0-9-]+\))?: .+'; then
     echo "❌ Invalid commit message format!"
     echo ""
     echo "📝 Please use conventional commit format:"

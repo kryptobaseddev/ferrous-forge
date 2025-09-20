@@ -746,7 +746,8 @@ fn generate_ai_instructions(
     _strategies: &[FixStrategy],
 ) -> AIInstructions {
     let system_prompt = 
-        r#"You are an expert Rust developer tasked with fixing code violations identified by Ferrous Forge.
+        r#"You are an expert Rust developer tasked with fixing code violations 
+identified by Ferrous Forge.
 
 Your goals:
 1. Fix violations while maintaining code functionality

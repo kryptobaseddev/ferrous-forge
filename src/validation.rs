@@ -489,7 +489,8 @@ impl RustValidator {
                     violation_type: ViolationType::UnderscoreBandaid,
                     file: rust_file.to_path_buf(),
                     line: i,
-                    message: "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings".to_string(),
+                    message: "BANNED: Underscore parameter (_param) - \
+                             fix the design instead of hiding warnings".to_string(),
                     severity: Severity::Error,
                 });
             }
@@ -506,7 +507,8 @@ impl RustValidator {
             }
 
             // Check for .unwrap() in production code (not in tests or if allowed)
-            if !in_test_block && !is_test_file && !allow_unwrap && self.patterns.unwrap_call.is_match(line) {
+            if !in_test_block && !is_test_file && !allow_unwrap 
+                && self.patterns.unwrap_call.is_match(line) {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),
@@ -519,7 +521,8 @@ impl RustValidator {
             }
 
             // Check for .expect() in production code (not in tests or if allowed)
-            if !in_test_block && !is_test_file && !allow_expect && self.patterns.expect_call.is_match(line) {
+            if !in_test_block && !is_test_file && !allow_expect 
+                && self.patterns.expect_call.is_match(line) {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),

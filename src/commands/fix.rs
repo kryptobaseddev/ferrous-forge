@@ -721,8 +721,8 @@ mod tests {
 
     #[test]
     fn test_safe_unwrap_fix() {
-        let content = 
-            "use anyhow::Result;\n\nfn process() -> Result<()> {\n    let value = some_func().unwrap();\n}";
+        let content = "use anyhow::Result;\n\nfn process() -> Result<()> {\n    \
+                        let value = some_func().unwrap();\n}";
         let context = analyze_file_context(content);
         let line = "    let value = some_func().unwrap();";
         let violation = Violation {
@@ -743,8 +743,8 @@ mod tests {
 
     #[test]
     fn test_skip_test_unwrap() {
-        let content = 
-            "#[cfg(test)]\nmod tests {\n    #[test]\n    fn test_something() {\n        value.unwrap();\n    }\n}";
+        let content = "#[cfg(test)]\nmod tests {\n    #[test]\n    \
+                        fn test_something() {\n        value.unwrap();\n    }\n}";
         let context = analyze_file_context(content);
         let line = "        value.unwrap();";
         let violation = Violation {

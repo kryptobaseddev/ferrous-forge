@@ -332,7 +332,8 @@ async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) ->
                 "Large files need splitting (validation.rs: 1133 lines)".to_string(),
                 "Large functions need refactoring".to_string(),
             ],
-            estimated_fix_time_hours: violations.len() as f64 * 0.25, // 15 minutes per violation average
+            // 15 minutes per violation average
+            estimated_fix_time_hours: violations.len() as f64 * 0.25,
         },
         violations: ai_violations,
         fix_instructions,

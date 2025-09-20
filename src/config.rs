@@ -453,8 +453,10 @@ mod tests {
                 prop_assert!(config.set("max_file_lines", &max_file_lines.to_string()).is_ok());
                 prop_assert_eq!(config.get("max_file_lines"), Some(max_file_lines.to_string()));
 
-                prop_assert!(config.set("max_function_lines", &max_function_lines.to_string()).is_ok());
-                prop_assert_eq!(config.get("max_function_lines"), Some(max_function_lines.to_string()));
+                prop_assert!(config.set("max_function_lines", 
+                    &max_function_lines.to_string()).is_ok());
+                prop_assert_eq!(config.get("max_function_lines"), 
+                    Some(max_function_lines.to_string()));
             }
         }
     }
