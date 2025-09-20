@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use super::types::{SemanticAnalysis, CodeContext, FixComplexity};
 use crate::validation::{ViolationType, Violation};
 
+/// Perform semantic analysis on a violation
 pub fn perform_semantic_analysis(
     violation: &Violation,
     context: &CodeContext,
@@ -117,6 +118,7 @@ fn trace_error_propagation(lines: &[&str], _line_idx: usize) -> Vec<String> {
     path
 }
 
+/// Assess the complexity of fixing a violation
 pub fn assess_fix_complexity(
     violation: &Violation,
     context: &CodeContext,

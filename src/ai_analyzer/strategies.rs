@@ -1,6 +1,10 @@
-use super::types::{FixStrategy, ViolationAnalysis, AIInstructions, ArchitecturalStyle, ErrorPattern, CodePatterns, Pattern};
+use super::types::{
+    FixStrategy, ViolationAnalysis, AIInstructions, ArchitecturalStyle, 
+    ErrorPattern, CodePatterns, Pattern
+};
 use crate::validation::ViolationType;
 
+/// Generate fix strategies from violation analyses
 pub fn generate_fix_strategies(analyses: &[ViolationAnalysis]) -> Vec<FixStrategy> {
     let mut strategies = Vec::new();
     let mut violation_counts = std::collections::HashMap::new();
@@ -82,9 +86,10 @@ fn create_strategy(violation_type: ViolationType, count: usize) -> FixStrategy {
     }
 }
 
+/// Generate AI instructions for fixing violations
 pub fn generate_ai_instructions(
     analyses: &[ViolationAnalysis],
-    strategies: &[FixStrategy],
+    _strategies: &[FixStrategy],
 ) -> AIInstructions {
     let summary = format!(
         "Analyzed {} violations. {} are AI-fixable with varying complexity.",
@@ -144,6 +149,7 @@ pub fn generate_ai_instructions(
     }
 }
 
+/// Identify code patterns in the given content
 pub fn identify_code_patterns(content: &str) -> CodePatterns {
     let architectural_style = detect_architectural_style(content);
     let error_patterns = detect_error_patterns(content);

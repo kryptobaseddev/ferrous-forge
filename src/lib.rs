@@ -36,6 +36,7 @@
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+/// AI-powered violation analysis module
 pub mod ai_analyzer;
 pub mod cli;
 pub mod commands;

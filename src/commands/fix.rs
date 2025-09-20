@@ -231,7 +231,10 @@ pub async fn execute_with_ai(
                     // Create instructions markdown from the report
                     let mut instructions = String::new();
                     instructions.push_str("# AI Orchestrator Instructions\n\n");
-                    instructions.push_str(&format!("## Summary\n{}\n\n", analysis_report.ai_instructions.summary));
+                    instructions.push_str(&format!(
+                        "## Summary\n{}\n\n", 
+                        analysis_report.ai_instructions.summary
+                    ));
                     instructions.push_str("## Prioritized Fixes\n");
                     for fix in &analysis_report.ai_instructions.prioritized_fixes {
                         instructions.push_str(&format!("- {}\n", fix));

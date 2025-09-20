@@ -2,12 +2,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::validation::ViolationType;
 
+/// Main AI analysis report structure
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AIAnalysisReport {
+    /// Analysis metadata
     pub metadata: AnalysisMetadata,
+    /// Individual violation analyses
     pub violation_analyses: Vec<ViolationAnalysis>,
+    /// Detected code patterns
     pub code_patterns: CodePatterns,
+    /// Generated fix strategies
     pub fix_strategies: Vec<FixStrategy>,
+    /// AI instructions for fixes
     pub ai_instructions: AIInstructions,
 }
 

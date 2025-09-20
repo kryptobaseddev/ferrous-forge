@@ -10,15 +10,18 @@ use super::semantic::{perform_semantic_analysis, assess_fix_complexity};
 use super::strategies::{generate_fix_strategies, generate_ai_instructions, identify_code_patterns};
 use crate::validation::Violation;
 
+/// AI analyzer for automated violation analysis
 pub struct AIAnalyzer {
     project_root: PathBuf,
 }
 
 impl AIAnalyzer {
+    /// Create a new AI analyzer
     pub fn new(project_root: PathBuf) -> Self {
         Self { project_root }
     }
 
+    /// Analyze violations and generate report
     pub fn analyze_violations(&self, violations: Vec<Violation>) -> Result<AIAnalysisReport> {
         let mut violation_analyses = Vec::new();
         let mut analyzable_count = 0;
@@ -54,7 +57,7 @@ impl AIAnalyzer {
 
     fn analyze_single_violation(&self, violation: &Violation) -> Result<ViolationAnalysis> {
         let content = fs::read_to_string(&violation.file)?;
-        let code_context = extract_code_context(&violation.file, violation.line, &content);
+        let code_context = extract_code_context(violation.line, &content);
         let semantic_analysis = perform_semantic_analysis(violation, &code_context, &content);
         let fix_complexity = assess_fix_complexity(violation, &code_context, &semantic_analysis);
         
@@ -89,7 +92,7 @@ impl AIAnalyzer {
         &self,
         violation: &Violation,
         context: &CodeContext,
-        semantic: &SemanticAnalysis,
+        _semantic: &SemanticAnalysis,
         complexity: &FixComplexity,
     ) -> (bool, f32) {
         match (&violation.violation_type, complexity) {
@@ -115,12 +118,12 @@ impl AIAnalyzer {
         &self,
         violation: &Violation,
         context: &CodeContext,
-        semantic: &SemanticAnalysis,
+        _semantic: &SemanticAnalysis,
     ) -> Option<String> {
         match violation.violation_type {
             crate::validation::ViolationType::UnwrapInProduction => {
                 if context.return_type.as_ref().map_or(false, |r| r.contains("Result")) {
-                    Some("Replace .unwrap() with ? operator".to_string())
+                    Some("Replace ? with ? operator".to_string())
                 } else {
                     Some("Change function return type to Result and use ?".to_string())
                 }
@@ -167,7 +170,12 @@ impl AIAnalyzer {
         let mut count = 0;
         
         // Simple file traversal
-        fn visit_dir(dir: &std::path::Path, content: &mut String, count: &mut usize, max: usize) -> Result<()> {
+        fn visit_dir(
+            dir: &std::path::Path, 
+            content: &mut String, 
+            count: &mut usize, 
+            max: usize
+        ) -> Result<()> {
             if *count >= max {
                 return Ok(());
             }
@@ -176,7 +184,9 @@ impl AIAnalyzer {
                 let entry = entry?;
                 let path = entry.path();
                 
-                if path.is_dir() && !path.file_name().unwrap_or_default().to_string_lossy().starts_with('.') {
+                if path.is_dir() 
+                    && !path.file_name().unwrap_or_default().to_string_lossy().starts_with('.') 
+                {
                     visit_dir(&path, content, count, max)?;
                 } else if path.extension().map_or(false, |ext| ext == "rs") {
                     if let Ok(file_content) = fs::read_to_string(&path) {
@@ -191,17 +201,27 @@ impl AIAnalyzer {
             Ok(())
         }
         
-        visit_dir(&self.project_root.join("src"), &mut all_content, &mut count, 10)?;
+        visit_dir(
+            &self.project_root.join("src"), 
+            &mut all_content, 
+            &mut count, 
+            10
+        )?;
 
         Ok(identify_code_patterns(&all_content))
     }
 
-    pub async fn analyze_violations_async(&self, violations: Vec<Violation>) -> Result<AIAnalysisReport> {
+    /// Async version of analyze_violations
+    pub async fn analyze_violations_async(
+        &self, 
+        violations: Vec<Violation>
+    ) -> Result<AIAnalysisReport> {
         // For now, just call the sync version
         // In future could parallelize with tokio
         self.analyze_violations(violations)
     }
 
+    /// Save analysis report to disk
     pub fn save_analysis(&self, report: &AIAnalysisReport) -> Result<()> {
         let analysis_dir = self.project_root.join(".ferrous-forge").join("ai-analysis");
         fs::create_dir_all(&analysis_dir)?;

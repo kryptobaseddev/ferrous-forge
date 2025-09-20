@@ -1,9 +1,8 @@
-use std::path::Path;
 
 use super::types::{CodeContext, ErrorHandlingStyle};
 
+/// Extract code context around a violation line
 pub fn extract_code_context(
-    file_path: &Path,
     line_number: usize,
     content: &str,
 ) -> CodeContext {
@@ -76,6 +75,7 @@ fn extract_function_info(
     (None, None, None)
 }
 
+/// Detect the error handling style used in the code
 pub fn detect_error_handling_style(imports: &[String], content: &str) -> ErrorHandlingStyle {
     if imports.iter().any(|i| i.contains("anyhow")) || content.contains("anyhow::Result") {
         ErrorHandlingStyle::AnyhowResult
