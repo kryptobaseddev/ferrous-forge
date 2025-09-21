@@ -202,11 +202,12 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires network access
-    async fn test_get_latest_release() {
+    async fn test_get_latest_release() -> Result<()> {
         let client = GitHubClient::new(None)?;
-        let release = client.get_latest_release().await.unwrap();
+        let release = client.get_latest_release().await?;
 
         assert!(!release.tag_name.is_empty());
         assert!(release.version.major >= 1);
+        Ok(())
     }
 }

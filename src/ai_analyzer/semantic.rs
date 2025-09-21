@@ -98,15 +98,6 @@ fn extract_variable_name(line: &str) -> Option<String> {
     }
 }
 
-fn extract_function_calls(line: &str) -> Vec<String> {
-    let mut calls = Vec::new();
-    for part in line.split(&[' ', '(', ')', '{', '}', ';'][..]) {
-        if part.contains("()") {
-            calls.push(part.replace("()", ""));
-        }
-    }
-    calls
-}
 
 fn trace_error_propagation(lines: &[&str], _line_idx: usize) -> Vec<String> {
     let mut path = Vec::new();

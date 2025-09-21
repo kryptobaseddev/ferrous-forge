@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::validation::ViolationType;
 
 /// Main AI analysis report structure
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AIAnalysisReport {
     /// Analysis metadata
     pub metadata: AnalysisMetadata,
@@ -17,23 +17,33 @@ pub struct AIAnalysisReport {
     pub ai_instructions: AIInstructions,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+/// Metadata about AI analysis results
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnalysisMetadata {
+    /// Total violations found
     pub total_violations: usize,
+    /// Violations that can be analyzed
     pub analyzable_violations: usize,
+    /// Project path analyzed
     pub project_path: String,
+    /// Depth of analysis performed
     pub analysis_depth: AnalysisDepth,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+/// Depth level of AI analysis
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AnalysisDepth {
+    /// Basic surface analysis
     Surface,
+    /// Context-aware analysis
     Contextual,
+    /// Semantic code analysis
     Semantic,
+    /// Architectural level analysis
     Architectural,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ViolationAnalysis {
     pub violation: crate::validation::Violation,
     pub code_context: CodeContext,
@@ -68,7 +78,7 @@ pub enum ErrorHandlingStyle {
     Unknown,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SemanticAnalysis {
     pub actual_type: Option<String>,
     pub expected_type: Option<String>,
@@ -78,7 +88,7 @@ pub struct SemanticAnalysis {
     pub error_propagation: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum FixComplexity {
     Trivial,
     Simple,
@@ -87,21 +97,21 @@ pub enum FixComplexity {
     Architectural,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CodePatterns {
     pub architectural_style: ArchitecturalStyle,
     pub error_patterns: Vec<ErrorPattern>,
     pub common_patterns: Vec<Pattern>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Pattern {
     pub name: String,
     pub occurrences: usize,
     pub locations: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ArchitecturalStyle {
     Monolithic,
     Modular,
@@ -111,7 +121,7 @@ pub enum ArchitecturalStyle {
     Unknown,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ErrorPattern {
     UnhandledResult,
     PanicUsage,
@@ -121,7 +131,7 @@ pub enum ErrorPattern {
     PropagatedError,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FixStrategy {
     pub violation_type: ViolationType,
     pub strategy_name: String,
@@ -131,7 +141,7 @@ pub struct FixStrategy {
     pub risk_level: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AIInstructions {
     pub summary: String,
     pub prioritized_fixes: Vec<String>,
@@ -139,7 +149,7 @@ pub struct AIInstructions {
     pub code_quality_improvements: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ViolationPrompt {
     pub violation_summary: String,
     pub context_description: String,

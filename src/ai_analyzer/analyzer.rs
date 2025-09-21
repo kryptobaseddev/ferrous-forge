@@ -241,7 +241,7 @@ impl AIAnalyzer {
         Ok(())
     }
 
-    fn save_orchestrator_instructions(&self, report: &AIAnalysisReport) -> Result<()> {
+    pub fn save_orchestrator_instructions(&self, report: &AIAnalysisReport) -> Result<()> {
         let analysis_dir = self.project_root.join(".ferrous-forge").join("ai-analysis");
         let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
         let filename = format!("orchestrator_instructions_{}.md", timestamp);

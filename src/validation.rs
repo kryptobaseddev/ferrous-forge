@@ -92,6 +92,46 @@ struct ValidationPatterns {
     function_def: Regex,
 }
 
+/// Check if a pattern match is inside a string literal
+fn is_in_string_literal(line: &str, pattern: &str) -> bool {
+    let mut in_string = false;
+    let mut escaped = false;
+    let mut quote_char = '"';
+    let bytes = line.as_bytes();
+    
+    // Find the pattern position first
+    if let Some(pattern_pos) = line.find(pattern) {
+        // Check if any quote comes before the pattern position
+        for (i, &byte) in bytes.iter().enumerate() {
+            if i >= pattern_pos {
+                break;
+            }
+            
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            
+            if byte == b'\\' {
+                escaped = true;
+                continue;
+            }
+            
+            if byte == b'"' || byte == b'\'' {
+                if !in_string {
+                    in_string = true;
+                    quote_char = byte as char;
+                } else if byte as char == quote_char {
+                    in_string = false;
+                }
+            }
+        }
+        in_string
+    } else {
+        false
+    }
+}
+
 impl RustValidator {
     /// Create a new validator for the given project
     pub fn new(project_root: PathBuf) -> Result<Self> {
@@ -508,7 +548,8 @@ impl RustValidator {
 
             // Check for .unwrap() in production code (not in tests or if allowed)
             if !in_test_block && !is_test_file && !allow_unwrap 
-                && self.patterns.unwrap_call.is_match(line) {
+                && self.patterns.unwrap_call.is_match(line)
+                && !is_in_string_literal(line, ".unwrap()") {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),
@@ -522,7 +563,8 @@ impl RustValidator {
 
             // Check for .expect() in production code (not in tests or if allowed)
             if !in_test_block && !is_test_file && !allow_expect 
-                && self.patterns.expect_call.is_match(line) {
+                && self.patterns.expect_call.is_match(line)
+                && !is_in_string_literal(line, ".expect(") {
                 violations.push(Violation {
                     violation_type: ViolationType::UnwrapInProduction,
                     file: rust_file.to_path_buf(),
