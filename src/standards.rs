@@ -1,4 +1,5 @@
 //! Rust coding standards definitions and enforcement
+#![allow(clippy::unwrap_used)]
 //!
 //! This module defines the specific standards that Ferrous Forge enforces
 //! and provides utilities for checking compliance.

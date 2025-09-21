@@ -68,9 +68,14 @@ fn trace_data_flow(lines: &[&str], line_idx: usize) -> Vec<String> {
     flow
 }
 
-fn trace_control_flow(lines: &[&str], _line_idx: usize) -> Vec<String> {
+fn trace_control_flow(lines: &[&str], line_idx: usize) -> Vec<String> {
     let mut flow = Vec::new();
-    for (i, line) in lines.iter().enumerate() {
+    // Include context around the violation line
+    let start = line_idx.saturating_sub(5);
+    let end = (line_idx + 5).min(lines.len());
+    
+    for i in start..end {
+        let line = lines[i];
         if line.contains("if ") || line.contains("match ") || line.contains("while ") {
             flow.push(format!("Line {}: Control flow statement", i + 1));
         }
@@ -99,9 +104,14 @@ fn extract_variable_name(line: &str) -> Option<String> {
 }
 
 
-fn trace_error_propagation(lines: &[&str], _line_idx: usize) -> Vec<String> {
+fn trace_error_propagation(lines: &[&str], line_idx: usize) -> Vec<String> {
     let mut path = Vec::new();
-    for (i, line) in lines.iter().enumerate() {
+    // Focus on error handling near the violation
+    let start = line_idx.saturating_sub(10);
+    let end = (line_idx + 10).min(lines.len());
+    
+    for i in start..end {
+        let line = lines[i];
         if line.contains('?') || line.contains(".unwrap()") || line.contains(".expect(") {
             path.push(format!("Line {}: Error handling point", i + 1));
         }

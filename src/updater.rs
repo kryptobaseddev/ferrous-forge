@@ -118,7 +118,7 @@ impl UpdateManager {
         match self.channel {
             UpdateChannel::Stable => self.parse_latest_release(&body).await,
             UpdateChannel::Beta => self.parse_prerelease(&body).await,
-            UpdateChannel::Nightly => self.parse_nightly_build(&body).await,
+            UpdateChannel::Nightly => self.parse_nightly_build().await,
         }
     }
 
@@ -375,7 +375,7 @@ impl UpdateManager {
     }
 
     /// Parse nightly build from GitHub Actions artifacts
-    async fn parse_nightly_build(&self, _response_body: &str) -> Result<Option<UpdateInfo>> {
+    async fn parse_nightly_build(&self) -> Result<Option<UpdateInfo>> {
         // Nightly builds would come from GitHub Actions artifacts
         // This is more complex and would require authentication
         // For now, return None as nightly builds aren't implemented

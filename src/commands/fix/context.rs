@@ -76,16 +76,23 @@ pub fn parse_function_signature_multiline(
     let returns_option = full_signature.contains("-> Option");
     
     // Find the end of the function (closing brace at the same indentation level)
-    let _indent = lines[start_idx].len() - lines[start_idx].trim_start().len();
+    let indent = lines[start_idx].len() - lines[start_idx].trim_start().len();
     let mut line_end = brace_line + 1;
     let mut brace_count = 1;
     
     while line_end < lines.len() && brace_count > 0 {
-        for ch in lines[line_end].chars() {
+        let line = lines[line_end];
+        let line_indent = line.len() - line.trim_start().len();
+        
+        for ch in line.chars() {
             if ch == '{' {
                 brace_count += 1;
             } else if ch == '}' {
                 brace_count -= 1;
+                // Check if this is the closing brace at the same indentation
+                if brace_count == 0 && line_indent == indent {
+                    break;
+                }
             }
         }
         if brace_count == 0 {

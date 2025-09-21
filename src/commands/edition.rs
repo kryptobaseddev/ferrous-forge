@@ -312,22 +312,11 @@ pub async fn handle_analyze(path: &Path, edition_str: &str) -> Result<()> {
     // Migration readiness
     println!();
     if report.is_ready_for_migration() {
-        println!(
-            "{}",
-            style("✅ Project is ready for migration!").green().bold()
-        );
-        println!(
-            "\nRun {} to start the migration",
-            style(format!("ferrous-forge edition migrate {}", edition_str)).cyan()
-        );
+        println!("{}", style("✅ Project is ready for migration!").green().bold());
+        println!("Run {} to start", style(format!("ferrous-forge edition migrate {}", edition_str)).cyan());
     } else {
-        println!(
-            "{}",
-            style("⚠️  Project needs attention before migration")
-                .yellow()
-                .bold()
-        );
-        println!("\nFix the errors listed above before attempting migration.");
+        println!("{}", style("⚠️  Project needs attention before migration").yellow().bold());
+        println!("Fix the errors listed above before attempting migration.");
     }
 
     Ok(())

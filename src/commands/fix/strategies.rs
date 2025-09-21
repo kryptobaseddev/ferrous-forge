@@ -5,7 +5,11 @@ use super::types::{FileContext, FixResult};
 use super::context::check_can_use_question_mark;
 
 /// Fix a violation in a line of code
-pub fn fix_violation_in_line(line: &str, violation: &Violation, context: &FileContext) -> FixResult {
+pub fn fix_violation_in_line(
+    line: &str, 
+    violation: &Violation, 
+    context: &FileContext
+) -> FixResult {
     match violation.violation_type {
         ViolationType::UnwrapInProduction => fix_unwrap_in_line(line, violation, context),
         ViolationType::UnderscoreBandaid => fix_underscore_in_line(line, violation, context),
