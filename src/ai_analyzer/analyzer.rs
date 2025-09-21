@@ -4,10 +4,12 @@ use std::path::PathBuf;
 use anyhow::Result;
 use chrono::Utc;
 
-use super::types::*;
 use super::context::extract_code_context;
-use super::semantic::{perform_semantic_analysis, assess_fix_complexity};
-use super::strategies::{generate_fix_strategies, generate_ai_instructions, identify_code_patterns};
+use super::semantic::{assess_fix_complexity, perform_semantic_analysis};
+use super::strategies::{
+    generate_ai_instructions, generate_fix_strategies, identify_code_patterns,
+};
+use super::types::*;
 use crate::validation::Violation;
 
 /// AI analyzer for automated violation analysis
@@ -60,7 +62,7 @@ impl AIAnalyzer {
         let code_context = extract_code_context(violation.line, &content);
         let semantic_analysis = perform_semantic_analysis(violation, &code_context, &content);
         let fix_complexity = assess_fix_complexity(violation, &code_context, &semantic_analysis);
-        
+
         let (ai_fixable, confidence_score) = self.assess_fixability(
             &violation,
             &code_context,
@@ -97,7 +99,11 @@ impl AIAnalyzer {
     ) -> (bool, f32) {
         match (&violation.violation_type, complexity) {
             (crate::validation::ViolationType::UnwrapInProduction, FixComplexity::Trivial) => {
-                if context.return_type.as_ref().map_or(false, |r| r.contains("Result")) {
+                if context
+                    .return_type
+                    .as_ref()
+                    .is_some_and(|r| r.contains("Result"))
+                {
                     (true, 0.95)
                 } else {
                     (true, 0.75)
@@ -122,7 +128,11 @@ impl AIAnalyzer {
     ) -> Option<String> {
         match violation.violation_type {
             crate::validation::ViolationType::UnwrapInProduction => {
-                if context.return_type.as_ref().map_or(false, |r| r.contains("Result")) {
+                if context
+                    .return_type
+                    .as_ref()
+                    .is_some_and(|r| r.contains("Result"))
+                {
                     Some("Replace ? with ? operator".to_string())
                 } else {
                     Some("Change function return type to Result and use ?".to_string())
@@ -138,16 +148,16 @@ impl AIAnalyzer {
         }
     }
 
-    fn identify_side_effects(
-        &self,
-        violation: &Violation,
-        context: &CodeContext,
-    ) -> Vec<String> {
+    fn identify_side_effects(&self, violation: &Violation, context: &CodeContext) -> Vec<String> {
         let mut effects = Vec::new();
 
         match violation.violation_type {
             crate::validation::ViolationType::UnwrapInProduction => {
-                if !context.return_type.as_ref().map_or(false, |r| r.contains("Result")) {
+                if !context
+                    .return_type
+                    .as_ref()
+                    .is_some_and(|r| r.contains("Result"))
+                {
                     effects.push("Function signature change required".to_string());
                     effects.push("All callers must be updated".to_string());
                 }
@@ -164,31 +174,35 @@ impl AIAnalyzer {
 
     fn analyze_project_patterns(&self) -> Result<CodePatterns> {
         let mut all_content = String::new();
-        
+
         // Sample a few files for pattern analysis
         use std::fs;
         let mut count = 0;
-        
+
         // Simple file traversal
         fn visit_dir(
-            dir: &std::path::Path, 
-            content: &mut String, 
-            count: &mut usize, 
-            max: usize
+            dir: &std::path::Path,
+            content: &mut String,
+            count: &mut usize,
+            max: usize,
         ) -> Result<()> {
             if *count >= max {
                 return Ok(());
             }
-            
+
             for entry in fs::read_dir(dir)? {
                 let entry = entry?;
                 let path = entry.path();
-                
-                if path.is_dir() 
-                    && !path.file_name().unwrap_or_default().to_string_lossy().starts_with('.') 
+
+                if path.is_dir()
+                    && !path
+                        .file_name()
+                        .unwrap_or_default()
+                        .to_string_lossy()
+                        .starts_with('.')
                 {
                     visit_dir(&path, content, count, max)?;
-                } else if path.extension().map_or(false, |ext| ext == "rs") {
+                } else if path.extension().is_some_and(|ext| ext == "rs") {
                     if let Ok(file_content) = fs::read_to_string(&path) {
                         content.push_str(&file_content);
                         *count += 1;
@@ -200,12 +214,12 @@ impl AIAnalyzer {
             }
             Ok(())
         }
-        
+
         visit_dir(
-            &self.project_root.join("src"), 
-            &mut all_content, 
-            &mut count, 
-            10
+            &self.project_root.join("src"),
+            &mut all_content,
+            &mut count,
+            10,
         )?;
 
         Ok(identify_code_patterns(&all_content))
@@ -213,8 +227,8 @@ impl AIAnalyzer {
 
     /// Async version of analyze_violations
     pub async fn analyze_violations_async(
-        &self, 
-        violations: Vec<Violation>
+        &self,
+        violations: Vec<Violation>,
     ) -> Result<AIAnalysisReport> {
         // For now, just call the sync version
         // In future could parallelize with tokio
@@ -241,6 +255,7 @@ impl AIAnalyzer {
         Ok(())
     }
 
+    /// Save orchestrator instructions to file
     pub fn save_orchestrator_instructions(&self, report: &AIAnalysisReport) -> Result<()> {
         let analysis_dir = self.project_root.join(".ferrous-forge").join("ai-analysis");
         let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
@@ -249,20 +264,26 @@ impl AIAnalyzer {
 
         let mut instructions = String::new();
         instructions.push_str("# AI Orchestrator Instructions\n\n");
-        instructions.push_str(&format!("## Summary\n{}\n\n", report.ai_instructions.summary));
-        
+        instructions.push_str(&format!(
+            "## Summary\n{}\n\n",
+            report.ai_instructions.summary
+        ));
+
         instructions.push_str("## Prioritized Fixes\n");
         for fix in &report.ai_instructions.prioritized_fixes {
             instructions.push_str(&format!("- {}\n", fix));
         }
-        
+
         instructions.push_str("\n## Architectural Recommendations\n");
         for rec in &report.ai_instructions.architectural_recommendations {
             instructions.push_str(&format!("- {}\n", rec));
         }
 
         fs::write(&filepath, instructions)?;
-        println!("📝 Orchestrator instructions saved to: {}", filepath.display());
+        println!(
+            "📝 Orchestrator instructions saved to: {}",
+            filepath.display()
+        );
 
         Ok(())
     }

@@ -80,6 +80,12 @@ pub enum Commands {
         #[command(subcommand)]
         command: SafetyCommand,
     },
+    /// Project template management
+    Template {
+        /// Template subcommand
+        #[command(subcommand)]
+        command: template::TemplateCommand,
+    },
     /// Automatically fix code violations
     Fix {
         /// Path to the project to fix (defaults to current directory)
@@ -202,6 +208,7 @@ pub mod rollback;
 pub mod rust;
 pub mod safety;
 pub mod status;
+pub mod template;
 pub mod uninstall;
 pub mod update;
 pub mod validate;

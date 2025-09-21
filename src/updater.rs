@@ -1,4 +1,5 @@
 //! Self-update system for Ferrous Forge
+#![allow(clippy::too_many_lines)]
 //!
 //! This module handles automatic updates of the Ferrous Forge binary and
 //! configuration rules from remote sources.

@@ -1,19 +1,20 @@
 //! Auto-fix command for Ferrous Forge violations
+#![allow(clippy::too_many_lines)]
 //!
 //! This module implements intelligent auto-fixing for common Rust anti-patterns.
 //! It analyzes code context to ensure fixes are safe and won't break compilation.
 
-mod types;
 mod context;
 mod strategies;
+mod types;
 mod utils;
 
 #[cfg(test)]
 mod tests;
 
-pub use types::{FileContext, FunctionSignature, FixResult, FixConfig};
 use context::analyze_file_context;
 use strategies::fix_violation_in_line;
+pub use types::{FileContext, FixConfig, FixResult, FunctionSignature};
 use utils::{filter_violations, group_violations_by_file};
 
 use crate::ai_analyzer;
@@ -88,10 +89,7 @@ pub async fn execute_with_ai(
     let filtered_violations = filter_violations(&violations, &only_types, &skip_types, limit);
 
     if filtered_violations.is_empty() {
-        println!(
-            "{}",
-            style("📝 No matching violations to fix").yellow()
-        );
+        println!("{}", style("📝 No matching violations to fix").yellow());
         return Ok(());
     }
 
@@ -109,23 +107,33 @@ pub async fn execute_with_ai(
             "{}",
             style("🤖 Running AI-powered analysis...").bold().magenta()
         );
-        
+
         // Run AI analysis
-        if let Err(e) = 
-            ai_analyzer::analyze_and_generate_report(&project_path, &violations).await
-        {
-            eprintln!("{}", style(format!("⚠️  AI analysis failed: {}", e)).yellow());
+        if let Err(e) = ai_analyzer::analyze_and_generate_report(&project_path, &violations).await {
+            eprintln!(
+                "{}",
+                style(format!("⚠️  AI analysis failed: {}", e)).yellow()
+            );
         } else {
             println!("{}", style("✅ AI analysis complete").green());
-            println!("{}", style("   📊 Reports saved to .ferrous-forge/ai-analysis/").dim());
+            println!(
+                "{}",
+                style("   📊 Reports saved to .ferrous-forge/ai-analysis/").dim()
+            );
         }
     }
 
     println!();
-    println!("{}", style("⚠️  WARNING: Auto-fix is experimental!")
-        .yellow().bold());
-    println!("{}", style("    Please review all changes and ensure your tests still pass.")
-        .yellow());
+    println!(
+        "{}",
+        style("⚠️  WARNING: Auto-fix is experimental!")
+            .yellow()
+            .bold()
+    );
+    println!(
+        "{}",
+        style("    Please review all changes and ensure your tests still pass.").yellow()
+    );
 
     // Group violations by file
     let violations_by_file = group_violations_by_file(&filtered_violations);
@@ -173,8 +181,8 @@ pub async fn execute_with_ai(
 
     // Print summary
     println!();
-    println!("{}", style("──────────────────────────────────────────────────").dim());
-    
+    println!("{}", style("─".repeat(50)).dim());
+
     if dry_run {
         println!(
             "{}",
@@ -198,12 +206,9 @@ pub async fn execute_with_ai(
                 .bold()
             );
         } else {
-            println!(
-                "{}",
-                style("No violations were auto-fixed").yellow()
-            );
+            println!("{}", style("No violations were auto-fixed").yellow());
         }
-        
+
         if total_skipped > 0 {
             println!(
                 "{}",
@@ -212,14 +217,13 @@ pub async fn execute_with_ai(
             println!();
             println!(
                 "{}",
-                style("💡 Tip: Review skipped fixes manually or use AI analysis for guidance").dim()
+                style("💡 Tip: Review skipped fixes manually or use AI analysis").dim()
             );
         }
     }
 
     Ok(())
 }
-
 
 /// Fix violations in a single file
 fn fix_file_violations(
@@ -267,7 +271,7 @@ fn fix_file_violations(
         } else {
             new_content
         };
-        
+
         fs::write(file_path, final_content)
             .with_context(|| format!("Failed to write file: {}", file_path.display()))?;
     }

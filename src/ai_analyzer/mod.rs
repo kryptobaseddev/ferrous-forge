@@ -1,21 +1,21 @@
 //! AI analysis module for automated violation analysis
 
-/// Type definitions for AI analysis
-pub mod types;
+/// Main AI analyzer implementation
+pub mod analyzer;
 /// Code context extraction utilities
 pub mod context;
 /// Semantic analysis of code violations
 pub mod semantic;
 /// Fix strategy generation
 pub mod strategies;
-/// Main AI analyzer implementation
-pub mod analyzer;
+/// Type definitions for AI analysis
+pub mod types;
 
-pub use types::*;
 pub use analyzer::AIAnalyzer;
+pub use types::*;
 
-use std::path::Path;
 use crate::validation::Violation;
+use std::path::Path;
 
 /// Legacy async API for backwards compatibility
 pub async fn analyze_violations_for_ai(
@@ -32,15 +32,17 @@ pub async fn analyze_and_generate_report(
     violations: &[Violation],
 ) -> anyhow::Result<()> {
     let analyzer = AIAnalyzer::new(project_path.to_path_buf());
-    let report = analyzer.analyze_violations_async(violations.to_vec()).await?;
-    
+    let report = analyzer
+        .analyze_violations_async(violations.to_vec())
+        .await?;
+
     // Save the analysis report
     analyzer.save_analysis(&report)?;
-    
+
     // Generate and save orchestrator instructions
     let instructions = generate_orchestrator_instructions(&report).await?;
     analyzer.save_orchestrator_instructions(&instructions)?;
-    
+
     Ok(())
 }
 

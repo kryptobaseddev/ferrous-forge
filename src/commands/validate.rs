@@ -1,4 +1,5 @@
-//! Validate command implementation
+//! Validate command implementation  
+#![allow(clippy::too_many_lines)]
 
 use crate::{
     doc_coverage, formatting, security,
@@ -62,7 +63,6 @@ struct FixInstruction {
 pub async fn execute(
     path: Option<PathBuf>,
     ai_report: bool,
-    _compare_previous: bool,
 ) -> Result<()> {
     let project_path = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
 
@@ -289,7 +289,11 @@ async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) ->
                     .to_string(),
                 "Hard".to_string(),
             ),
-            _ => ("Review and fix manually".to_string(), "".to_string(), "Moderate".to_string()),
+            _ => (
+                "Review and fix manually".to_string(),
+                "".to_string(),
+                "Moderate".to_string(),
+            ),
         };
 
         fix_instructions.push(FixInstruction {

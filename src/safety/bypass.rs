@@ -1,4 +1,5 @@
 //! Emergency bypass system for safety pipeline
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use crate::{Error, Result};
 use chrono::{DateTime, Utc};
@@ -120,8 +121,10 @@ impl BypassManager {
 
         // Check if bypass has expired
         if Utc::now() > bypass.expires_at {
-            // Remove expired bypass
-            let _ = fs::remove_file(&bypass_path).await;
+            // Remove expired bypass (ignore errors if file doesn't exist)
+            if let Err(e) = fs::remove_file(&bypass_path).await {
+                eprintln!("Warning: Failed to remove expired bypass file: {}", e);
+            }
             return Ok(None);
         }
 

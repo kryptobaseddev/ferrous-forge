@@ -1,22 +1,18 @@
-
 use super::types::{CodeContext, ErrorHandlingStyle};
 
 /// Extract code context around a violation line
-pub fn extract_code_context(
-    line_number: usize,
-    content: &str,
-) -> CodeContext {
+pub fn extract_code_context(line_number: usize, content: &str) -> CodeContext {
     let lines: Vec<&str> = content.lines().collect();
     let context_start = line_number.saturating_sub(10);
     let context_end = (line_number + 10).min(lines.len());
-    
+
     let surrounding_code = lines[context_start..context_end]
         .iter()
         .map(|s| s.to_string())
         .collect();
-    
+
     let imports = extract_imports(content);
-    let (function_name, function_signature, return_type) = 
+    let (function_name, function_signature, return_type) =
         extract_function_info(&lines, line_number);
     let is_async = function_signature
         .as_ref()
@@ -28,7 +24,7 @@ pub fn extract_code_context(
         .unwrap_or(false);
     let trait_impl = detect_trait_impl(content, line_number);
     let error_handling_style = detect_error_handling_style(&imports, content);
-    
+
     CodeContext {
         function_name,
         function_signature,

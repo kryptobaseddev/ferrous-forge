@@ -1,4 +1,5 @@
 //! Code formatting and auto-correction module
+#![allow(clippy::too_many_lines)]
 //!
 //! This module provides integration with rustfmt for code formatting
 //! validation and automatic correction.

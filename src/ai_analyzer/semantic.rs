@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use super::types::{SemanticAnalysis, CodeContext, FixComplexity};
-use crate::validation::{ViolationType, Violation};
+use super::types::{CodeContext, FixComplexity, SemanticAnalysis};
+use crate::validation::{Violation, ViolationType};
 
 /// Perform semantic analysis on a violation
 pub fn perform_semantic_analysis(
@@ -11,14 +11,14 @@ pub fn perform_semantic_analysis(
 ) -> SemanticAnalysis {
     let lines: Vec<&str> = content.lines().collect();
     let line_idx = violation.line.saturating_sub(1);
-    
+
     let actual_type = infer_actual_type(&lines, line_idx);
     let expected_type = infer_expected_type(&violation.violation_type);
     let data_flow = trace_data_flow(&lines, line_idx);
     let control_flow = trace_control_flow(&lines, line_idx);
     let dependencies = extract_dependencies(context);
     let error_propagation = trace_error_propagation(&lines, line_idx);
-    
+
     SemanticAnalysis {
         actual_type,
         expected_type,
@@ -49,7 +49,14 @@ fn infer_actual_type(lines: &[&str], line_idx: usize) -> Option<String> {
 fn infer_expected_type(violation_type: &ViolationType) -> Option<String> {
     match violation_type {
         ViolationType::UnwrapInProduction => Some("Result or Option".to_string()),
-        _ => None,
+        ViolationType::UnderscoreBandaid
+        | ViolationType::WrongEdition
+        | ViolationType::FileTooLarge
+        | ViolationType::FunctionTooLarge
+        | ViolationType::LineTooLong
+        | ViolationType::MissingDocs
+        | ViolationType::MissingDependencies
+        | ViolationType::OldRustVersion => None,
     }
 }
 
@@ -60,7 +67,11 @@ fn trace_data_flow(lines: &[&str], line_idx: usize) -> Vec<String> {
             let usage = analyze_variable_usage(lines);
             if let Some(uses) = usage.get(&var_name) {
                 for use_line in uses {
-                    flow.push(format!("Line {}: Variable '{}' used", use_line + 1, var_name));
+                    flow.push(format!(
+                        "Line {}: Variable '{}' used",
+                        use_line + 1,
+                        var_name
+                    ));
                 }
             }
         }
@@ -73,9 +84,8 @@ fn trace_control_flow(lines: &[&str], line_idx: usize) -> Vec<String> {
     // Include context around the violation line
     let start = line_idx.saturating_sub(5);
     let end = (line_idx + 5).min(lines.len());
-    
-    for i in start..end {
-        let line = lines[i];
+
+    for (i, line) in lines.iter().enumerate().skip(start).take(end - start) {
         if line.contains("if ") || line.contains("match ") || line.contains("while ") {
             flow.push(format!("Line {}: Control flow statement", i + 1));
         }
@@ -95,7 +105,8 @@ fn analyze_variable_usage(lines: &[&str]) -> HashMap<String, Vec<usize>> {
 
 fn extract_variable_name(line: &str) -> Option<String> {
     if line.contains("let ") {
-        line.split("let ").nth(1)
+        line.split("let ")
+            .nth(1)
             .and_then(|s| s.split('=').next())
             .map(|s| s.trim().to_string())
     } else {
@@ -103,15 +114,13 @@ fn extract_variable_name(line: &str) -> Option<String> {
     }
 }
 
-
 fn trace_error_propagation(lines: &[&str], line_idx: usize) -> Vec<String> {
     let mut path = Vec::new();
     // Focus on error handling near the violation
     let start = line_idx.saturating_sub(10);
     let end = (line_idx + 10).min(lines.len());
-    
-    for i in start..end {
-        let line = lines[i];
+
+    for (i, line) in lines.iter().enumerate().skip(start).take(end - start) {
         if line.contains('?') || line.contains(".unwrap()") || line.contains(".expect(") {
             path.push(format!("Line {}: Error handling point", i + 1));
         }
@@ -127,7 +136,11 @@ pub fn assess_fix_complexity(
 ) -> FixComplexity {
     match violation.violation_type {
         ViolationType::UnwrapInProduction => {
-            if context.return_type.as_ref().map_or(false, |r| r.contains("Result")) {
+            if context
+                .return_type
+                .as_ref()
+                .is_some_and(|r| r.contains("Result"))
+            {
                 if semantic.dependencies.is_empty() {
                     FixComplexity::Trivial
                 } else {
@@ -147,24 +160,24 @@ pub fn assess_fix_complexity(
 
 fn extract_dependencies(context: &CodeContext) -> Vec<String> {
     let mut deps = Vec::new();
-    
+
     for import in &context.imports {
         if !import.contains("std::") {
             deps.push(import.clone());
         }
     }
-    
+
     if context.trait_impl.is_some() {
         deps.push("Trait implementation".to_string());
     }
-    
+
     if context.is_async {
         deps.push("Async context".to_string());
     }
-    
+
     if context.is_generic {
         deps.push("Generic constraints".to_string());
     }
-    
+
     deps
 }

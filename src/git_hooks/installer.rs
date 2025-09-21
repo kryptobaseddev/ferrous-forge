@@ -1,9 +1,9 @@
 //! Git hooks installation and removal logic
 
+use super::scripts::{COMMIT_MSG_HOOK, PRE_COMMIT_HOOK, PRE_PUSH_HOOK};
 use crate::{Error, Result};
 use std::path::Path;
 use tokio::fs;
-use super::scripts::{PRE_COMMIT_HOOK, PRE_PUSH_HOOK, COMMIT_MSG_HOOK};
 
 /// Install git hooks for a project
 pub async fn install_git_hooks(project_path: &Path) -> Result<()> {
@@ -114,9 +114,7 @@ pub async fn uninstall_git_hooks(project_path: &Path) -> Result<()> {
     for hook_name in &["pre-commit", "pre-push", "commit-msg"] {
         let hook_path = hooks_dir.join(hook_name);
         if hook_path.exists() {
-            let content = fs::read_to_string(&hook_path)
-                .await
-                .unwrap_or_default();
+            let content = fs::read_to_string(&hook_path).await.unwrap_or_default();
 
             if content.contains("Ferrous Forge") {
                 fs::remove_file(&hook_path)

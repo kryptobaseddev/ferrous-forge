@@ -4,7 +4,7 @@
 #![allow(clippy::expect_used, clippy::unwrap_used)] // Benchmarks need unwrap/expect for setup
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use ferrous_forge::validation::RustValidator;
+use ferrous_forge::validation::{rust_validator::file_checks::validate_cargo_toml, RustValidator};
 use tempfile::TempDir;
 use tokio::runtime::Runtime;
 
@@ -33,8 +33,7 @@ serde = "1.0"
                 let validator = RustValidator::new(temp_dir.path().to_path_buf())
                     .expect("Failed to create validator");
                 let mut violations = Vec::new();
-                validator
-                    .validate_cargo_toml(black_box(&cargo_toml), &mut violations)
+                validate_cargo_toml(black_box(&cargo_toml), &mut violations)
                     .await
                     .expect("Failed to validate");
                 violations

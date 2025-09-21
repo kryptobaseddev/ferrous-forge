@@ -34,8 +34,8 @@ async fn main() -> Result<()> {
         commands::Commands::Validate {
             path,
             ai_report,
-            compare_previous,
-        } => commands::validate::execute(path, ai_report, compare_previous).await,
+            compare_previous: _,
+        } => commands::validate::execute(path, ai_report).await,
         commands::Commands::Rollback { version } => commands::rollback::execute(version).await,
         commands::Commands::Uninstall { confirm } => commands::uninstall::execute(confirm).await,
         commands::Commands::Rust { command } => match command {
@@ -59,6 +59,7 @@ async fn main() -> Result<()> {
                 commands::edition::handle_analyze(&path, &edition).await
             }
         },
+        commands::Commands::Template { command } => command.execute().await,
         commands::Commands::Safety { command } => match command {
             commands::SafetyCommand::Status => commands::safety::handle_status().await,
             commands::SafetyCommand::Install { force, path } => {

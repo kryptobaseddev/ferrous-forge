@@ -90,7 +90,8 @@ commit_msg_file=$1
 commit_msg=$(cat "$commit_msg_file")
 
 # Check for conventional commit format
-if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{1,50}"; then
+if ! echo "$commit_msg" | \
+    grep -qE "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{1,50}"; then
     echo "❌ Invalid commit message format"
     echo "   Use conventional commit format: type(scope): description"
     echo "   Examples:"

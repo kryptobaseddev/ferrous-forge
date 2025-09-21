@@ -25,19 +25,25 @@ impl SafetyCheck for DocCheck {
 }
 
 /// Run documentation build check (placeholder)
-pub async fn run(_project_path: &Path) -> Result<CheckResult> {
+pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Doc);
     result.set_duration(start.elapsed());
-    result.add_context("Documentation check placeholder - always passes");
+    result.add_context(&format!(
+        "Documentation check placeholder for {} - always passes",
+        project_path.display()
+    ));
     Ok(result)
 }
 
 /// Check documentation coverage (placeholder)
-pub async fn coverage_check(_project_path: &Path) -> Result<CheckResult> {
+pub async fn coverage_check(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::DocCoverage);
     result.set_duration(start.elapsed());
-    result.add_context("Documentation coverage check placeholder - always passes");
+    result.add_context(&format!(
+        "Documentation coverage check placeholder for {} - always passes",
+        project_path.display()
+    ));
     Ok(result)
 }

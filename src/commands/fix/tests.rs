@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use super::super::{analyze_file_context, FixResult};
     use super::super::strategies;
+    use super::super::{analyze_file_context, FixResult};
     use crate::validation::{Severity, Violation, ViolationType};
     use std::path::PathBuf;
 
@@ -72,9 +72,15 @@ async fn process_data() -> Result<String> {
         assert!(context.is_bin_file);
         assert!(context.is_test_file);
         // Debug: print function signatures found
-        eprintln!("Found {} function signatures:", context.function_signatures.len());
+        eprintln!(
+            "Found {} function signatures:",
+            context.function_signatures.len()
+        );
         for sig in &context.function_signatures {
-            eprintln!("  - {} at lines {}-{}", sig.name, sig.line_start, sig.line_end);
+            eprintln!(
+                "  - {} at lines {}-{}",
+                sig.name, sig.line_start, sig.line_end
+            );
         }
         assert_eq!(context.function_signatures.len(), 3);
     }

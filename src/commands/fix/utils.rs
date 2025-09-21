@@ -1,7 +1,7 @@
 //! Utility functions for the fix command
 
-use crate::validation::Violation;
 use super::strategies::can_potentially_auto_fix;
+use crate::validation::Violation;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 

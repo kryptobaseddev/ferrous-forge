@@ -1,6 +1,6 @@
 use super::types::{
-    FixStrategy, ViolationAnalysis, AIInstructions, ArchitecturalStyle, 
-    ErrorPattern, CodePatterns, Pattern
+    AIInstructions, ArchitecturalStyle, CodePatterns, ErrorPattern, FixStrategy, Pattern,
+    ViolationAnalysis,
 };
 use crate::validation::ViolationType;
 
@@ -8,15 +8,17 @@ use crate::validation::ViolationType;
 pub fn generate_fix_strategies(analyses: &[ViolationAnalysis]) -> Vec<FixStrategy> {
     let mut strategies = Vec::new();
     let mut violation_counts = std::collections::HashMap::new();
-    
+
     for analysis in analyses {
-        *violation_counts.entry(&analysis.violation.violation_type).or_insert(0) += 1;
+        *violation_counts
+            .entry(&analysis.violation.violation_type)
+            .or_insert(0) += 1;
     }
-    
+
     for (violation_type, count) in violation_counts {
         strategies.push(create_strategy(violation_type.clone(), count));
     }
-    
+
     strategies
 }
 
@@ -96,27 +98,27 @@ pub fn generate_ai_instructions(
         analyses.len(),
         analyses.iter().filter(|a| a.ai_fixable).count()
     );
-    
+
     let mut prioritized_fixes = Vec::new();
-    
+
     // Prioritize by complexity and confidence
     let mut trivial_fixes = Vec::new();
     let mut simple_fixes = Vec::new();
     let mut moderate_fixes = Vec::new();
-    
+
     for analysis in analyses {
         if !analysis.ai_fixable {
             continue;
         }
-        
+
         let fix_desc = format!(
-            "Fix {} at {}:{} (confidence: {:.0}%)",
-            format!("{:?}", analysis.violation.violation_type),
+            "Fix {:?} at {}:{} (confidence: {:.0}%)",
+            analysis.violation.violation_type,
             analysis.violation.file.display(),
             analysis.violation.line,
             analysis.confidence_score * 100.0
         );
-        
+
         match analysis.fix_complexity {
             super::types::FixComplexity::Trivial => trivial_fixes.push(fix_desc),
             super::types::FixComplexity::Simple => simple_fixes.push(fix_desc),
@@ -124,23 +126,23 @@ pub fn generate_ai_instructions(
             _ => {}
         }
     }
-    
+
     prioritized_fixes.extend(trivial_fixes);
     prioritized_fixes.extend(simple_fixes);
     prioritized_fixes.extend(moderate_fixes);
-    
+
     let architectural_recommendations = vec![
         "Consider adopting consistent error handling patterns".to_string(),
         "Modularize large files to improve maintainability".to_string(),
         "Extract complex logic into well-tested utility functions".to_string(),
     ];
-    
+
     let code_quality_improvements = vec![
         "Add comprehensive documentation".to_string(),
         "Increase test coverage".to_string(),
         "Implement CI/CD checks for code standards".to_string(),
     ];
-    
+
     AIInstructions {
         summary,
         prioritized_fixes,
@@ -154,7 +156,7 @@ pub fn identify_code_patterns(content: &str) -> CodePatterns {
     let architectural_style = detect_architectural_style(content);
     let error_patterns = detect_error_patterns(content);
     let common_patterns = detect_common_patterns(content);
-    
+
     CodePatterns {
         architectural_style,
         error_patterns,
@@ -176,7 +178,7 @@ fn detect_architectural_style(content: &str) -> ArchitecturalStyle {
 
 fn detect_error_patterns(content: &str) -> Vec<ErrorPattern> {
     let mut patterns = Vec::new();
-    
+
     if content.contains(".unwrap()") {
         patterns.push(ErrorPattern::UnwrapUsage);
     }
@@ -192,13 +194,13 @@ fn detect_error_patterns(content: &str) -> Vec<ErrorPattern> {
     if content.contains("?") {
         patterns.push(ErrorPattern::PropagatedError);
     }
-    
+
     patterns
 }
 
 fn detect_common_patterns(content: &str) -> Vec<Pattern> {
     let mut patterns = Vec::new();
-    
+
     let builder_count = content.matches("Builder").count();
     if builder_count > 0 {
         patterns.push(Pattern {
@@ -207,7 +209,7 @@ fn detect_common_patterns(content: &str) -> Vec<Pattern> {
             locations: vec![],
         });
     }
-    
+
     let factory_count = content.matches("Factory").count() + content.matches("::new(").count();
     if factory_count > 0 {
         patterns.push(Pattern {
@@ -216,6 +218,6 @@ fn detect_common_patterns(content: &str) -> Vec<Pattern> {
             locations: vec![],
         });
     }
-    
+
     patterns
 }
