@@ -46,12 +46,12 @@ pub async fn validate_cargo_toml(cargo_file: &Path, violations: &mut Vec<Violati
 pub async fn validate_rust_file(
     rust_file: &Path,
     violations: &mut Vec<Violation>,
-    patterns: &ValidationPatterns,
+    _patterns: &ValidationPatterns,
 ) -> Result<()> {
     let content = fs::read_to_string(rust_file).await?;
     let lines: Vec<&str> = content.lines().collect();
-    let is_test_file = is_test_file(rust_file);
-    let (allow_unwrap, allow_expect) = check_allow_attributes(&lines);
+    let _is_test_file = is_test_file(rust_file);
+    let (_allow_unwrap, _allow_expect) = check_allow_attributes(&lines);
     
     // Check file size limit (400 lines)
     if lines.len() > 400 {

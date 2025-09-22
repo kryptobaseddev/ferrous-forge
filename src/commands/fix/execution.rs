@@ -12,19 +12,19 @@ use std::path::Path;
 
 /// Execute the main fix process
 pub async fn execute_fix_process(
-    project_path: &Path,
+    _project_path: &Path,
     dry_run: bool,
     filter_options: FilterOptions,
     ai_mode: bool,
 ) -> Result<()> {
     // Validate project and get violations
-    let violations = validate_project(project_path).await?;
+    let violations = validate_project(_project_path).await?;
     
     // Filter violations based on user preferences
     let filtered_violations = validate_and_filter_violations(
         violations,
         &filter_options,
-        project_path
+        _project_path
     ).await?;
 
     if filtered_violations.is_empty() {
@@ -36,7 +36,7 @@ pub async fn execute_fix_process(
 
     // Run AI analysis if requested
     if ai_mode {
-        run_ai_analysis(project_path, &filtered_violations).await;
+        run_ai_analysis(_project_path, &filtered_violations).await;
     }
 
     if !dry_run {
@@ -64,7 +64,7 @@ async fn validate_project(project_path: &Path) -> Result<Vec<Violation>> {
 async fn validate_and_filter_violations(
     violations: Vec<Violation>,
     filter_options: &FilterOptions,
-    project_path: &Path,
+    _project_path: &Path,
 ) -> Result<Vec<Violation>> {
     // Filter violations that we can potentially fix
     let fixable_violations = filter_violations(

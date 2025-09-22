@@ -1,11 +1,10 @@
 //! Template management commands
 
-use crate::templates::{TemplateEngine, TemplateRegistry};
-use crate::{Error, Result};
+use crate::templates::TemplateRegistry;
+use crate::Result;
 use clap::Subcommand;
 use console::style;
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 mod creation;
 mod display;
