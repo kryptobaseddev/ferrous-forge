@@ -22,7 +22,7 @@ async fn test_generate_report_no_violations() {
     let violations = vec![];
     let report = validator.generate_report(&violations);
 
-    assert!(report.contains("✅ No violations found"));
+    assert!(report.contains("✅ All Rust validation checks passed"));
 }
 
 #[tokio::test]
