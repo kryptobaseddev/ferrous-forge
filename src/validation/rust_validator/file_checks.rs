@@ -192,11 +192,12 @@ pub async fn validate_rust_file(
             });
         }
 
-        // Check for .unwrap() in production code (not in tests or if allowed)
+        // Check for unwrap in production code (not in tests or if allowed)
         if !in_test_block
             && !in_test_module
             && !is_test_file
             && !allow_unwrap
+            && !line_stripped.starts_with("//")
             && patterns.unwrap_call.is_match(line)
             && !is_in_string_literal(line, ".unwrap()")
         {
@@ -210,11 +211,12 @@ pub async fn validate_rust_file(
             });
         }
 
-        // Check for .expect() in production code (not in tests or if allowed)
+        // Check for expect in production code (not in tests or if allowed)
         if !in_test_block
             && !in_test_module
             && !is_test_file
             && !allow_expect
+            && !line_stripped.starts_with("//")
             && patterns.expect_call.is_match(line)
             && !is_in_string_literal(line, ".expect(")
         {

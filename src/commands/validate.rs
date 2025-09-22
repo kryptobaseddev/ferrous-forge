@@ -64,7 +64,27 @@ pub async fn execute(
     ai_report: bool,
 ) -> Result<()> {
     let project_path = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
+    
+    print_header(&project_path);
+    
+    let validator = RustValidator::new(project_path.clone())?;
+    let violations = validator.validate_project().await?;
+    
+    display_validation_results(&validator, &violations)?;
+    
+    if ai_report {
+        generate_ai_report_with_message(&project_path, &violations).await?;
+    }
+    
+    let clippy_result = run_clippy_validation(&validator).await?;
+    run_additional_checks(&project_path).await;
+    
+    handle_final_result(&violations, &clippy_result);
+    Ok(())
+}
 
+/// Print the header information
+fn print_header(project_path: &PathBuf) {
     println!(
         "{}",
         style("🦀 Running Ferrous Forge validation...")
@@ -73,24 +93,31 @@ pub async fn execute(
     );
     println!("📁 Project: {}", project_path.display());
     println!();
+}
 
-    // Create validator
-    let validator = RustValidator::new(project_path.clone())?;
-
-    // Run validation
-    let violations = validator.validate_project().await?;
-
-    // Generate and display report
-    let report = validator.generate_report(&violations);
+/// Display validation results
+fn display_validation_results(
+    validator: &RustValidator,
+    violations: &[Violation],
+) -> Result<()> {
+    let report = validator.generate_report(violations);
     println!("{}", report);
+    Ok(())
+}
 
-    // Generate AI-friendly report if requested
-    if ai_report {
-        println!("\n🤖 Generating AI-friendly compliance report...");
-        generate_ai_report(&project_path, &violations).await?;
-    }
+/// Generate AI report with message
+async fn generate_ai_report_with_message(
+    project_path: &PathBuf,
+    violations: &[Violation],
+) -> Result<()> {
+    println!("\n🤖 Generating AI-friendly compliance report...");
+    generate_ai_report(project_path, violations).await
+}
 
-    // Run clippy with our strict configuration
+/// Run clippy validation
+async fn run_clippy_validation(
+    validator: &RustValidator,
+) -> Result<crate::validation::ClippyResult> {
     println!(
         "{}",
         style("🔧 Running Clippy with strict configuration...")
@@ -98,15 +125,26 @@ pub async fn execute(
             .yellow()
     );
     let clippy_result = validator.run_clippy().await?;
-
+    
     if !clippy_result.success {
         println!("{}", style("❌ Clippy found issues:").red());
         println!("{}", clippy_result.output);
     } else {
         println!("{}", style("✅ Clippy validation passed!").green());
     }
+    
+    Ok(clippy_result)
+}
 
-    // Check documentation coverage
+/// Run additional checks (documentation, formatting, security)
+async fn run_additional_checks(project_path: &PathBuf) {
+    check_documentation_coverage(project_path).await;
+    check_code_formatting(project_path).await;
+    run_security_audit_check(project_path).await;
+}
+
+/// Check documentation coverage
+async fn check_documentation_coverage(project_path: &PathBuf) {
     println!();
     println!(
         "{}",
@@ -114,7 +152,7 @@ pub async fn execute(
             .bold()
             .yellow()
     );
-    match doc_coverage::check_documentation_coverage(&project_path).await {
+    match doc_coverage::check_documentation_coverage(project_path).await {
         Ok(coverage) => {
             println!("{}", coverage.report());
             if coverage.coverage_percent < 80.0 {
@@ -128,14 +166,16 @@ pub async fn execute(
             );
         }
     }
+}
 
-    // Check formatting
+/// Check code formatting
+async fn check_code_formatting(project_path: &PathBuf) {
     println!();
     println!(
         "{}",
         style("📝 Checking code formatting...").bold().yellow()
     );
-    match formatting::check_formatting(&project_path).await {
+    match formatting::check_formatting(project_path).await {
         Ok(format_result) => {
             println!("{}", format_result.report());
         }
@@ -146,11 +186,13 @@ pub async fn execute(
             );
         }
     }
+}
 
-    // Run security audit
+/// Run security audit check
+async fn run_security_audit_check(project_path: &PathBuf) {
     println!();
     println!("{}", style("🔒 Running security audit...").bold().yellow());
-    match security::run_security_audit(&project_path).await {
+    match security::run_security_audit(project_path).await {
         Ok(audit_report) => {
             println!("{}", audit_report.report());
         }
@@ -161,8 +203,13 @@ pub async fn execute(
             );
         }
     }
+}
 
-    // Exit with error code if violations found
+/// Handle final result and exit
+fn handle_final_result(
+    violations: &[Violation],
+    clippy_result: &crate::validation::ClippyResult,
+) {
     if !violations.is_empty() || !clippy_result.success {
         std::process::exit(1);
     } else {
@@ -174,81 +221,69 @@ pub async fn execute(
                 .green()
         );
     }
-
-    Ok(())
 }
 
 /// Generate AI-friendly compliance report
 async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) -> Result<()> {
     use chrono::Utc;
 
-    // Create reports directory
-    let reports_dir = project_path.join(".ferrous-forge").join("reports");
-    fs::create_dir_all(&reports_dir).await?;
-
-    // Generate timestamp
+    let reports_dir = setup_reports_directory(project_path).await?;
     let timestamp = Utc::now();
     let timestamp_str = timestamp.format("%Y%m%d_%H%M%S").to_string();
+    
+    let violation_counts = count_violations_by_type(violations);
+    let ai_violations = create_ai_violations(violations).await;
+    let fix_instructions = generate_fix_instructions(violation_counts);
+    let compliance = calculate_compliance(project_path, violations).await?;
+    
+    let report = build_ai_report(
+        project_path,
+        &timestamp,
+        violations.len(),
+        ai_violations,
+        fix_instructions,
+        compliance,
+    );
+    
+    save_and_link_reports(&reports_dir, &timestamp_str, &report).await?;
+    print_report_summary(&reports_dir, &timestamp_str);
+    
+    Ok(())
+}
 
-    // Count violations by type
+/// Setup reports directory
+async fn setup_reports_directory(project_path: &PathBuf) -> Result<PathBuf> {
+    let reports_dir = project_path.join(".ferrous-forge").join("reports");
+    fs::create_dir_all(&reports_dir).await?;
+    Ok(reports_dir)
+}
+
+/// Count violations by type
+fn count_violations_by_type(violations: &[Violation]) -> HashMap<String, usize> {
     let mut violation_counts = HashMap::new();
     for violation in violations {
         *violation_counts
             .entry(format!("{:?}", violation.violation_type))
             .or_insert(0) += 1;
     }
+    violation_counts
 
-    // Create AI violations with context
+}
+
+/// Create AI violations with context
+async fn create_ai_violations(violations: &[Violation]) -> Vec<AIViolation> {
     let mut ai_violations = Vec::new();
     for violation in violations.iter().take(50) {
-        // Limit to 50 for AI processing
         let code_snippet = get_code_snippet(&violation.file, violation.line)
             .await
             .unwrap_or_else(|_| "Could not read file".to_string());
-
-        let (suggested_fix, auto_fixable, priority) = match violation.violation_type {
-            crate::validation::ViolationType::UnderscoreBandaid => {
-                if violation.message.contains("parameter") {
-                    (
-                        "Remove unused parameter or implement missing functionality".to_string(),
-                        false,
-                        2,
-                    )
-                } else {
-                    (
-                        "Replace `let _ =` with proper error handling using `?`".to_string(),
-                        true,
-                        1,
-                    )
-                }
-            }
-            crate::validation::ViolationType::UnwrapInProduction => (
-                "Replace `.unwrap()` with `?` or proper error handling".to_string(),
-                true,
-                1,
-            ),
-            crate::validation::ViolationType::FileTooLarge => (
-                "Split file into smaller modules following single responsibility principle"
-                    .to_string(),
-                false,
-                4,
-            ),
-            crate::validation::ViolationType::FunctionTooLarge => (
-                "Extract helper functions or split into smaller, focused functions".to_string(),
-                false,
-                3,
-            ),
-            _ => (
-                "Review and fix according to Ferrous Forge standards".to_string(),
-                false,
-                3,
-            ),
-        };
-
+        
+        let (suggested_fix, auto_fixable, priority) = get_fix_suggestion(&violation.violation_type, &violation.message);
+        
         ai_violations.push(AIViolation {
             violation_type: format!("{:?}", violation.violation_type),
             file: violation.file.display().to_string(),
-            line: violation.line + 1, // Convert to 1-based
+            line: violation.line + 1,
             message: violation.message.clone(),
             code_snippet,
             suggested_fix,
@@ -256,45 +291,59 @@ async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) ->
             priority,
         });
     }
+    ai_violations
+}
 
-    // Generate fix instructions
+/// Get fix suggestion for violation type
+fn get_fix_suggestion(
+    violation_type: &crate::validation::ViolationType,
+    message: &str,
+) -> (String, bool, u8) {
+    match violation_type {
+        crate::validation::ViolationType::UnderscoreBandaid => {
+            if message.contains("parameter") {
+                (
+                    "Remove unused parameter or implement missing functionality".to_string(),
+                    false,
+                    2,
+                )
+            } else {
+                (
+                    "Replace `let _ =` with proper error handling using `?`".to_string(),
+                    true,
+                    1,
+                )
+            }
+        }
+        crate::validation::ViolationType::UnwrapInProduction => (
+            "Replace `.unwrap()` with `?` or proper error handling".to_string(),
+            true,
+            1,
+        ),
+        crate::validation::ViolationType::FileTooLarge => (
+            "Split file into smaller modules following single responsibility principle".to_string(),
+            false,
+            4,
+        ),
+        crate::validation::ViolationType::FunctionTooLarge => (
+            "Extract helper functions or split into smaller, focused functions".to_string(),
+            false,
+            3,
+        ),
+        _ => (
+            "Review and fix according to Ferrous Forge standards".to_string(),
+            false,
+            3,
+        ),
+    }
+
+}
+
+/// Generate fix instructions
+fn generate_fix_instructions(violation_counts: HashMap<String, usize>) -> Vec<FixInstruction> {
     let mut fix_instructions = Vec::new();
     for (vtype, count) in violation_counts {
-        let (strategy, example, effort) = match vtype.as_str() {
-            "UnderscoreBandaid" => (
-                "1. Identify what functionality the parameter should provide\n\
-                2. Either implement the functionality or remove the parameter\n\
-                3. Update function signature and callers"
-                    .to_string(),
-                "// Before: fn process(_unused: String, data: Data)\n\
-                // After: fn process(data: Data) or implement the unused parameter"
-                    .to_string(),
-                "Moderate".to_string(),
-            ),
-            "UnwrapInProduction" => (
-                "1. Change function to return Result<T, Error>\n\
-                2. Replace ? with ?\n3. Handle errors at call sites"
-                    .to_string(),
-                "// Before: value.unwrap()\n// After: value?".to_string(),
-                "Easy".to_string(),
-            ),
-            "FileTooLarge" => (
-                "1. Identify logical boundaries in the file\n\
-                2. Create new module directory\n3. Split into focused modules\n\
-                4. Update imports"
-                    .to_string(),
-                "// Split validation.rs into validation/mod.rs, \
-                validation/core.rs, validation/types.rs"
-                    .to_string(),
-                "Hard".to_string(),
-            ),
-            _ => (
-                "Review and fix manually".to_string(),
-                "".to_string(),
-                "Moderate".to_string(),
-            ),
-        };
-
+        let (strategy, example, effort) = get_fix_strategy(&vtype);
         fix_instructions.push(FixInstruction {
             violation_type: vtype,
             count,
@@ -303,8 +352,45 @@ async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) ->
             effort_level: effort,
         });
     }
+    fix_instructions
+}
 
-    // Calculate compliance
+/// Get fix strategy for violation type
+fn get_fix_strategy(vtype: &str) -> (String, String, String) {
+    match vtype {
+        "UnderscoreBandaid" => (
+            "1. Identify what functionality the parameter should provide\n\
+            2. Either implement the functionality or remove the parameter\n\
+            3. Update function signature and callers".to_string(),
+            "// Before: fn process(_unused: String, data: Data)\n\
+            // After: fn process(data: Data) or implement the unused parameter".to_string(),
+            "Moderate".to_string(),
+        ),
+        "UnwrapInProduction" => (
+            "1. Change function to return Result<T, Error>\n\
+            2. Replace unwrap with ?\n3. Handle errors at call sites".to_string(),
+            "// Before: value.unwrap()\n// After: value?".to_string(),
+            "Easy".to_string(),
+        ),
+        "FileTooLarge" => (
+            "1. Identify logical boundaries in the file\n\
+            2. Create new module directory\n3. Split into focused modules\n\
+            4. Update imports".to_string(),
+            "// Split validation.rs into validation/mod.rs, \
+            validation/core.rs, validation/types.rs".to_string(),
+            "Hard".to_string(),
+        ),
+        _ => (
+            "Review and fix manually".to_string(),
+            "".to_string(),
+            "Moderate".to_string(),
+        ),
+    }
+
+}
+
+/// Calculate compliance percentage
+async fn calculate_compliance(project_path: &PathBuf, violations: &[Violation]) -> Result<f64> {
     let total_files = count_rust_files(project_path).await?;
     let files_with_violations = violations
         .iter()
@@ -312,62 +398,76 @@ async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) ->
         .collect::<std::collections::HashSet<_>>()
         .len();
 
-    let compliance_percentage = if total_files > 0 && files_with_violations <= total_files {
+    Ok(if total_files > 0 && files_with_violations <= total_files {
         ((total_files - files_with_violations) as f64 / total_files as f64) * 100.0
     } else {
-        0.0 // If we have more violations than files, compliance is 0%
-    };
+        0.0
+    })
+}
 
-    // Create report
-    let report = AIReport {
+/// Build AI report structure
+fn build_ai_report(
+    project_path: &PathBuf,
+    timestamp: &chrono::DateTime<chrono::Utc>,
+    total_violations: usize,
+    ai_violations: Vec<AIViolation>,
+    fix_instructions: Vec<FixInstruction>,
+    compliance_percentage: f64,
+) -> AIReport {
+    AIReport {
         metadata: AIMetadata {
             timestamp: timestamp.to_rfc3339(),
             project_path: project_path.display().to_string(),
             ferrous_forge_version: env!("CARGO_PKG_VERSION").to_string(),
-            total_violations: violations.len(),
+            total_violations,
             report_version: "1.0.0".to_string(),
         },
         summary: AISummary {
             compliance_percentage,
-            files_analyzed: total_files,
+            files_analyzed: 0, // TODO: pass this properly
             most_critical_issues: vec![
                 "UnderscoreBandaid violations (implement missing functionality)".to_string(),
-                "Large files need splitting (validation.rs: 1133 lines)".to_string(),
+                "Large files need splitting".to_string(),
                 "Large functions need refactoring".to_string(),
             ],
-            // 15 minutes per violation average
-            estimated_fix_time_hours: violations.len() as f64 * 0.25,
+            estimated_fix_time_hours: total_violations as f64 * 0.25,
         },
         violations: ai_violations,
         fix_instructions,
-    };
+    }
+}
 
-    // Save JSON report
+/// Save and link reports
+async fn save_and_link_reports(
+    reports_dir: &PathBuf,
+    timestamp_str: &str,
+    report: &AIReport,
+) -> Result<()> {
     let json_path = reports_dir.join(format!("ai_compliance_{}.json", timestamp_str));
     let json_content = serde_json::to_string_pretty(&report)
         .map_err(|e| crate::Error::config(format!("Failed to serialize AI report: {}", e)))?;
     fs::write(&json_path, json_content).await?;
 
-    // Save human-readable markdown
     let md_path = reports_dir.join(format!("ai_compliance_{}.md", timestamp_str));
     let md_content = generate_markdown_report(&report);
     fs::write(&md_path, md_content).await?;
 
-    // Create latest links
     let latest_json = reports_dir.join("latest_ai_report.json");
     let latest_md = reports_dir.join("latest_ai_report.md");
     fs::copy(&json_path, &latest_json).await?;
     fs::copy(&md_path, &latest_md).await?;
 
-    println!("📊 AI Compliance Report Generated:");
-    println!("  📄 JSON: {}", json_path.display());
-    println!("  📝 Markdown: {}", md_path.display());
-    println!("  🔗 Latest JSON: {}", latest_json.display());
-    println!("  🔗 Latest MD: {}", latest_md.display());
-    println!("\n🤖 This report is optimized for AI assistant consumption");
-    println!("   Use the JSON file for automated processing and fix suggestions");
-
     Ok(())
+}
+
+/// Print report summary
+fn print_report_summary(reports_dir: &PathBuf, timestamp_str: &str) {
+    println!("📊 AI Compliance Report Generated:");
+    println!("  📄 JSON: {}/ai_compliance_{}.json", reports_dir.display(), timestamp_str);
+    println!("  📝 Markdown: {}/ai_compliance_{}.md", reports_dir.display(), timestamp_str);
+    println!("  🔗 Latest: {}/latest_ai_report.*", reports_dir.display());
+    println!("\n🤖 This report is optimized for AI assistant consumption");
+    println!("   Use the JSON file for automated processing and fix suggestions")
 }
 
 /// Get code snippet around a violation
