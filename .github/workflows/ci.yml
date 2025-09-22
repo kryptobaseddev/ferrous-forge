@@ -51,9 +51,9 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         rust: ["stable"]
         include:
-          # Test MSRV on Linux only
+          # Test MSRV on Linux only - 3 versions back from stable
           - os: ubuntu-latest
-            rust: "1.75"  # MSRV - Edition 2021 minimum
+            rust: "1.87"  # MSRV - Stable minus ~3 versions
           # Test beta on Linux only to catch upcoming issues
           - os: ubuntu-latest
             rust: "beta"

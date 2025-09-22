@@ -2,7 +2,7 @@
 name = "ferrous-forge"
 version = "1.4.0"
 edition = "2021"
-rust-version = "1.82"
+rust-version = "1.87"
 authors = ["Ferrous Forge Contributors"]
 description = "System-wide Rust development standards enforcer"
 documentation = "https://docs.rs/ferrous-forge"
