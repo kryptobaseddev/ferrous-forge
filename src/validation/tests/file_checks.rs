@@ -44,7 +44,7 @@ async fn test_validate_cargo_toml_wrong_edition() {
 [package]
 name = "test"
 version = "0.1.0"
-edition = "2021"
+edition = "2018"
 
 [dependencies]
 "#;
@@ -99,8 +99,8 @@ async fn test_validate_rust_file_size_limit() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let rust_file = temp_dir.path().join("test.rs");
 
-    // Create a file with many lines (over 300)
-    let content: String = (0..350)
+    // Create a file with many lines (over 400)
+    let content: String = (0..450)
         .map(|i| format!("// Line {}", i))
         .collect::<Vec<_>>()
         .join("\n");
@@ -151,7 +151,7 @@ async fn test_validate_rust_file_underscore_bandaid() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let rust_file = temp_dir.path().join("test.rs");
 
-    let content = "fn test_function(_unused: String) {\n    println!(\"test\");\n}\n";
+    let content = "fn process_data(_unused: String) {\n    println!(\"test\");\n}\n";
     fs::write(&rust_file, content)
         .await
         .expect("Failed to write Rust file");
