@@ -1,5 +1,4 @@
 //! Violation types and reporting
-#![allow(clippy::unwrap_used)]
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;

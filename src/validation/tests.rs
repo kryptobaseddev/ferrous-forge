@@ -1,5 +1,4 @@
 //! Tests for the Rust validation module
-#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use super::rust_validator::{
     file_checks::{validate_cargo_toml, validate_rust_file},

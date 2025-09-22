@@ -1,5 +1,4 @@
 //! Validate command implementation  
-#![allow(clippy::too_many_lines)]
 
 use crate::{
     doc_coverage, formatting, security,

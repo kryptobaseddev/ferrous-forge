@@ -1,5 +1,4 @@
 //! Coverage reporting and validation
-#![allow(clippy::lines_filter_map_ok)]
 
 use super::analyzer::CoverageAnalyzer;
 use super::types::CoverageReport;

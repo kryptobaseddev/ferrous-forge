@@ -1,5 +1,4 @@
 //! Template management commands
-#![allow(clippy::too_many_lines)]
 
 use crate::templates::{TemplateEngine, TemplateRegistry};
 use crate::{Error, Result};

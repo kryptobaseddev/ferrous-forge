@@ -117,14 +117,27 @@ pub async fn validate_rust_file(
     let mut in_test_block = false;
     let mut current_function_start: Option<usize> = None;
     let mut next_function_is_test = false;
+    let mut in_test_module = false;
+    let mut next_module_is_test = false;
 
     for (i, line) in lines.iter().enumerate() {
         let line_stripped = line.trim();
 
+        // Check for test module markers
+        if line_stripped.contains("#[cfg(test)]") {
+            next_module_is_test = true;
+            next_function_is_test = true;
+        }
+
+        // Check if we're entering a test module
+        if line_stripped.starts_with("mod tests") && next_module_is_test {
+            in_test_module = true;
+            next_module_is_test = false;
+        }
+
         // Check for test attributes that apply to the next function
         if line_stripped.contains("#[test]")
             || line_stripped.contains("#[tokio::test]")
-            || line_stripped.contains("#[cfg(test)]")
             || line_stripped.contains("#[bench]")
         {
             next_function_is_test = true;
@@ -181,6 +194,7 @@ pub async fn validate_rust_file(
 
         // Check for .unwrap() in production code (not in tests or if allowed)
         if !in_test_block
+            && !in_test_module
             && !is_test_file
             && !allow_unwrap
             && patterns.unwrap_call.is_match(line)
@@ -198,6 +212,7 @@ pub async fn validate_rust_file(
 
         // Check for .expect() in production code (not in tests or if allowed)
         if !in_test_block
+            && !in_test_module
             && !is_test_file
             && !allow_expect
             && patterns.expect_call.is_match(line)

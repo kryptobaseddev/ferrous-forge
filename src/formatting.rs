@@ -305,7 +305,6 @@ blank_lines_lower_bound = 0
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used)]
 mod tests {
     use super::*;
 

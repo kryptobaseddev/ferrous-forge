@@ -1,5 +1,4 @@
 //! Template registry for managing available templates
-#![allow(clippy::too_many_lines)]
 
 use super::manifest::{TemplateFile, TemplateKind, TemplateManifest, TemplateVariable};
 use crate::{Error, Result};

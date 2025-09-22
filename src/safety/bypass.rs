@@ -1,5 +1,4 @@
 //! Emergency bypass system for safety pipeline
-#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use crate::{Error, Result};
 use chrono::{DateTime, Utc};
@@ -242,7 +241,6 @@ impl BypassManager {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 
