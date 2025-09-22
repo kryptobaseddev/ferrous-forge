@@ -51,7 +51,8 @@ pub async fn execute_with_ai(
     print_startup_banner(&project_path, dry_run);
     
     let filter_options = parse_filter_options(only, skip);
-    let filtered_violations = validate_and_filter_violations(&project_path, &filter_options, limit).await?;
+    let filtered_violations = 
+        validate_and_filter_violations(&project_path, &filter_options, limit).await?;
     
     if let Some(violations) = filtered_violations {
         execute_fix_process(&project_path, violations, ai_analysis, dry_run).await;
@@ -137,7 +138,12 @@ async fn validate_and_filter_violations(
         return Ok(None);
     }
     
-    let filtered_violations = filter_violations(&violations, &filter_options.only_types, &filter_options.skip_types, limit);
+    let filtered_violations = filter_violations(
+        &violations, 
+        &filter_options.only_types, 
+        &filter_options.skip_types, 
+        limit
+    );
     
     if filtered_violations.is_empty() {
         println!("{}", style("📝 No matching violations to fix").yellow());

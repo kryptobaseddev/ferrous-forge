@@ -116,12 +116,32 @@ async fn create_project(
     skip_prompts: bool,
 ) -> Result<()> {
     let registry = TemplateRegistry::new();
+    let template = get_template(&registry, template_name)?;
+    
+    display_creation_header(template_name);
+    let temp_dir = setup_template_files(&template)?;
+    let mut engine = TemplateEngine::new(template.manifest.clone(), temp_dir);
+    
+    let variables = collect_template_variables(vars, &engine, skip_prompts)?;
+    engine.set_variables(variables)?;
+    engine.generate(target_dir)?;
+    
+    display_creation_success(target_dir);
+    Ok(())
+}
 
-    // Get the template
-    let template = registry
+/// Get template from registry
+fn get_template<'a>(
+    registry: &'a TemplateRegistry,
+    template_name: &str,
+) -> Result<&'a crate::templates::registry::BuiltinTemplate> {
+    registry
         .get_builtin(template_name)
-        .ok_or_else(|| Error::validation(format!("Template not found: {}", template_name)))?;
+        .ok_or_else(|| Error::validation(format!("Template not found: {}", template_name)))
+}
 
+/// Display project creation header
+fn display_creation_header(template_name: &str) {
     println!(
         "{}",
         style(format!(
@@ -132,8 +152,10 @@ async fn create_project(
         .cyan()
     );
     println!();
+}
 
-    // Create a temporary directory for template files
+/// Setup template files in temporary directory
+fn setup_template_files(template: &crate::templates::registry::BuiltinTemplate) -> Result<PathBuf> {
     let timestamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs())
@@ -141,7 +163,6 @@ async fn create_project(
     let temp_dir = std::env::temp_dir().join(format!("ferrous-forge-{}", timestamp));
     std::fs::create_dir_all(&temp_dir)?;
 
-    // Write template files to temp directory
     for (path, content) in &template.files {
         let file_path = temp_dir.join(path);
         if let Some(parent) = file_path.parent() {
@@ -149,38 +170,55 @@ async fn create_project(
         }
         std::fs::write(file_path, content)?;
     }
+    
+    Ok(temp_dir)
+}
 
-    // Create engine
-    let mut engine = TemplateEngine::new(template.manifest.clone(), temp_dir.clone());
-
-    // Set provided variables
+/// Collect template variables from command line and prompts
+fn collect_template_variables(
+    vars: Vec<(String, String)>,
+    engine: &TemplateEngine,
+    skip_prompts: bool,
+) -> Result<HashMap<String, String>> {
     let mut variables = HashMap::new();
+    
+    // Set provided variables
     for (key, value) in vars {
         variables.insert(key, value);
     }
 
     // Prompt for required variables if not provided
     if !skip_prompts {
-        for var in engine.required_variables() {
-            if !variables.contains_key(&var.name) {
-                println!("{}: {}", style(&var.name).yellow(), var.description);
-                print!("  Enter {}: ", var.name);
-                use std::io::{self, Write};
-                io::stdout().flush()?;
-                let mut value = String::new();
-                io::stdin().read_line(&mut value)?;
-                let value = value.trim().to_string();
-                variables.insert(var.name.clone(), value);
-            }
+        prompt_for_missing_variables(&mut variables, engine)?;
+    }
+    
+    Ok(variables)
+}
+
+/// Prompt user for missing required variables
+fn prompt_for_missing_variables(
+    variables: &mut HashMap<String, String>,
+    engine: &TemplateEngine,
+) -> Result<()> {
+    use std::io::{self, Write};
+    
+    for var in engine.required_variables() {
+        if !variables.contains_key(&var.name) {
+            println!("{}: {}", style(&var.name).yellow(), var.description);
+            print!("  Enter {}: ", var.name);
+            io::stdout().flush()?;
+            let mut value = String::new();
+            io::stdin().read_line(&mut value)?;
+            let value = value.trim().to_string();
+            variables.insert(var.name.clone(), value);
         }
     }
+    
+    Ok(())
+}
 
-    // Set all variables
-    engine.set_variables(variables)?;
-
-    // Generate the project
-    engine.generate(target_dir)?;
-
+/// Display project creation success message
+fn display_creation_success(target_dir: &Path) {
     println!();
     println!(
         "{}",
@@ -191,20 +229,25 @@ async fn create_project(
     println!("  cd {}", target_dir.display());
     println!("  cargo build");
     println!("  ferrous-forge validate .");
-
-    Ok(())
 }
 
 /// Show template information
 async fn show_template_info(template_name: &str) -> Result<()> {
     let registry = TemplateRegistry::new();
-
-    let template = registry
-        .get_builtin(template_name)
-        .ok_or_else(|| Error::validation(format!("Template not found: {}", template_name)))?;
-
+    let template = get_template(&registry, template_name)?;
     let manifest = &template.manifest;
 
+    display_template_header(manifest);
+    display_template_basic_info(manifest);
+    display_template_variables(manifest);
+    display_template_files(manifest);
+    display_post_generation_commands(manifest);
+
+    Ok(())
+}
+
+/// Display template header
+fn display_template_header(manifest: &crate::templates::TemplateManifest) {
     println!(
         "{}",
         style(format!("📋 Template: {}", manifest.name))
@@ -212,6 +255,10 @@ async fn show_template_info(template_name: &str) -> Result<()> {
             .cyan()
     );
     println!();
+}
+
+/// Display basic template information
+fn display_template_basic_info(manifest: &crate::templates::TemplateManifest) {
     println!("  {} {}", style("Version:").bold(), manifest.version);
     println!("  {} {:?}", style("Type:").bold(), manifest.kind);
     println!(
@@ -221,28 +268,39 @@ async fn show_template_info(template_name: &str) -> Result<()> {
     );
     println!("  {} {}", style("Author:").bold(), manifest.author);
     println!("  {} {}", style("Edition:").bold(), manifest.edition);
+}
 
+/// Display template variables information
+fn display_template_variables(manifest: &crate::templates::TemplateManifest) {
     if !manifest.variables.is_empty() {
         println!();
         println!("{}", style("Variables:").bold());
         for var in &manifest.variables {
-            let required = if var.required { "*" } else { "" };
-            println!(
-                "  {} {}{} - {}",
-                style("•").dim(),
-                style(&var.name).yellow(),
-                style(required).red(),
-                var.description
-            );
-            if let Some(default) = &var.default {
-                println!("    {} {}", style("Default:").dim(), default);
-            }
-            if let Some(pattern) = &var.pattern {
-                println!("    {} {}", style("Pattern:").dim(), pattern);
-            }
+            display_variable_info(var);
         }
     }
+}
 
+/// Display information for a single variable
+fn display_variable_info(var: &crate::templates::TemplateVariable) {
+    let required = if var.required { "*" } else { "" };
+    println!(
+        "  {} {}{} - {}",
+        style("•").dim(),
+        style(&var.name).yellow(),
+        style(required).red(),
+        var.description
+    );
+    if let Some(default) = &var.default {
+        println!("    {} {}", style("Default:").dim(), default);
+    }
+    if let Some(pattern) = &var.pattern {
+        println!("    {} {}", style("Pattern:").dim(), pattern);
+    }
+}
+
+/// Display template files information
+fn display_template_files(manifest: &crate::templates::TemplateManifest) {
     if !manifest.files.is_empty() {
         println!();
         println!("{}", style("Files:").bold());
@@ -256,7 +314,10 @@ async fn show_template_info(template_name: &str) -> Result<()> {
             );
         }
     }
+}
 
+/// Display post-generation commands
+fn display_post_generation_commands(manifest: &crate::templates::TemplateManifest) {
     if !manifest.post_generate.is_empty() {
         println!();
         println!("{}", style("Post-generation commands:").bold());
@@ -264,8 +325,6 @@ async fn show_template_info(template_name: &str) -> Result<()> {
             println!("  {} {}", style("$").dim(), cmd);
         }
     }
-
-    Ok(())
 }
 
 /// Validate a template
