@@ -10,16 +10,24 @@ use tokio::fs;
 /// AI-friendly compliance report structure
 #[derive(Serialize, Deserialize)]
 pub struct AIReport {
+    /// Report metadata including timestamp and version
     pub metadata: AIMetadata,
+    /// Summary of violations found
     pub summary: AISummary,
+    /// Detailed list of violations
     pub violations: Vec<AIViolation>,
+    /// Instructions for fixing violations
     pub fix_instructions: Vec<FixInstruction>,
 }
 
 #[derive(Serialize, Deserialize)]
+/// Metadata for AI compliance reports
 pub struct AIMetadata {
+    /// ISO timestamp when report was generated
     pub timestamp: String,
+    /// Path to the project being analyzed
     pub project_path: String,
+    /// Version of Ferrous Forge used
     pub ferrous_forge_version: String,
     pub total_violations: usize,
     pub report_version: String,
@@ -120,11 +128,6 @@ fn get_fix_suggestion(
             "Remove unused parameter or implement missing functionality".to_string(),
             true,
             2,
-        ),
-        crate::validation::ViolationType::UnwrapInProduction => (
-            "Replace `let _ =` with proper error handling using `?`".to_string(),
-            true,
-            1,
         ),
         crate::validation::ViolationType::UnwrapInProduction => (
             "Replace `.unwrap()` with `?` or proper error handling".to_string(),

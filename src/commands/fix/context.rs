@@ -3,6 +3,7 @@
 use super::types::{FileContext, FunctionSignature};
 
 /// Analyze a file's content to understand its context
+#[allow(dead_code)]
 pub fn analyze_file_context(content: &str) -> FileContext {
     let is_test_file = content.contains("#[test]")
         || content.contains("#[cfg(test)]")
@@ -37,6 +38,7 @@ pub fn analyze_file_context(content: &str) -> FileContext {
 }
 
 /// Parse a function signature that may span multiple lines
+#[allow(dead_code)]
 pub fn parse_function_signature_multiline(
     lines: &[&str],
     start_idx: usize,
@@ -56,6 +58,7 @@ pub fn parse_function_signature_multiline(
 }
 
 /// Collect signature lines until the opening brace is found
+#[allow(dead_code)]
 fn collect_signature_lines(lines: &[&str], start_idx: usize) -> Option<(String, usize)> {
     let mut brace_line = start_idx;
     let mut signature_lines = vec![lines[start_idx].to_string()];
@@ -74,6 +77,7 @@ fn collect_signature_lines(lines: &[&str], start_idx: usize) -> Option<(String, 
 }
 
 /// Extract the function name from the full signature
+#[allow(dead_code)]
 fn extract_function_name(full_signature: &str) -> Option<String> {
     let name_start = full_signature.find("fn ")?;
     let name_part = &full_signature[name_start + 3..];
@@ -82,6 +86,7 @@ fn extract_function_name(full_signature: &str) -> Option<String> {
 }
 
 /// Check what types the function returns
+#[allow(dead_code)]
 fn check_return_types(full_signature: &str) -> (bool, bool) {
     let returns_result = full_signature.contains("-> Result")
         || full_signature.contains("-> anyhow::Result")

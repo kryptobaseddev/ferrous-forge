@@ -21,6 +21,7 @@ pub mod test;
 pub mod test_runner;
 
 /// Trait for implementing safety checks
+#[allow(async_fn_in_trait)]
 pub trait SafetyCheck {
     /// Run the safety check
     async fn run(project_path: &Path) -> Result<CheckResult>;

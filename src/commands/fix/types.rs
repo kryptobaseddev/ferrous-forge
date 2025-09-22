@@ -56,7 +56,9 @@ pub struct FixConfig {
 /// Configuration for filter options
 #[derive(Debug)]
 pub struct FilterOptions {
+    /// Only fix violations of these types
     pub only_types: Option<HashSet<String>>,
+    /// Skip violations of these types
     pub skip_types: Option<HashSet<String>>,
 }
 

@@ -56,6 +56,7 @@ pub fn display_recommendation(recommendation: &UpdateRecommendation) {
 /// Display minor update recommendation
 fn display_minor_update(latest: &Version, release_url: &str) {
     println!("{}", style("💡 Minor update available").yellow().bold());
+    println!("   Current: {}", latest);
     println!("   Update command: {}", style("rustup update").cyan());
     println!("   Release notes: {}", release_url);
 }

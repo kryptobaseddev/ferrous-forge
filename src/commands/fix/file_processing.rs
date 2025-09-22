@@ -2,9 +2,7 @@
 
 use super::types::FixStats;
 use crate::validation::Violation;
-use crate::Result;
-use anyhow::Context as AnyhowContext;
-use console::style;
+use crate::{Error, Result};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -53,7 +51,7 @@ fn process_single_file(
 
 /// Handle successful fix results
 fn handle_successful_fix(
-    file_path: &PathBuf,
+    _file_path: &PathBuf,
     fixed_count: usize,
     dry_run: bool,
     stats: &mut FixStats,
@@ -74,7 +72,9 @@ fn fix_file_violations(
     dry_run: bool,
 ) -> Result<usize> {
     let content = fs::read_to_string(file_path)
-        .with_context(|| format!("Failed to read file: {}", file_path.display()))?;
+        .map_err(|e| Error::validation(
+            format!("Failed to read file {}: {}", file_path.display(), e)
+        ))?;
 
     let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
     let preserve_trailing_newline = content.ends_with('\n');
@@ -115,7 +115,7 @@ fn apply_fixes_to_lines(lines: &mut [String], violations: &[Violation]) -> usize
 }
 
 /// Simple fix attempt for basic violations
-fn try_simple_fix(line: &str, violation: &Violation) -> Option<String> {
+fn try_simple_fix(_line: &str, violation: &Violation) -> Option<String> {
     match violation.violation_type {
         crate::validation::ViolationType::LineTooLong => {
             // For now, don't auto-fix line too long
@@ -139,6 +139,8 @@ fn write_fixed_content(
     };
 
     fs::write(file_path, final_content)
-        .with_context(|| format!("Failed to write file: {}", file_path.display()))?;
+        .map_err(|e| Error::validation(
+            format!("Failed to write file {}: {}", file_path.display(), e)
+        ))?;
     Ok(())
 }

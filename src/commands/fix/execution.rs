@@ -6,11 +6,9 @@ use super::utils::{filter_violations, group_violations_by_file};
 use crate::ai_analyzer;
 use crate::validation::{RustValidator, Violation};
 use crate::Result;
-use anyhow::Context as AnyhowContext;
 use console::style;
 use std::collections::HashSet;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 /// Execute the main fix process
 pub async fn execute_fix_process(

@@ -213,10 +213,20 @@ fn parse_format_output(stdout: &[u8], stderr: &[u8], success: bool) -> Result<Fo
     let stderr_str = String::from_utf8_lossy(stderr);
     let stdout_str = String::from_utf8_lossy(stdout);
 
-    let mut unformatted_files = Vec::new();
-    let mut suggestions = Vec::new();
+    let unformatted_files = parse_unformatted_files(&stderr_str);
+    let suggestions = parse_formatting_suggestions(&stdout_str);
 
-    // Parse file names from stderr (rustfmt --check output)
+    Ok(FormatResult {
+        formatted: false,
+        unformatted_files,
+        suggestions,
+    })
+}
+
+/// Parse unformatted files from stderr
+fn parse_unformatted_files(stderr_str: &str) -> Vec<String> {
+    let mut unformatted_files = Vec::new();
+    
     for line in stderr_str.lines() {
         if line.starts_with("Diff in") {
             if let Some(file) = line.strip_prefix("Diff in ") {
@@ -226,35 +236,41 @@ fn parse_format_output(stdout: &[u8], stderr: &[u8], success: bool) -> Result<Fo
             }
         }
     }
+    
+    unformatted_files
+}
 
-    // Parse suggestions from stdout if available
+/// Parse formatting suggestions from stdout
+fn parse_formatting_suggestions(stdout_str: &str) -> Vec<FormatSuggestion> {
+    let mut suggestions = Vec::new();
+    
     for line in stdout_str.lines() {
         if line.starts_with("warning:") || line.contains("formatting") {
-            // Extract file and line info if present
-            if let Some(pos) = line.find(".rs:") {
-                let start = line.rfind('/').unwrap_or(0);
-                let file = &line[start..pos + 3];
-
-                // Try to extract line number
-                let line_num = if let Some(num_start) = line[pos + 3..].find(':') {
-                    line[pos + 4..pos + 3 + num_start].parse().unwrap_or(0)
-                } else {
-                    0
-                };
-
-                suggestions.push(FormatSuggestion {
-                    file: file.to_string(),
-                    line: line_num,
-                    description: "Formatting required".to_string(),
-                });
+            if let Some(suggestion) = extract_format_suggestion(line) {
+                suggestions.push(suggestion);
             }
         }
     }
+    
+    suggestions
+}
 
-    Ok(FormatResult {
-        formatted: false,
-        unformatted_files,
-        suggestions,
+/// Extract formatting suggestion from a line
+fn extract_format_suggestion(line: &str) -> Option<FormatSuggestion> {
+    let pos = line.find(".rs:")?;
+    let start = line.rfind('/').unwrap_or(0);
+    let file = &line[start..pos + 3];
+
+    let line_num = if let Some(num_start) = line[pos + 3..].find(':') {
+        line[pos + 4..pos + 3 + num_start].parse().unwrap_or(0)
+    } else {
+        0
+    };
+
+    Some(FormatSuggestion {
+        file: file.to_string(),
+        line: line_num,
+        description: "Formatting required".to_string(),
     })
 }
 
