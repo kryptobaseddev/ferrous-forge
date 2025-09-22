@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["generate_ai_report"],"struct":["AIMetadata","AIReport","AISummary","AIViolation","FixInstruction"]};

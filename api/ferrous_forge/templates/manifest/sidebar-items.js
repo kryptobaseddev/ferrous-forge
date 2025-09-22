@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["TemplateKind"],"struct":["TemplateFile","TemplateManifest","TemplateVariable"]};

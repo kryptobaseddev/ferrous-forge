@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["display_recommendation","display_recommendation_details","display_recommendation_header","display_releases_list","display_version_status"]};

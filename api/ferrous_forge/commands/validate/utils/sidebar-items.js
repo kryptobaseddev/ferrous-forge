@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["calculate_compliance","count_rust_files","count_violations_by_type","get_code_snippet"]};

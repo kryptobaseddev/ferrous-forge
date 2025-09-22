@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["cli_template","library_template","web_service_template"]};

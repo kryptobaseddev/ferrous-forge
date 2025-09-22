@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["CoverageAnalyzer","CoverageConfig","CoverageReport","FileCoverage"]};
+window.SIDEBAR_ITEMS = {"mod":["analyzer","reporting","tests","types"]};

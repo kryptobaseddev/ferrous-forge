@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["is_in_string_literal"],"struct":["ValidationPatterns"]};

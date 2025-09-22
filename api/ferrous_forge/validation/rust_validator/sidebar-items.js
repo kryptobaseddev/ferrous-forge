@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["file_checks","patterns"],"struct":["ClippyResult","RustValidator"]};

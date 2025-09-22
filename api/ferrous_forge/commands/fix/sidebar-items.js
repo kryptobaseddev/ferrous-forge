@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["execute","execute_with_ai"]};
+window.SIDEBAR_ITEMS = {"enum":["FixResult"],"fn":["execute","execute_with_ai"],"struct":["FileContext","FilterOptions","FixConfig","FunctionSignature"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["AnalysisDepth","ArchitecturalStyle","ErrorHandlingStyle","ErrorPattern","FixComplexity"],"struct":["AIAnalysisReport","AIInstructions","AnalysisMetadata","CodeContext","CodePatterns","FixStrategy","Pattern","SemanticAnalysis","ViolationAnalysis","ViolationPrompt"]};

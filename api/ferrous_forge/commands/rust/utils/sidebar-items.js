@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_spinner","fetch_latest_version"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["generate_ai_instructions","generate_fix_strategies","identify_code_patterns"]};

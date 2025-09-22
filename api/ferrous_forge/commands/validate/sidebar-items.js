@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["execute"]};
+window.SIDEBAR_ITEMS = {"fn":["execute"],"mod":["ai_report","checks","markdown","utils"]};

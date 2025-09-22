@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["validate_cargo_toml","validate_rust_file"]};

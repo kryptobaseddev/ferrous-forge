@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["assess_fix_complexity","perform_semantic_analysis"]};

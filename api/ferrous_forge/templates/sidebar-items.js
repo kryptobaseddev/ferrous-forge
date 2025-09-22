@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["available_templates"],"struct":["ProjectTemplate","TemplateManager"]};
+window.SIDEBAR_ITEMS = {"mod":["builtin","engine","manifest","registry"]};

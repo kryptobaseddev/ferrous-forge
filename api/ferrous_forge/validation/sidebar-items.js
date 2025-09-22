@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Severity","ViolationType"],"struct":["ClippyResult","RustValidator","Violation"]};
+window.SIDEBAR_ITEMS = {"mod":["rust_validator","violation"]};

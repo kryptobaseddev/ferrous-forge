@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["TemplateCommand"],"fn":["collect_template_variables","create_from_template","parse_var","show_template_info","validate_template_manifest"]};

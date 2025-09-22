@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["MigrationStatus"],"struct":["EditionMigrator","MigrationOptions","MigrationResult"]};
+window.SIDEBAR_ITEMS = {"mod":["types"],"struct":["EditionMigrator"]};
