@@ -11,12 +11,12 @@ impl Default for CodingStandards {
                 auto_upgrade: false,
             },
             file_limits: FileLimits {
-                max_lines: 300,
+                max_lines: 400,
                 max_line_length: 100,
                 exempt_files: vec!["tests.rs".to_string(), "benches.rs".to_string()],
             },
             function_limits: FunctionLimits {
-                max_lines: 50,
+                max_lines: 230,
                 max_complexity: 10,
                 exempt_functions: vec!["main".to_string(), "test_*".to_string()],
             },

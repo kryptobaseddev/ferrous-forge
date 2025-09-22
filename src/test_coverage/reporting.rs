@@ -51,7 +51,8 @@ impl CoverageAnalyzer {
         let mut output = String::new();
 
         output.push_str("📊 Test Coverage Report\n");
-        output.push_str("═══════════════════════════════════════\n\n");
+        output.push_str("=".repeat(39).as_str());
+        output.push_str("\n\n");
 
         output.push_str(&format!("📈 Overall Coverage:\n"));
         output.push_str(&format!(

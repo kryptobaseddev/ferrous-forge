@@ -6,24 +6,9 @@ use std::io::{self, Write};
 
 /// Execute the uninstall command
 pub async fn execute(confirm: bool) -> Result<()> {
-    if !confirm {
-        print!(
-            "Are you sure you want to uninstall Ferrous Forge? \
-            This will remove all system integration. [y/N]: "
-        );
-        io::stdout()
-            .flush()
-            .map_err(|e| Error::process(format!("Failed to flush stdout: {}", e)))?;
-
-        let mut input = String::new();
-        io::stdin()
-            .read_line(&mut input)
-            .map_err(|e| Error::process(format!("Failed to read input: {}", e)))?;
-
-        if !input.trim().to_lowercase().starts_with('y') {
-            println!("Uninstall cancelled.");
-            return Ok(());
-        }
+    if !confirm && !get_user_confirmation()? {
+        println!("Uninstall cancelled.");
+        return Ok(());
     }
 
     println!(
@@ -31,18 +16,41 @@ pub async fn execute(confirm: bool) -> Result<()> {
         style("🗑️  Uninstalling Ferrous Forge...").bold().red()
     );
 
-    // Remove cargo wrapper
+    perform_uninstall().await?;
+    print_uninstall_complete();
+
+    Ok(())
+}
+
+/// Get user confirmation for uninstall
+fn get_user_confirmation() -> Result<bool> {
+    print!(
+        "Are you sure you want to uninstall Ferrous Forge? \
+        This will remove all system integration. [y/N]: "
+    );
+    io::stdout()
+        .flush()
+        .map_err(|e| Error::process(format!("Failed to flush stdout: {}", e)))?;
+
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .map_err(|e| Error::process(format!("Failed to read input: {}", e)))?;
+
+    Ok(input.trim().to_lowercase().starts_with('y'))
+}
+
+/// Perform the actual uninstall steps
+async fn perform_uninstall() -> Result<()> {
     remove_cargo_hijacking().await?;
-
-    // Remove clippy config
     remove_clippy_config().await?;
-
-    // Remove shell integration
     remove_shell_integration().await?;
-
-    // Remove configuration
     remove_configuration().await?;
+    Ok(())
+}
 
+/// Print uninstall completion message
+fn print_uninstall_complete() {
     println!(
         "{}",
         style("✅ Ferrous Forge has been uninstalled")
@@ -55,8 +63,6 @@ pub async fn execute(confirm: bool) -> Result<()> {
     println!();
     println!("To completely remove the binary, run:");
     println!("  cargo uninstall ferrous-forge");
-
-    Ok(())
 }
 
 async fn remove_cargo_hijacking() -> Result<()> {

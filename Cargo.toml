@@ -31,6 +31,9 @@ indicatif = "0.17"
 termcolor = "1.4"
 dialoguer = "0.11"
 
+# Crypto
+sha2 = "0.10"
+
 # File system and paths
 dirs = "5.0"
 walkdir = "2.5"

@@ -75,38 +75,8 @@ impl GitHubClient {
             GITHUB_API_BASE, RUST_REPO_OWNER, RUST_REPO_NAME
         );
 
-        let mut request = self
-            .client
-            .get(&url)
-            .header("Accept", "application/vnd.github.v3+json");
-
-        if let Some(token) = &self.auth_token {
-            request = request.header("Authorization", format!("token {}", token));
-        }
-
-        let response = request
-            .send()
-            .await
-            .map_err(|e| Error::network(format!("Failed to fetch release: {}", e)))?;
-
-        // Check for rate limiting
-        if response.status() == 429 {
-            let retry_after = response
-                .headers()
-                .get("X-RateLimit-Reset")
-                .and_then(|v| v.to_str().ok())
-                .and_then(|s| s.parse::<u64>().ok())
-                .unwrap_or(60);
-
-            return Err(Error::rate_limited(retry_after));
-        }
-
-        if !response.status().is_success() {
-            return Err(Error::network(format!(
-                "GitHub API returned status: {}",
-                response.status()
-            )));
-        }
+        let response = self.make_github_request(&url).await?;
+        self.check_response_status(&response)?;
 
         let mut release: GitHubRelease = response
             .json()
@@ -119,27 +89,25 @@ impl GitHubClient {
         Ok(release)
     }
 
-    /// Get multiple recent releases
-    pub async fn get_releases(&self, count: usize) -> Result<Vec<GitHubRelease>> {
-        let url = format!(
-            "{}/repos/{}/{}/releases?per_page={}",
-            GITHUB_API_BASE, RUST_REPO_OWNER, RUST_REPO_NAME, count
-        );
-
+    /// Make a GitHub API request with authentication
+    async fn make_github_request(&self, url: &str) -> Result<reqwest::Response> {
         let mut request = self
             .client
-            .get(&url)
+            .get(url)
             .header("Accept", "application/vnd.github.v3+json");
 
         if let Some(token) = &self.auth_token {
             request = request.header("Authorization", format!("token {}", token));
         }
 
-        let response = request
+        request
             .send()
             .await
-            .map_err(|e| Error::network(format!("Failed to fetch releases: {}", e)))?;
+            .map_err(|e| Error::network(format!("Failed to fetch from GitHub: {}", e)))
+    }
 
+    /// Check response status and handle rate limiting
+    fn check_response_status(&self, response: &reqwest::Response) -> Result<()> {
         if response.status() == 429 {
             let retry_after = response
                 .headers()
@@ -157,6 +125,19 @@ impl GitHubClient {
                 response.status()
             )));
         }
+
+        Ok(())
+    }
+
+    /// Get multiple recent releases
+    pub async fn get_releases(&self, count: usize) -> Result<Vec<GitHubRelease>> {
+        let url = format!(
+            "{}/repos/{}/{}/releases?per_page={}",
+            GITHUB_API_BASE, RUST_REPO_OWNER, RUST_REPO_NAME, count
+        );
+
+        let response = self.make_github_request(&url).await?;
+        self.check_response_status(&response)?;
 
         let mut releases: Vec<GitHubRelease> = response
             .json()

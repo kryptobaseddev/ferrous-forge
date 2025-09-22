@@ -640,6 +640,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+ "sha2",
  "shell-escape",
  "syn",
  "tempfile",

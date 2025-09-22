@@ -65,8 +65,23 @@ impl DocCoverage {
 
 /// Check documentation coverage for a Rust project
 pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCoverage> {
-    // Run cargo doc with JSON output to get warnings
-    let output = Command::new("cargo")
+    let output = run_cargo_doc(project_path)?;
+    let missing = find_missing_docs(&output)?;
+    let (total, documented) = count_documentation_items(project_path).await?;
+    
+    let coverage_percent = calculate_coverage_percent(documented, total);
+
+    Ok(DocCoverage {
+        total_items: total,
+        documented_items: documented,
+        coverage_percent,
+        missing,
+    })
+}
+
+/// Run cargo doc and get output
+fn run_cargo_doc(project_path: &Path) -> Result<std::process::Output> {
+    Command::new("cargo")
         .args(&[
             "doc",
             "--no-deps",
@@ -75,19 +90,20 @@ pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCove
         ])
         .current_dir(project_path)
         .output()
-        .map_err(|e| Error::process(format!("Failed to run cargo doc: {}", e)))?;
+        .map_err(|e| Error::process(format!("Failed to run cargo doc: {}", e)))
+}
 
+/// Find missing documentation items from cargo doc output
+fn find_missing_docs(output: &std::process::Output) -> Result<Vec<String>> {
     let stderr = String::from_utf8_lossy(&output.stderr);
     let stdout = String::from_utf8_lossy(&output.stdout);
-
-    // Parse JSON messages for missing docs warnings
     let mut missing = Vec::new();
 
+    // Parse JSON messages for missing docs warnings
     for line in stdout.lines() {
         if line.contains("missing_docs") {
             if let Ok(json) = serde_json::from_str::<serde_json::Value>(line) {
                 if let Some(message) = json["message"]["rendered"].as_str() {
-                    // Extract the item name from the message
                     if let Some(item_match) = extract_item_name(message) {
                         missing.push(item_match);
                     }
@@ -103,22 +119,17 @@ pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCove
     for cap in warning_re.captures_iter(&stderr) {
         missing.push(cap[1].to_string());
     }
+    
+    Ok(missing)
+}
 
-    // Count public items by parsing the source
-    let (total, documented) = count_documentation_items(project_path).await?;
-
-    let coverage_percent = if total > 0 {
+/// Calculate coverage percentage
+fn calculate_coverage_percent(documented: usize, total: usize) -> f32 {
+    if total > 0 {
         (documented as f32 / total as f32) * 100.0
     } else {
         100.0
-    };
-
-    Ok(DocCoverage {
-        total_items: total,
-        documented_items: documented,
-        coverage_percent,
-        missing,
-    })
+    }
 }
 
 /// Count documentation items in the project

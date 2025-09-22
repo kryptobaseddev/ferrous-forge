@@ -10,38 +10,53 @@ pub async fn execute(force: bool) -> Result<()> {
         style("🔨 Initializing Ferrous Forge...").bold().cyan()
     );
 
-    // Check if already initialized
     let config = Config::load_or_default().await?;
+    if check_already_initialized(&config, force)? {
+        return Ok(());
+    }
+
+    perform_initialization(config).await?;
+    print_completion_message();
+
+    Ok(())
+}
+
+/// Check if already initialized and handle accordingly
+fn check_already_initialized(config: &Config, force: bool) -> Result<bool> {
     if config.is_initialized() && !force {
         println!(
             "{}",
             style("✅ Ferrous Forge is already initialized!").green()
         );
         println!("Use --force to reinitialize.");
-        return Ok(());
+        return Ok(true);
     }
+    Ok(false)
+}
 
-    // Create configuration directories
+/// Perform the actual initialization steps
+async fn perform_initialization(config: Config) -> Result<()> {
     println!("📁 Creating configuration directories...");
     config.ensure_directories().await?;
 
-    // Install system-wide cargo hijacking
     println!("🔧 Setting up cargo command hijacking...");
     install_cargo_hijacking().await?;
 
-    // Copy clippy configuration
     println!("📋 Installing clippy configuration...");
     install_clippy_config().await?;
 
-    // Setup shell integration
     println!("🐚 Installing shell integration...");
     install_shell_integration().await?;
 
-    // Mark as initialized
     let mut config = config;
     config.mark_initialized();
     config.save().await?;
+    
+    Ok(())
+}
 
+/// Print completion message and next steps
+fn print_completion_message() {
     println!(
         "{}",
         style("🎉 Ferrous Forge initialization complete!")
@@ -53,8 +68,6 @@ pub async fn execute(force: bool) -> Result<()> {
     println!("• Restart your shell or run: source ~/.bashrc");
     println!("• Create a new project: cargo new my-project");
     println!("• All new projects will automatically use Edition 2024 + strict standards!");
-
-    Ok(())
 }
 
 async fn install_cargo_hijacking() -> Result<()> {

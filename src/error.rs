@@ -158,6 +158,16 @@ impl Error {
         Self::RateLimited(retry_after)
     }
 
+    /// Create a new IO error from a string
+    pub fn io(msg: impl Into<String>) -> Self {
+        Self::Io(std::io::Error::new(std::io::ErrorKind::Other, msg.into()))
+    }
+
+    /// Create a new security error
+    pub fn security(msg: impl Into<String>) -> Self {
+        Self::Validation(format!("Security: {}", msg.into()))
+    }
+
     /// Create a new migration error
     pub fn migration(msg: impl Into<String>) -> Self {
         Self::Migration(msg.into())

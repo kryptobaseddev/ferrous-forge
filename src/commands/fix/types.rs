@@ -52,3 +52,18 @@ pub struct FixConfig {
     /// Limit number of fixes
     pub limit: Option<usize>,
 }
+
+/// Configuration for filter options
+#[derive(Debug)]
+pub struct FilterOptions {
+    pub only_types: Option<HashSet<String>>,
+    pub skip_types: Option<HashSet<String>>,
+}
+
+/// Statistics for fix operations
+#[derive(Debug)]
+pub struct FixStats {
+    pub total_fixed: usize,
+    pub total_skipped: usize,
+    pub files_modified: usize,
+}

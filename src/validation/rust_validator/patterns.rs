@@ -39,36 +39,66 @@ impl ValidationPatterns {
     }
 }
 
-/// Helper function to check if a pattern is inside a string literal
+/// Helper function to check if a pattern is inside a string literal or comment
 pub fn is_in_string_literal(line: &str, pattern: &str) -> bool {
-    let mut in_string = false;
-    let mut escaped = false;
-    let chars = line.chars();
-    let mut pos = 0;
-
-    for c in chars {
-        if escaped {
-            escaped = false;
-            pos += c.len_utf8();
-            continue;
-        }
-
-        match c {
-            '\\' => escaped = true,
-            '"' => in_string = !in_string,
-            _ if !in_string => {
-                // Check if pattern starts at this position
-                let remaining = &line[pos..];
-                if remaining.starts_with(pattern) {
-                    return false; // Pattern found outside string
-                }
-            }
-            _ => {}
-        }
-
-        pos += c.len_utf8();
+    // First check if pattern exists at all
+    if !line.contains(pattern) {
+        return false;
     }
-
-    // If we get here, pattern is only in strings (or not found)
-    line.contains(pattern)
+    
+    // Find all occurrences of the pattern
+    let pattern_positions: Vec<usize> = line.match_indices(pattern).map(|(i, _)| i).collect();
+    if pattern_positions.is_empty() {
+        return false;
+    }
+    
+    // Check each occurrence to see if it's in a string or comment
+    for pattern_pos in pattern_positions {
+        let mut in_string = false;
+        let mut in_raw_string = false;
+        let mut escaped = false;
+        let mut pos = 0;
+        
+        // Check if we're in a comment
+        if let Some(comment_pos) = line.find("//") {
+            if pattern_pos >= comment_pos {
+                continue; // This occurrence is in a comment, check next
+            }
+        }
+        
+        for c in line.chars() {
+            if pos >= pattern_pos {
+                // We've reached the pattern position
+                // If we're not in a string, it's a real occurrence
+                if !in_string && !in_raw_string {
+                    return false;
+                }
+                break;
+            }
+            
+            if escaped {
+                escaped = false;
+                pos += c.len_utf8();
+                continue;
+            }
+            
+            match c {
+                '\\' if in_string && !in_raw_string => escaped = true,
+                '"' if !in_raw_string => in_string = !in_string,
+                'r' if !in_string && !in_raw_string => {
+                    // Check for raw string
+                    let remaining = &line[pos..];
+                    if remaining.starts_with("r\"") || remaining.starts_with("r#\"") {
+                        in_raw_string = true;
+                    }
+                }
+                _ => {}
+            }
+            
+            pos += c.len_utf8();
+        }
+    }
+    
+    // All occurrences are in strings or comments
+    true
 }
