@@ -9,12 +9,12 @@ use std::path::Path;
 /// Handle edition check command
 pub async fn handle_check(path: &Path) -> Result<()> {
     let status = run_compliance_check_with_progress(path).await?;
-    
+
     display_compliance_header(path, &status);
     display_edition_status(&status);
     display_migration_status(&status);
     display_recommendations(&status);
-    
+
     Ok(())
 }
 
@@ -31,7 +31,7 @@ async fn run_compliance_check_with_progress(path: &Path) -> Result<crate::editio
 
     let status = check_compliance(path).await?;
     spinner.finish_and_clear();
-    
+
     Ok(status)
 }
 

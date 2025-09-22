@@ -11,7 +11,10 @@ pub fn display_version_status(current: &RustVersion, latest: &Version, verbose: 
     println!();
 
     // Current version
-    println!("📦 Current Version: {}", style(&current.version).green().bold());
+    println!(
+        "📦 Current Version: {}",
+        style(&current.version).green().bold()
+    );
 
     if verbose {
         println!("   Channel: {}", current.channel);
@@ -36,10 +39,18 @@ pub fn display_recommendation(recommendation: &UpdateRecommendation) {
         UpdateRecommendation::UpToDate => {
             println!("{}", style("✅ No update needed").green().bold());
         }
-        UpdateRecommendation::MinorUpdate { current: _, latest, release_url } => {
+        UpdateRecommendation::MinorUpdate {
+            current: _,
+            latest,
+            release_url,
+        } => {
             display_minor_update(latest, release_url);
         }
-        UpdateRecommendation::MajorUpdate { current: _, latest, release_url } => {
+        UpdateRecommendation::MajorUpdate {
+            current: _,
+            latest,
+            release_url,
+        } => {
             display_major_update(latest, release_url);
         }
         UpdateRecommendation::SecurityUpdate {
@@ -78,8 +89,12 @@ fn display_security_update(latest: &Version, release_url: &str, details: &str) {
     println!("{}", style("🚨 SECURITY UPDATE AVAILABLE").red().bold());
     println!("   Version: {}", style(latest).bold());
     println!();
-    println!("   {} {}", style("⚠️").red(), style("Security Issue:").red().bold());
-    
+    println!(
+        "   {} {}",
+        style("⚠️").red(),
+        style("Security Issue:").red().bold()
+    );
+
     // Format details with proper indentation
     for line in details.lines() {
         let trimmed = line.trim();
@@ -87,10 +102,11 @@ fn display_security_update(latest: &Version, release_url: &str, details: &str) {
             println!("   {}", trimmed);
         }
     }
-    
+
     println!();
-    println!("   {} {}", 
-        style("🔧").yellow(), 
+    println!(
+        "   {} {}",
+        style("🔧").yellow(),
         style("Update immediately with:").yellow().bold()
     );
     println!("   {}", style("rustup update").cyan().bold());
@@ -113,24 +129,31 @@ pub fn display_recommendation_details(recommendation: &UpdateRecommendation, sta
         UpdateRecommendation::UpToDate => {
             display_up_to_date_recommendation(stable_only);
         }
-        UpdateRecommendation::MinorUpdate { latest, .. } |
-        UpdateRecommendation::MajorUpdate { latest, .. } => {
+        UpdateRecommendation::MinorUpdate { latest, .. }
+        | UpdateRecommendation::MajorUpdate { latest, .. } => {
             display_update_recommendation(latest);
         }
-        UpdateRecommendation::SecurityUpdate { latest, details, .. } => {
+        UpdateRecommendation::SecurityUpdate {
+            latest, details, ..
+        } => {
             display_security_recommendation(latest);
             println!("Security details: {}", details);
         }
     }
-    
+
     display_general_recommendations();
 }
 
 /// Display up-to-date recommendation
 fn display_up_to_date_recommendation(stable_only: bool) {
-    println!("{}", style("✅ You're running the latest version!").green().bold());
+    println!(
+        "{}",
+        style("✅ You're running the latest version!")
+            .green()
+            .bold()
+    );
     println!();
-    
+
     if stable_only {
         println!("🔒 Staying on stable releases is recommended for:");
         println!("   • Production environments");
@@ -138,9 +161,18 @@ fn display_up_to_date_recommendation(stable_only: bool) {
         println!("   • Maximum stability");
     } else {
         println!("💡 Consider these update channels:");
-        println!("   • {} - Most stable, recommended for production", style("stable").green());
-        println!("   • {} - Preview of next stable release", style("beta").yellow());
-        println!("   • {} - Latest features, may be unstable", style("nightly").red());
+        println!(
+            "   • {} - Most stable, recommended for production",
+            style("stable").green()
+        );
+        println!(
+            "   • {} - Preview of next stable release",
+            style("beta").yellow()
+        );
+        println!(
+            "   • {} - Latest features, may be unstable",
+            style("nightly").red()
+        );
     }
     println!();
 }
@@ -165,14 +197,12 @@ fn display_security_recommendation(latest: &Version) {
     println!("{}", style("🚨 SECURITY UPDATE REQUIRED").red().bold());
     println!("Update to: {}", style(latest).bold());
     println!();
-    println!("{} {}", 
-        style("⚠️").red(), 
+    println!(
+        "{} {}",
+        style("⚠️").red(),
         style("Your current version has known security vulnerabilities.")
     );
-    println!("{} {}", 
-        style("🔧").yellow(), 
-        style("Update immediately:")
-    );
+    println!("{} {}", style("🔧").yellow(), style("Update immediately:"));
     println!("   {}", style("rustup update").cyan().bold());
     println!();
 }
@@ -181,7 +211,10 @@ fn display_security_recommendation(latest: &Version) {
 fn display_general_recommendations() {
     println!("{}", style("📋 General Recommendations:").bold());
     println!("   • Keep Rust updated for security and performance");
-    println!("   • Use {} for production environments", style("stable").green());
+    println!(
+        "   • Use {} for production environments",
+        style("stable").green()
+    );
     println!("   • Test updates in development before deploying");
     println!("   • Follow Rust release notes for breaking changes");
     println!();
@@ -195,7 +228,7 @@ pub fn display_releases_list(releases: &[GitHubRelease]) {
 
     for (index, release) in releases.iter().enumerate() {
         display_release_entry(index + 1, release);
-        
+
         if index < releases.len() - 1 {
             println!();
         }
@@ -206,23 +239,23 @@ pub fn display_releases_list(releases: &[GitHubRelease]) {
 fn display_release_entry(index: usize, release: &GitHubRelease) {
     let version = &release.tag_name;
     let is_prerelease = release.prerelease;
-    
+
     let version_style = if is_prerelease {
         style(version).yellow()
     } else {
         style(version).green().bold()
     };
-    
+
     println!("{}. {}", index, version_style);
-    
+
     if is_prerelease {
         println!("   {}", style("(Pre-release)").dim());
     }
-    
+
     if let Some(date) = &release.published_at {
         println!("   Published: {}", style(date).dim());
     }
-    
+
     if !release.body.is_empty() {
         display_release_summary(&release.body);
     }
@@ -235,7 +268,7 @@ fn display_release_summary(body: &str) {
         .take(3)
         .filter(|line| !line.trim().is_empty())
         .collect();
-    
+
     if !summary_lines.is_empty() {
         println!("   Summary:");
         for line in summary_lines {

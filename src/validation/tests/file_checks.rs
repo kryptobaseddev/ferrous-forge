@@ -10,7 +10,7 @@ use tokio::fs;
 async fn test_validate_cargo_toml_correct_edition() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let cargo_toml_path = temp_dir.path().join("Cargo.toml");
-    
+
     let content = r#"
 [package]
 name = "test"
@@ -19,15 +19,15 @@ edition = "2024"
 
 [dependencies]
 "#;
-    
+
     fs::write(&cargo_toml_path, content)
         .await
         .expect("Failed to write Cargo.toml");
-    
+
     let violations = validate_cargo_toml(&cargo_toml_path)
         .await
         .expect("Validation should succeed");
-    
+
     // Should have no violations for correct edition
     assert!(violations.is_empty());
 }
@@ -36,7 +36,7 @@ edition = "2024"
 async fn test_validate_cargo_toml_wrong_edition() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let cargo_toml_path = temp_dir.path().join("Cargo.toml");
-    
+
     let content = r#"
 [package]
 name = "test"
@@ -45,25 +45,27 @@ edition = "2021"
 
 [dependencies]
 "#;
-    
+
     fs::write(&cargo_toml_path, content)
         .await
         .expect("Failed to write Cargo.toml");
-    
+
     let violations = validate_cargo_toml(&cargo_toml_path)
         .await
         .expect("Validation should succeed");
-    
+
     // Should have violation for wrong edition
     assert!(!violations.is_empty());
-    assert!(violations.iter().any(|v| matches!(v.violation_type, ViolationType::WrongEdition)));
+    assert!(violations
+        .iter()
+        .any(|v| matches!(v.violation_type, ViolationType::WrongEdition)));
 }
 
 #[tokio::test]
 async fn test_validate_cargo_toml_missing_edition() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let cargo_toml_path = temp_dir.path().join("Cargo.toml");
-    
+
     let content = r#"
 [package]
 name = "test"
@@ -71,69 +73,84 @@ version = "0.1.0"
 
 [dependencies]
 "#;
-    
+
     fs::write(&cargo_toml_path, content)
         .await
         .expect("Failed to write Cargo.toml");
-    
+
     let violations = validate_cargo_toml(&cargo_toml_path)
         .await
         .expect("Validation should succeed");
-    
+
     // Should have violation for missing edition
     assert!(!violations.is_empty());
-    assert!(violations.iter().any(|v| matches!(v.violation_type, ViolationType::WrongEdition)));
+    assert!(violations
+        .iter()
+        .any(|v| matches!(v.violation_type, ViolationType::WrongEdition)));
 }
 
 #[tokio::test]
 async fn test_validate_rust_file_size_limit() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let rust_file = temp_dir.path().join("test.rs");
-    
+
     // Create a file with many lines (over 300)
-    let content: String = (0..350).map(|i| format!("// Line {}", i)).collect::<Vec<_>>().join("\n");
-    
+    let content: String = (0..350)
+        .map(|i| format!("// Line {}", i))
+        .collect::<Vec<_>>()
+        .join("\n");
+
     fs::write(&rust_file, content)
         .await
         .expect("Failed to write Rust file");
-    
-    let violations = validate_rust_file(&rust_file).await.expect("Validation should succeed");
-    
+
+    let violations = validate_rust_file(&rust_file)
+        .await
+        .expect("Validation should succeed");
+
     // Should have violation for file too large
     assert!(!violations.is_empty());
-    assert!(violations.iter().any(|v| matches!(v.violation_type, ViolationType::FileTooLarge)));
+    assert!(violations
+        .iter()
+        .any(|v| matches!(v.violation_type, ViolationType::FileTooLarge)));
 }
 
 #[tokio::test]
 async fn test_validate_rust_file_line_length() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let rust_file = temp_dir.path().join("test.rs");
-    
+
     let content = "// ".to_string() + &"a".repeat(150); // Create a very long line
-    
+
     fs::write(&rust_file, content)
         .await
         .expect("Failed to write Rust file");
-    
-    let violations = validate_rust_file(&rust_file).await.expect("Validation should succeed");
-    
+
+    let violations = validate_rust_file(&rust_file)
+        .await
+        .expect("Validation should succeed");
+
     // Should have violation for line too long
     assert!(!violations.is_empty());
-    assert!(violations.iter().any(|v| matches!(v.violation_type, ViolationType::LineTooLong)));
+    assert!(violations
+        .iter()
+        .any(|v| matches!(v.violation_type, ViolationType::LineTooLong)));
 }
 
 #[tokio::test]
 async fn test_validate_rust_file_underscore_bandaid() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let rust_file = temp_dir.path().join("test.rs");
-    
+
     let content = "fn test_function(_unused: String) {\n    println!(\"test\");\n}\n";
     fs::write(&rust_file, content)
         .await
         .expect("Failed to write Rust file");
-    
-    let violations = validate_rust_file(&rust_file).await.expect("Validation should succeed");
-    
+
+    let violations = validate_rust_file(&rust_file)
+        .await
+        .expect("Validation should succeed");
+
     // Should have violations for underscore bandaid
     assert!(!violations.is_empty());
     assert!(violations
@@ -145,8 +162,8 @@ async fn test_validate_rust_file_underscore_bandaid() {
 async fn test_validate_rust_file_unwrap_in_production() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let rust_file = temp_dir.path().join("test.rs");
-    
-    let content = r"
+
+    let content = r#"
 #[test]
 fn test_code() {
     let value = Some(42);
@@ -158,19 +175,22 @@ fn production_code() {
     value.unwrap(); // This SHOULD be flagged
     value.expect("error"); // This SHOULD also be flagged
 }
-";
-    
+"#;
+
     fs::write(&rust_file, content)
         .await
         .expect("Failed to write Rust file");
-    
-    let violations = validate_rust_file(&rust_file).await.expect("Validation should succeed");
-    
+
+    let violations = validate_rust_file(&rust_file)
+        .await
+        .expect("Validation should succeed");
+
     // Should have violations for unwrap in production code, but not in test code
-    let unwrap_violations: Vec<_> = violations.iter()
+    let unwrap_violations: Vec<_> = violations
+        .iter()
         .filter(|v| matches!(v.violation_type, ViolationType::UnwrapInProduction))
         .collect();
-    
+
     // Should find unwrap and expect in production function but not in test function
     assert!(!unwrap_violations.is_empty());
     assert!(unwrap_violations.len() >= 2); // unwrap and expect

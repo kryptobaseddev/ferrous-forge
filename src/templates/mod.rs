@@ -8,7 +8,7 @@ pub mod engine;
 pub mod manifest;
 pub mod registry;
 
-pub use registry::BuiltinTemplate;
 pub use engine::{TemplateEngine, TemplateVariable};
 pub use manifest::{TemplateFile, TemplateKind, TemplateManifest};
+pub use registry::BuiltinTemplate;
 pub use registry::TemplateRegistry;

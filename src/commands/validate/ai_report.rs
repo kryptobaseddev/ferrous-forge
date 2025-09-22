@@ -116,7 +116,6 @@ async fn setup_reports_directory(project_path: &PathBuf) -> Result<PathBuf> {
     Ok(reports_dir)
 }
 
-
 async fn create_ai_violations(violations: &[Violation]) -> Vec<AIViolation> {
     let mut ai_violations = Vec::new();
     for violation in violations {
@@ -124,7 +123,7 @@ async fn create_ai_violations(violations: &[Violation]) -> Vec<AIViolation> {
             .await
             .unwrap_or_else(|_| "Could not read file".to_string());
 
-        let (suggested_fix, auto_fixable, priority) = 
+        let (suggested_fix, auto_fixable, priority) =
             get_fix_suggestion(&violation.violation_type, &violation.message);
 
         ai_violations.push(AIViolation {
@@ -194,23 +193,28 @@ fn get_fix_strategy(vtype: &str) -> (String, String, String) {
         "UnderscoreBandaid" => (
             "1. Identify what functionality the parameter should provide\n\
             2. Either implement the functionality or remove the parameter\n\
-            3. Update function signature and callers".to_string(),
+            3. Update function signature and callers"
+                .to_string(),
             "// Before: fn process(_unused: String, data: Data)\n\
-            // After: fn process(data: Data) or implement the unused parameter".to_string(),
+            // After: fn process(data: Data) or implement the unused parameter"
+                .to_string(),
             "Moderate".to_string(),
         ),
         "UnwrapInProduction" => (
             "1. Change function to return Result<T, Error>\n\
-            2. Replace unwrap with ?\n3. Handle errors at call sites".to_string(),
+            2. Replace unwrap with ?\n3. Handle errors at call sites"
+                .to_string(),
             "// Before: value.unwrap()\n// After: value?".to_string(),
             "Easy".to_string(),
         ),
         "FileTooLarge" => (
             "1. Identify logical boundaries\n2. Extract modules\n\
             3. Move related functions to new modules\n\
-            4. Update imports".to_string(),
+            4. Update imports"
+                .to_string(),
             "// Extract to separate modules like: \n\
-            validation/core.rs, validation/types.rs".to_string(),
+            validation/core.rs, validation/types.rs"
+                .to_string(),
             "Hard".to_string(),
         ),
         _ => (
@@ -220,7 +224,6 @@ fn get_fix_strategy(vtype: &str) -> (String, String, String) {
         ),
     }
 }
-
 
 fn build_ai_report(
     project_path: &PathBuf,
@@ -277,9 +280,16 @@ async fn save_and_link_reports(
 
 fn print_report_summary(reports_dir: &PathBuf, timestamp_str: &str) {
     println!("🤖 AI compliance report generated:");
-    println!("  📄 JSON: {}/ai_compliance_{}.json", reports_dir.display(), timestamp_str);
-    println!("  📝 Markdown: {}/ai_compliance_{}.md", reports_dir.display(), timestamp_str);
+    println!(
+        "  📄 JSON: {}/ai_compliance_{}.json",
+        reports_dir.display(),
+        timestamp_str
+    );
+    println!(
+        "  📝 Markdown: {}/ai_compliance_{}.md",
+        reports_dir.display(),
+        timestamp_str
+    );
     println!("  🔗 Latest: {}/latest_ai_report.*", reports_dir.display());
     println!();
 }
-

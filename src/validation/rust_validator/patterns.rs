@@ -45,27 +45,27 @@ pub fn is_in_string_literal(line: &str, pattern: &str) -> bool {
     if !line.contains(pattern) {
         return false;
     }
-    
+
     // Find all occurrences of the pattern
     let pattern_positions: Vec<usize> = line.match_indices(pattern).map(|(i, _)| i).collect();
     if pattern_positions.is_empty() {
         return false;
     }
-    
+
     // Check each occurrence to see if it's in a string or comment
     for pattern_pos in pattern_positions {
         let mut in_string = false;
         let mut in_raw_string = false;
         let mut escaped = false;
         let mut pos = 0;
-        
+
         // Check if we're in a comment
         if let Some(comment_pos) = line.find("//") {
             if pattern_pos >= comment_pos {
                 continue; // This occurrence is in a comment, check next
             }
         }
-        
+
         for c in line.chars() {
             if pos >= pattern_pos {
                 // We've reached the pattern position
@@ -75,13 +75,13 @@ pub fn is_in_string_literal(line: &str, pattern: &str) -> bool {
                 }
                 break;
             }
-            
+
             if escaped {
                 escaped = false;
                 pos += c.len_utf8();
                 continue;
             }
-            
+
             match c {
                 '\\' if in_string && !in_raw_string => escaped = true,
                 '"' if !in_raw_string => in_string = !in_string,
@@ -94,11 +94,11 @@ pub fn is_in_string_literal(line: &str, pattern: &str) -> bool {
                 }
                 _ => {}
             }
-            
+
             pos += c.len_utf8();
         }
     }
-    
+
     // All occurrences are in strings or comments
     true
 }

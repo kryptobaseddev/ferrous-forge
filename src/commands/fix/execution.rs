@@ -19,13 +19,10 @@ pub async fn execute_fix_process(
 ) -> Result<()> {
     // Validate project and get violations
     let violations = validate_project(_project_path).await?;
-    
+
     // Filter violations based on user preferences
-    let filtered_violations = validate_and_filter_violations(
-        violations,
-        &filter_options,
-        _project_path
-    ).await?;
+    let filtered_violations =
+        validate_and_filter_violations(violations, &filter_options, _project_path).await?;
 
     if filtered_violations.is_empty() {
         println!("✅ No violations found that can be auto-fixed!");
@@ -45,12 +42,12 @@ pub async fn execute_fix_process(
 
     // Group violations by file for processing
     let violations_by_file = group_violations_by_file(&filtered_violations);
-    
+
     // Process all files
     let stats = process_all_files(violations_by_file, dry_run);
-    
+
     print_final_summary(stats, dry_run);
-    
+
     Ok(())
 }
 
@@ -71,20 +68,17 @@ async fn validate_and_filter_violations(
         &violations,
         &filter_options.only_types,
         &filter_options.skip_types,
-        None // limit
+        None, // limit
     );
-    
+
     if fixable_violations.is_empty() {
         println!("ℹ️  No fixable violations found with current filters.");
         return Ok(vec![]);
     }
 
     // For now, we only support specific violation types
-    let supported_types = HashSet::from([
-        "LINETOOLONG",
-        "UNDERSCORE_BANDAID", 
-        "UNWRAP_IN_PRODUCTION",
-    ]);
+    let supported_types =
+        HashSet::from(["LINETOOLONG", "UNDERSCORE_BANDAID", "UNWRAP_IN_PRODUCTION"]);
 
     let filtered: Vec<_> = fixable_violations
         .into_iter()
@@ -105,13 +99,16 @@ async fn validate_and_filter_violations(
 /// Print summary of violations to be fixed
 fn print_violations_summary(violations: &[Violation]) {
     println!();
-    println!("📋 Found {} violations that can be auto-fixed:", violations.len());
-    
+    println!(
+        "📋 Found {} violations that can be auto-fixed:",
+        violations.len()
+    );
+
     let mut counts = std::collections::HashMap::new();
     for violation in violations {
         *counts.entry(&violation.violation_type).or_insert(0) += 1;
     }
-    
+
     for (vtype, count) in counts {
         println!("   • {:?}: {} violations", vtype, count);
     }
@@ -124,7 +121,7 @@ async fn run_ai_analysis(project_path: &Path, violations: &[Violation]) {
         "{}",
         style("🤖 Running AI-powered analysis...").bold().magenta()
     );
-    
+
     if let Err(e) = ai_analyzer::analyze_and_generate_report(project_path, violations).await {
         eprintln!(
             "{}",
@@ -158,7 +155,7 @@ fn print_warning_banner() {
 fn print_final_summary(stats: FixStats, dry_run: bool) {
     println!();
     println!("📊 Fix Summary:");
-    
+
     if dry_run {
         println!("   {} violations would be fixed", stats.total_fixed);
         println!("   {} violations would be skipped", stats.total_skipped);
@@ -169,7 +166,7 @@ fn print_final_summary(stats: FixStats, dry_run: bool) {
         println!("   {} violations fixed", stats.total_fixed);
         println!("   {} violations skipped", stats.total_skipped);
         println!("   {} files modified", stats.files_modified);
-        
+
         if stats.total_fixed > 0 {
             println!();
             println!("🔄 Remember to run your tests to ensure everything still works!");

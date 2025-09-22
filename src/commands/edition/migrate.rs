@@ -58,11 +58,7 @@ async fn validate_and_display_intro(
 }
 
 /// Display the migration plan to the user
-fn display_migration_plan(
-    target_edition: &Edition,
-    no_backup: bool,
-    test: bool,
-) {
+fn display_migration_plan(target_edition: &Edition, no_backup: bool, test: bool) {
     println!("This will:");
     println!(
         "  1. {} of your project",
@@ -89,11 +85,7 @@ fn display_migration_plan(
 }
 
 /// Create migration options from command line flags
-fn create_migration_options(
-    no_backup: bool,
-    test: bool,
-    idioms: bool,
-) -> MigrationOptions {
+fn create_migration_options(no_backup: bool, test: bool, idioms: bool) -> MigrationOptions {
     MigrationOptions {
         create_backup: !no_backup,
         run_tests: test,
@@ -129,9 +121,7 @@ async fn execute_migration(
 }
 
 /// Process and display migration results
-fn process_migration_result(
-    result: &crate::edition::migrator::MigrationResult,
-) -> Result<()> {
+fn process_migration_result(result: &crate::edition::migrator::MigrationResult) -> Result<()> {
     display_migration_status(&result.status)?;
     display_result_messages(result);
     display_backup_info(result);
@@ -140,11 +130,9 @@ fn process_migration_result(
 }
 
 /// Display the migration status
-fn display_migration_status(
-    status: &crate::edition::migrator::MigrationStatus,
-) -> Result<()> {
+fn display_migration_status(status: &crate::edition::migrator::MigrationStatus) -> Result<()> {
     use crate::edition::migrator::MigrationStatus;
-    
+
     match status {
         MigrationStatus::Success | MigrationStatus::Completed => {
             println!(

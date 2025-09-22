@@ -51,7 +51,7 @@ async fn perform_initialization(config: Config) -> Result<()> {
     let mut config = config;
     config.mark_initialized();
     config.save().await?;
-    
+
     Ok(())
 }
 

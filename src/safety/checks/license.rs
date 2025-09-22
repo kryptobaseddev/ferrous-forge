@@ -87,7 +87,7 @@ fn validate_license_fields(manifest: &toml::Value, project_path: &Path, result: 
 fn validate_license_string(license_str: &str, result: &mut CheckResult) {
     let approved_licenses = [
         "MIT",
-        "Apache-2.0", 
+        "Apache-2.0",
         "MIT OR Apache-2.0",
         "Apache-2.0 OR MIT",
         "BSD-3-Clause",
@@ -96,7 +96,10 @@ fn validate_license_string(license_str: &str, result: &mut CheckResult) {
         "MPL-2.0",
     ];
 
-    if !approved_licenses.iter().any(|&approved| license_str.contains(approved)) {
+    if !approved_licenses
+        .iter()
+        .any(|&approved| license_str.contains(approved))
+    {
         result.add_error(format!("Uncommon license detected: {}", license_str));
         result.add_suggestion("Consider using a standard license like 'MIT OR Apache-2.0'");
         result.add_context("This may cause issues with some package managers");
@@ -110,12 +113,12 @@ fn check_license_file_exists(license_str: &str, project_path: &Path, result: &mu
     if license_str.contains("MIT") || license_str.contains("Apache") {
         let license_files = [
             "LICENSE",
-            "LICENSE.txt", 
+            "LICENSE.txt",
             "LICENSE.md",
             "LICENSE-MIT",
             "LICENSE-APACHE",
         ];
-        
+
         let has_license_file = license_files
             .iter()
             .any(|&file| project_path.join(file).exists());

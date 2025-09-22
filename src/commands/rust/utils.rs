@@ -39,7 +39,7 @@ pub async fn fetch_latest_version(
         Err(e) => {
             spinner.finish_and_clear();
             eprintln!("{}", style("❌ Failed to check latest version").red());
-            
+
             match e {
                 Error::Network(msg) => {
                     eprintln!("Network error: {}", msg);
@@ -53,7 +53,7 @@ pub async fn fetch_latest_version(
                     eprintln!("Error: {}", e);
                 }
             }
-            
+
             None
         }
     }

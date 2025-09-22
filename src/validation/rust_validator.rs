@@ -203,7 +203,7 @@ impl RustValidator {
         if path.to_string_lossy().contains("target/") {
             return Ok(());
         }
-        
+
         if path.is_file() {
             if let Some(ext) = path.extension() {
                 if ext == "rs" {
@@ -241,7 +241,7 @@ impl RustValidator {
         if path.to_string_lossy().contains("target/") {
             return Ok(());
         }
-        
+
         if path.is_file() {
             if path.file_name().and_then(|n| n.to_str()) == Some("Cargo.toml") {
                 cargo_files.push(path.to_path_buf());

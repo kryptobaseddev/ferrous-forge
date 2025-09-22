@@ -29,7 +29,7 @@ fn test_violation_type_variants() {
 #[test]
 fn test_severity_variants() {
     let severities = [Severity::Error, Severity::Warning, Severity::Info];
-    
+
     for severity in severities {
         // Test that Debug formatting works
         let _debug_str = format!("{:?}", severity);
@@ -80,7 +80,7 @@ fn test_serialization() {
     // Test that we can serialize and deserialize
     let json = serde_json::to_string(&violation).expect("Serialization should work");
     let deserialized: Violation = serde_json::from_str(&json).expect("Deserialization should work");
-    
+
     assert_eq!(violation.violation_type, deserialized.violation_type);
     assert_eq!(violation.file, deserialized.file);
     assert_eq!(violation.line, deserialized.line);

@@ -16,10 +16,7 @@ use console::style;
 use std::path::PathBuf;
 
 /// Execute the validate command
-pub async fn execute(
-    path: Option<PathBuf>,
-    ai_report: bool,
-) -> Result<()> {
+pub async fn execute(path: Option<PathBuf>, ai_report: bool) -> Result<()> {
     let project_path = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
 
     print_header(&project_path);
@@ -45,19 +42,16 @@ fn print_header(project_path: &PathBuf) {
     println!();
     println!("{}", style("🦀 Running Ferrous Forge validation...").bold());
     println!();
-    
+
     println!("📁 Project: {}", project_path.display());
     println!();
 }
 
-fn display_validation_results(
-    validator: &RustValidator,
-    violations: &[Violation],
-) -> Result<()> {
+fn display_validation_results(validator: &RustValidator, violations: &[Violation]) -> Result<()> {
     let report = validator.generate_report(violations);
-    
+
     println!("{}", report);
-    
+
     Ok(())
 }
 
@@ -68,24 +62,17 @@ async fn generate_ai_report_with_message(
     generate_ai_report(project_path, violations).await
 }
 
-fn handle_final_result(
-    violations: &[Violation],
-    clippy_result: &crate::validation::ClippyResult,
-) {
+fn handle_final_result(violations: &[Violation], clippy_result: &crate::validation::ClippyResult) {
     if !violations.is_empty() || !clippy_result.success {
         println!(
             "{}",
-            style("❌ Validation completed with issues")
-                .red()
-                .bold()
+            style("❌ Validation completed with issues").red().bold()
         );
         std::process::exit(1);
     } else {
         println!(
             "{}",
-            style("✅ All validation checks passed!")
-                .green()
-                .bold()
+            style("✅ All validation checks passed!").green().bold()
         );
     }
 }

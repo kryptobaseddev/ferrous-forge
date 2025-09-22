@@ -68,7 +68,7 @@ pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCove
     let output = run_cargo_doc(project_path)?;
     let missing = find_missing_docs(&output)?;
     let (total, documented) = count_documentation_items(project_path).await?;
-    
+
     let coverage_percent = calculate_coverage_percent(documented, total);
 
     Ok(DocCoverage {
@@ -119,7 +119,7 @@ fn find_missing_docs(output: &std::process::Output) -> Result<Vec<String>> {
     for cap in warning_re.captures_iter(&stderr) {
         missing.push(cap[1].to_string());
     }
-    
+
     Ok(missing)
 }
 

@@ -6,8 +6,8 @@ pub mod utils;
 use crate::rust_version::VersionManager;
 use crate::Result;
 use display::{
-    display_recommendation, display_recommendation_details, 
-    display_recommendation_header, display_releases_list, display_version_status
+    display_recommendation, display_recommendation_details, display_recommendation_header,
+    display_releases_list, display_version_status,
 };
 use utils::{create_spinner, fetch_latest_version};
 
@@ -37,7 +37,7 @@ pub async fn handle_check(verbose: bool) -> Result<()> {
 pub async fn handle_recommend(stable_only: bool) -> Result<()> {
     let manager = VersionManager::new()?;
     let current = manager.check_current().await?;
-    
+
     display_recommendation_header(&current);
 
     let recommendation = manager.get_recommendation().await?;
@@ -50,7 +50,7 @@ pub async fn handle_recommend(stable_only: bool) -> Result<()> {
 pub async fn handle_list(count: usize) -> Result<()> {
     let manager = VersionManager::new()?;
     let releases = manager.get_recent_releases(count).await?;
-    
+
     display_releases_list(&releases);
 
     Ok(())

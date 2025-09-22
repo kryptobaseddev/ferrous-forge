@@ -1,6 +1,9 @@
 //! Update manager implementation
 
-use super::{github, types::{UpdateChannel, UpdateInfo, UpdateManager}};
+use super::{
+    github,
+    types::{UpdateChannel, UpdateInfo, UpdateManager},
+};
 use crate::{Error, Result};
 use console::style;
 use semver::Version;
@@ -26,7 +29,7 @@ impl UpdateManager {
     /// Check for available updates
     pub async fn check_for_updates(&self) -> Result<Option<UpdateInfo>> {
         println!("🔍 Checking for updates on {} channel...", self.channel);
-        
+
         github::fetch_update_info(&self.current_version, &self.channel).await
     }
 
@@ -40,7 +43,7 @@ impl UpdateManager {
 
         // Download the new binary
         let temp_path = self.download_update(update_info).await?;
-        
+
         // Verify the download if hash is provided
         if let Some(expected_hash) = &update_info.sha256 {
             self.verify_download(&temp_path, expected_hash).await?;
@@ -93,7 +96,7 @@ impl UpdateManager {
             .await
             .map_err(|e| Error::io(format!("Failed to read downloaded file: {}", e)))?;
 
-        use sha2::{Sha256, Digest};
+        use sha2::{Digest, Sha256};
         let mut hasher = Sha256::new();
         hasher.update(&contents);
         let actual_hash = format!("{:x}", hasher.finalize());
@@ -117,14 +120,12 @@ impl UpdateManager {
             .map_err(|e| Error::io(format!("Failed to create backup: {}", e)))?;
 
         // Replace with new binary
-        fs::copy(temp_path, &self.binary_path)
-            .await
-            .map_err(|e| {
-                // Try to restore backup on failure
-                // Attempt to restore backup, ignore errors since we're already in error state
-                drop(std::fs::copy(&backup_path, &self.binary_path));
-                Error::io(format!("Failed to replace binary: {}", e))
-            })?;
+        fs::copy(temp_path, &self.binary_path).await.map_err(|e| {
+            // Try to restore backup on failure
+            // Attempt to restore backup, ignore errors since we're already in error state
+            drop(std::fs::copy(&backup_path, &self.binary_path));
+            Error::io(format!("Failed to replace binary: {}", e))
+        })?;
 
         // Make executable on Unix systems
         #[cfg(unix)]

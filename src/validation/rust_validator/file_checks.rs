@@ -52,7 +52,7 @@ pub async fn validate_rust_file(
     let lines: Vec<&str> = content.lines().collect();
     let _is_test_file = is_test_file(rust_file);
     let (_allow_unwrap, _allow_expect) = check_allow_attributes(&lines);
-    
+
     // Check file size limit (400 lines)
     if lines.len() > 400 {
         violations.push(Violation {
@@ -78,7 +78,7 @@ pub async fn validate_rust_file(
     }
 
     // Skip complex pattern validation to maintain ZERO violations
-    
+
     Ok(())
 }
 
@@ -123,7 +123,7 @@ fn check_allow_attributes(lines: &[&str]) -> (bool, bool) {
             break;
         }
     }
-    
+
     (allow_unwrap, allow_expect)
 }
 
@@ -229,17 +229,20 @@ fn _legacy_validate_patterns(
             // Check if the entire match is within a string literal
             // We need to check for common underscore patterns
             let has_underscore = line.contains("_unused") || line.contains("_param");
-            
+
             // Enhanced string detection - also check for backslash escapes and raw strings
-            let not_in_unused_literal = !is_in_string_literal(line, "_unused") 
-                && !line.contains("\\\"") && !line.contains("r#");
-            let not_in_param_literal = !is_in_string_literal(line, "_param") 
-                && !line.contains("\\\"") && !line.contains("r#");
-            
+            let not_in_unused_literal = !is_in_string_literal(line, "_unused")
+                && !line.contains("\\\"")
+                && !line.contains("r#");
+            let not_in_param_literal = !is_in_string_literal(line, "_param")
+                && !line.contains("\\\"")
+                && !line.contains("r#");
+
             // Also skip if this is clearly test content or example code
-            let is_test_content = line.contains("test_function") 
-                || line.contains("// Before:") || line.contains("// After:");
-            
+            let is_test_content = line.contains("test_function")
+                || line.contains("// Before:")
+                || line.contains("// After:");
+
             // Only flag if it's not in a string literal, comment, or test content
             if has_underscore && not_in_unused_literal && not_in_param_literal && !is_test_content {
                 violations.push(Violation {

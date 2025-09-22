@@ -17,11 +17,11 @@ pub fn process_all_files(
         total_skipped: 0,
         files_modified: 0,
     };
-    
+
     for (file_path, file_violations) in violations_by_file {
         process_single_file(&file_path, &file_violations, dry_run, &mut stats);
     }
-    
+
     stats
 }
 
@@ -33,7 +33,7 @@ fn process_single_file(
     stats: &mut FixStats,
 ) {
     println!("🔧 Processing: {}", file_path.display());
-    
+
     match fix_file_violations(file_path, file_violations, dry_run) {
         Ok(fixed_count) if fixed_count > 0 => {
             handle_successful_fix(file_path, fixed_count, dry_run, stats);
@@ -71,10 +71,13 @@ fn fix_file_violations(
     violations: &[Violation],
     dry_run: bool,
 ) -> Result<usize> {
-    let content = fs::read_to_string(file_path)
-        .map_err(|e| Error::validation(
-            format!("Failed to read file {}: {}", file_path.display(), e)
-        ))?;
+    let content = fs::read_to_string(file_path).map_err(|e| {
+        Error::validation(format!(
+            "Failed to read file {}: {}",
+            file_path.display(),
+            e
+        ))
+    })?;
 
     let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
     let preserve_trailing_newline = content.ends_with('\n');
@@ -138,9 +141,12 @@ fn write_fixed_content(
         new_content
     };
 
-    fs::write(file_path, final_content)
-        .map_err(|e| Error::validation(
-            format!("Failed to write file {}: {}", file_path.display(), e)
-        ))?;
+    fs::write(file_path, final_content).map_err(|e| {
+        Error::validation(format!(
+            "Failed to write file {}: {}",
+            file_path.display(),
+            e
+        ))
+    })?;
     Ok(())
 }

@@ -226,7 +226,7 @@ fn parse_format_output(stdout: &[u8], stderr: &[u8], success: bool) -> Result<Fo
 /// Parse unformatted files from stderr
 fn parse_unformatted_files(stderr_str: &str) -> Vec<String> {
     let mut unformatted_files = Vec::new();
-    
+
     for line in stderr_str.lines() {
         if line.starts_with("Diff in") {
             if let Some(file) = line.strip_prefix("Diff in ") {
@@ -236,14 +236,14 @@ fn parse_unformatted_files(stderr_str: &str) -> Vec<String> {
             }
         }
     }
-    
+
     unformatted_files
 }
 
 /// Parse formatting suggestions from stdout
 fn parse_formatting_suggestions(stdout_str: &str) -> Vec<FormatSuggestion> {
     let mut suggestions = Vec::new();
-    
+
     for line in stdout_str.lines() {
         if line.starts_with("warning:") || line.contains("formatting") {
             if let Some(suggestion) = extract_format_suggestion(line) {
@@ -251,7 +251,7 @@ fn parse_formatting_suggestions(stdout_str: &str) -> Vec<FormatSuggestion> {
             }
         }
     }
-    
+
     suggestions
 }
 

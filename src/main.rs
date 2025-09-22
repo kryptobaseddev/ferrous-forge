@@ -72,9 +72,7 @@ async fn execute_rust_command(command: commands::RustCommand) -> Result<()> {
 /// Execute edition subcommands
 async fn execute_edition_command(command: commands::EditionCommand) -> Result<()> {
     match command {
-        commands::EditionCommand::Check { path } => {
-            commands::edition::handle_check(&path).await
-        }
+        commands::EditionCommand::Check { path } => commands::edition::handle_check(&path).await,
         commands::EditionCommand::Migrate {
             edition,
             no_backup,

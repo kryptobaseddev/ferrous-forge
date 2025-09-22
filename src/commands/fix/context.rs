@@ -94,7 +94,7 @@ fn check_return_types(full_signature: &str) -> (bool, bool) {
         || full_signature.contains("-> io::Result");
 
     let returns_option = full_signature.contains("-> Option");
-    
+
     (returns_result, returns_option)
 }
 

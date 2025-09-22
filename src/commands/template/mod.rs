@@ -51,48 +51,46 @@ impl TemplateCommand {
     pub async fn execute(&self) -> Result<()> {
         match self {
             TemplateCommand::List => {
-                println!("{}", style("📚 Available Ferrous Forge Templates").cyan().bold());
+                println!(
+                    "{}",
+                    style("📚 Available Ferrous Forge Templates").cyan().bold()
+                );
                 println!();
 
                 let registry = TemplateRegistry::new();
                 let templates = registry.list_templates();
-                
+
                 if templates.is_empty() {
                     println!("   No templates found.");
                     return Ok(());
                 }
 
                 for (name, _kind, description) in &templates {
-                    println!("  {} {}", 
-                        style("•").cyan(), 
-                        style(name).white().bold()
-                    );
-                    println!("    {}", 
-                        style(description).dim()
-                    );
+                    println!("  {} {}", style("•").cyan(), style(name).white().bold());
+                    println!("    {}", style(description).dim());
                     println!();
                 }
 
-                println!("Use {} to create a project from a template.", 
+                println!(
+                    "Use {} to create a project from a template.",
                     style("ferrous-forge template create <template-name> <output-dir>").cyan()
                 );
-                println!("Use {} to see detailed information about a template.",
+                println!(
+                    "Use {} to see detailed information about a template.",
                     style("ferrous-forge template info <template-name>").cyan()
                 );
                 Ok(())
             }
 
-            TemplateCommand::Create { template, output, variables } => {
-                create_from_template(template, output, variables).await
-            }
+            TemplateCommand::Create {
+                template,
+                output,
+                variables,
+            } => create_from_template(template, output, variables).await,
 
-            TemplateCommand::Info { template } => {
-                show_template_info(template).await
-            }
+            TemplateCommand::Info { template } => show_template_info(template).await,
 
-            TemplateCommand::Validate { manifest } => {
-                validate_template_manifest(manifest).await
-            }
+            TemplateCommand::Validate { manifest } => validate_template_manifest(manifest).await,
         }
     }
 }

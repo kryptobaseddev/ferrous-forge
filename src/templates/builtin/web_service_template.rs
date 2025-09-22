@@ -7,8 +7,7 @@ use std::path::PathBuf;
 
 /// Create the web service template
 pub fn create_web_service_template() -> BuiltinTemplate {
-    let mut manifest =
-        TemplateManifest::new("web-service".to_string(), TemplateKind::WebService);
+    let mut manifest = TemplateManifest::new("web-service".to_string(), TemplateKind::WebService);
 
     manifest.description = "Web service with axum and tokio".to_string();
     manifest.author = "Ferrous Forge Team".to_string();

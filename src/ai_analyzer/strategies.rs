@@ -171,7 +171,7 @@ fn categorize_and_prioritize_fixes(analyses: &[ViolationAnalysis]) -> Vec<String
     prioritized_fixes.extend(trivial_fixes);
     prioritized_fixes.extend(simple_fixes);
     prioritized_fixes.extend(moderate_fixes);
-    
+
     prioritized_fixes
 }
 

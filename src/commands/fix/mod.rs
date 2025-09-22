@@ -15,7 +15,7 @@ mod utils;
 mod tests;
 
 use execution::execute_fix_process;
-pub use types::{FileContext, FixConfig, FixResult, FilterOptions, FunctionSignature};
+pub use types::{FileContext, FilterOptions, FixConfig, FixResult, FunctionSignature};
 
 use crate::Result;
 use console::style;
@@ -43,9 +43,9 @@ pub async fn execute_with_ai(
     ai_analysis: bool,
 ) -> Result<()> {
     let project_path = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
-    
+
     print_startup_banner(&project_path, dry_run);
-    
+
     let filter_options = parse_filter_options(only, skip);
     execute_fix_process(&project_path, dry_run, filter_options, ai_analysis).await
 }
@@ -57,7 +57,7 @@ fn print_startup_banner(project_path: &Path, dry_run: bool) {
         style("🔧 Running Ferrous Forge auto-fix...").bold().cyan()
     );
     println!("📁 Project: {}", project_path.display());
-    
+
     if dry_run {
         println!(
             "{}",
@@ -71,14 +71,13 @@ fn parse_filter_options(only: Option<String>, skip: Option<String>) -> FilterOpt
     let only_types: Option<HashSet<String>> = only
         .as_ref()
         .map(|s| s.split(',').map(|t| t.trim().to_uppercase()).collect());
-    
+
     let skip_types: Option<HashSet<String>> = skip
         .as_ref()
         .map(|s| s.split(',').map(|t| t.trim().to_uppercase()).collect());
-    
+
     FilterOptions {
         only_types,
         skip_types,
     }
 }
-

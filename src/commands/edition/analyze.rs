@@ -9,15 +9,15 @@ use std::path::Path;
 /// Handle edition analyze command
 pub async fn handle_analyze(path: &Path, edition_str: &str) -> Result<()> {
     let target_edition = Edition::parse_edition(edition_str)?;
-    
+
     print_analysis_header(path, &target_edition);
-    
+
     let report = run_analysis_with_progress(path, target_edition).await?;
-    
+
     display_analysis_results(&report);
     display_analysis_sections(&report);
     display_migration_readiness(&report, edition_str);
-    
+
     Ok(())
 }
 
@@ -83,7 +83,7 @@ fn display_issues(issues: &[crate::edition::analyzer::EditionIssue]) {
     if issues.is_empty() {
         return;
     }
-    
+
     println!("\n⚠️  Issues to address:");
     for issue in issues {
         let severity_style = match issue.severity {
@@ -110,7 +110,7 @@ fn display_warnings(warnings: &[String]) {
     if warnings.is_empty() {
         return;
     }
-    
+
     println!("\n📝 General warnings:");
     for warning in warnings {
         println!("  • {}", warning);
@@ -122,7 +122,7 @@ fn display_suggestions(suggestions: &[String]) {
     if suggestions.is_empty() {
         return;
     }
-    
+
     println!("\n💡 Suggestions:");
     for suggestion in suggestions {
         println!("  • {}", style(suggestion).cyan());
@@ -131,7 +131,7 @@ fn display_suggestions(suggestions: &[String]) {
 
 /// Display migration readiness status and instructions
 fn display_migration_readiness(
-    report: &crate::edition::analyzer::AnalysisReport, 
+    report: &crate::edition::analyzer::AnalysisReport,
     edition_str: &str,
 ) {
     println!();

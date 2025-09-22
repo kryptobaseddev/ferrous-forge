@@ -21,10 +21,10 @@ pub async fn get_code_snippet(file_path: &PathBuf, line: usize) -> Result<String
     if !file_path.exists() {
         return Ok("File not found".to_string());
     }
-    
+
     let contents = fs::read_to_string(file_path).await?;
     let lines: Vec<&str> = contents.lines().collect();
-    
+
     if line > 0 && line <= lines.len() {
         Ok(lines[line - 1].to_string())
     } else {

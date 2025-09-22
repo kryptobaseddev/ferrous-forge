@@ -33,15 +33,18 @@ impl TemplateRegistry {
         };
 
         // Register built-in templates
-        registry.builtin.insert("cli-app".to_string(), create_cli_template());
-        registry.builtin.insert("library".to_string(), create_library_template());
-        registry.builtin.insert("web-service".to_string(), create_web_service_template());
+        registry
+            .builtin
+            .insert("cli-app".to_string(), create_cli_template());
+        registry
+            .builtin
+            .insert("library".to_string(), create_library_template());
+        registry
+            .builtin
+            .insert("web-service".to_string(), create_web_service_template());
 
         registry
     }
-
-
-
 
     /// List all available templates
     pub fn list_templates(&self) -> Vec<(&str, TemplateKind, &str)> {

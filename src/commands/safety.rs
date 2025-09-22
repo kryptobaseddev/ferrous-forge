@@ -10,7 +10,7 @@ use std::path::Path;
 pub async fn handle_install(force: bool, project_path: &Path) -> Result<()> {
     display_install_header();
     let hooks_dir = validate_git_repo_and_create_hooks_dir(project_path)?;
-    
+
     install_pre_commit_hook(&hooks_dir, force)?;
     install_pre_push_hook(&hooks_dir, force)?;
     display_install_success();
@@ -41,7 +41,7 @@ fn validate_git_repo_and_create_hooks_dir(project_path: &Path) -> Result<std::pa
 /// Install pre-commit hook
 fn install_pre_commit_hook(hooks_dir: &Path, force: bool) -> Result<()> {
     let pre_commit_path = hooks_dir.join("pre-commit");
-    
+
     if pre_commit_path.exists() && !force {
         println!("⚠️  Pre-commit hook already exists. Use --force to overwrite.");
         return Ok(());
@@ -56,7 +56,7 @@ fn install_pre_commit_hook(hooks_dir: &Path, force: bool) -> Result<()> {
 /// Install pre-push hook
 fn install_pre_push_hook(hooks_dir: &Path, force: bool) -> Result<()> {
     let pre_push_path = hooks_dir.join("pre-push");
-    
+
     if pre_push_path.exists() && !force {
         println!("⚠️  Pre-push hook already exists. Use --force to overwrite.");
         return Ok(());

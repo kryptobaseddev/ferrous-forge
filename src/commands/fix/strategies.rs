@@ -89,7 +89,7 @@ fn fix_expect_call(line: &str, context: &FileContext) -> FixResult {
 fn replace_expect_with_question_mark(line: &str, start: usize) -> Option<String> {
     let before = &line[..start];
     let after_expect = &line[start + 8..];
-    
+
     find_matching_paren(after_expect).map(|end_idx| {
         let after = &after_expect[end_idx + 1..];
         format!("{}?{}", before, after)

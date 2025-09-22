@@ -8,37 +8,44 @@ use std::path::Path;
 /// Show detailed information about a template
 pub async fn show_template_info(template_name: &str) -> Result<()> {
     let registry = TemplateRegistry::new();
-    let template = registry.get_builtin(template_name)
+    let template = registry
+        .get_builtin(template_name)
         .ok_or_else(|| Error::template(format!("Template '{}' not found", template_name)))?;
-    
+
     display_template_header(&template.manifest);
     display_template_basic_info(&template.manifest);
     display_template_variables(&template.manifest);
     display_template_files(&template.manifest);
     display_post_generation_commands(&template.manifest);
-    
+
     Ok(())
 }
 
 /// Validate a template manifest
 pub async fn validate_template_manifest(manifest_path: &Path) -> Result<()> {
-    let content = tokio::fs::read_to_string(manifest_path).await
+    let content = tokio::fs::read_to_string(manifest_path)
+        .await
         .map_err(|e| Error::template(format!("Failed to read manifest: {}", e)))?;
-    
+
     let manifest: crate::templates::TemplateManifest = toml::from_str(&content)
         .map_err(|e| Error::template(format!("Invalid template manifest: {}", e)))?;
-    
+
     println!("{}", style("✅ Template manifest is valid").green().bold());
     println!("   📄 Template: {}", manifest.name);
     println!("   📝 Description: {}", manifest.description);
     println!("   📊 Variables: {}", manifest.variables.len());
     println!("   📁 Files: {}", manifest.files.len());
-    
+
     Ok(())
 }
 
 fn display_template_header(manifest: &crate::templates::TemplateManifest) {
-    println!("{}", style(format!("📋 Template: {}", manifest.name)).cyan().bold());
+    println!(
+        "{}",
+        style(format!("📋 Template: {}", manifest.name))
+            .cyan()
+            .bold()
+    );
     println!("{}", style("═".repeat(60)).dim());
     println!();
 }
@@ -47,7 +54,7 @@ fn display_template_basic_info(manifest: &crate::templates::TemplateManifest) {
     println!("{}", style("📝 Description:").yellow().bold());
     println!("   {}", manifest.description);
     println!();
-    
+
     println!("{}", style("🏷️  Version:").yellow().bold());
     println!("   {}", manifest.version);
     println!();
@@ -69,15 +76,16 @@ fn display_variable_info(var: &crate::templates::TemplateVariable) {
     } else {
         style("(optional)").dim()
     };
-    
-    println!("   {} {} {}", 
+
+    println!(
+        "   {} {} {}",
         style("•").cyan(),
         style(&var.name).white().bold(),
         required_text
     );
-    
+
     println!("     {}", style(&var.description).dim());
-    
+
     if let Some(default) = &var.default {
         println!("     Default: {}", style(default).cyan());
     }

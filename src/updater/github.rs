@@ -32,7 +32,7 @@ pub async fn fetch_update_info(
 ) -> Result<Option<UpdateInfo>> {
     let client = reqwest::Client::new();
     let url = "https://api.github.com/repos/ferrous-systems/ferrous-forge/releases";
-    
+
     let response = client
         .get(url)
         .header("User-Agent", "ferrous-forge")
@@ -96,7 +96,7 @@ pub async fn fetch_update_info(
 fn get_platform_suffix() -> String {
     let os = std::env::consts::OS;
     let arch = std::env::consts::ARCH;
-    
+
     match (os, arch) {
         ("linux", "x86_64") => "linux-x86_64",
         ("macos", "x86_64") => "darwin-x86_64",

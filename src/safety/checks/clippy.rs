@@ -63,14 +63,14 @@ fn run_clippy_command(project_path: &Path) -> Result<std::process::Output> {
         .current_dir(project_path)
         .args(&[
             "clippy",
-            "--all-targets", 
+            "--all-targets",
             "--all-features",
             "--",
             "-D",
             "warnings",
         ])
         .output()?;
-    
+
     Ok(output)
 }
 
@@ -80,7 +80,7 @@ fn handle_clippy_errors(output: &std::process::Output, result: &mut CheckResult)
     result.add_suggestion("Fix clippy warnings before proceeding");
 
     parse_clippy_output(&String::from_utf8_lossy(&output.stderr), result);
-    
+
     // Add general suggestions
     result.add_suggestion("Run 'cargo clippy --fix' to auto-fix some issues");
     result.add_suggestion("Check https://rust-lang.github.io/rust-clippy/ for lint explanations");

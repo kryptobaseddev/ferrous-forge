@@ -48,13 +48,34 @@ impl Config {
         vec![
             ("update_channel".to_string(), self.update_channel.clone()),
             ("auto_update".to_string(), self.auto_update.to_string()),
-            ("max_file_lines".to_string(), self.max_file_lines.to_string()),
-            ("max_function_lines".to_string(), self.max_function_lines.to_string()),
-            ("enforce_edition_2024".to_string(), self.enforce_edition_2024.to_string()),
-            ("ban_underscore_bandaid".to_string(), self.ban_underscore_bandaid.to_string()),
-            ("require_documentation".to_string(), self.require_documentation.to_string()),
-            ("clippy_rules".to_string(), format!("{:?}", self.clippy_rules)),
-            ("custom_rules_count".to_string(), self.custom_rules.len().to_string()),
+            (
+                "max_file_lines".to_string(),
+                self.max_file_lines.to_string(),
+            ),
+            (
+                "max_function_lines".to_string(),
+                self.max_function_lines.to_string(),
+            ),
+            (
+                "enforce_edition_2024".to_string(),
+                self.enforce_edition_2024.to_string(),
+            ),
+            (
+                "ban_underscore_bandaid".to_string(),
+                self.ban_underscore_bandaid.to_string(),
+            ),
+            (
+                "require_documentation".to_string(),
+                self.require_documentation.to_string(),
+            ),
+            (
+                "clippy_rules".to_string(),
+                format!("{:?}", self.clippy_rules),
+            ),
+            (
+                "custom_rules_count".to_string(),
+                self.custom_rules.len().to_string(),
+            ),
         ]
     }
 
@@ -103,16 +124,16 @@ impl Config {
     }
 
     fn set_ban_underscore_bandaid(&mut self, value: &str) -> Result<()> {
-        self.ban_underscore_bandaid = value.parse().map_err(|_| {
-            Error::config("Invalid boolean value for ban_underscore_bandaid")
-        })?;
+        self.ban_underscore_bandaid = value
+            .parse()
+            .map_err(|_| Error::config("Invalid boolean value for ban_underscore_bandaid"))?;
         Ok(())
     }
 
     fn set_require_documentation(&mut self, value: &str) -> Result<()> {
-        self.require_documentation = value.parse().map_err(|_| {
-            Error::config("Invalid boolean value for require_documentation")
-        })?;
+        self.require_documentation = value
+            .parse()
+            .map_err(|_| Error::config("Invalid boolean value for require_documentation"))?;
         Ok(())
     }
 }
