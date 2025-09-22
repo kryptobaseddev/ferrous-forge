@@ -29,36 +29,58 @@ pub struct AIMetadata {
     pub project_path: String,
     /// Version of Ferrous Forge used
     pub ferrous_forge_version: String,
+    /// Total number of violations found in the project
     pub total_violations: usize,
+    /// Version of the report format
     pub report_version: String,
 }
 
 #[derive(Serialize, Deserialize)]
+/// Summary statistics for the AI compliance report
 pub struct AISummary {
+    /// Percentage of code that meets Ferrous Forge standards (0-100)
     pub compliance_percentage: f64,
+    /// Number of files analyzed in the project
     pub files_analyzed: usize,
+    /// List of the most critical issues found
     pub most_critical_issues: Vec<String>,
+    /// Estimated time in hours to fix all violations
     pub estimated_fix_time_hours: f64,
 }
 
 #[derive(Serialize, Deserialize)]
+/// Individual violation details for AI analysis
 pub struct AIViolation {
+    /// Type of violation (e.g., "UNWRAPINPRODUCTION", "FUNCTIONTOOLARGE")
     pub violation_type: String,
+    /// Path to the file containing the violation
     pub file: String,
+    /// Line number where the violation occurs
     pub line: usize,
+    /// Descriptive message about the violation
     pub message: String,
+    /// Code snippet showing the violation in context
     pub code_snippet: String,
+    /// Suggested fix for the violation
     pub suggested_fix: String,
+    /// Whether this violation can be automatically fixed
     pub auto_fixable: bool,
+    /// Priority level (1 = highest, 5 = lowest)
     pub priority: u8,
 }
 
 #[derive(Serialize, Deserialize)]
+/// Instructions for fixing a specific type of violation
 pub struct FixInstruction {
+    /// Type of violation this instruction applies to
     pub violation_type: String,
+    /// Number of this type of violation found
     pub count: usize,
+    /// Strategy for fixing this type of violation
     pub fix_strategy: String,
+    /// Example code showing how to fix this violation
     pub example_fix: String,
+    /// Effort level required ("trivial", "moderate", "complex")
     pub effort_level: String,
 }
 

@@ -68,8 +68,8 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.rust }}
           
-      - name: Install cargo-nextest (compatible version)
-        run: cargo install cargo-nextest@0.9.72 --locked
+      - name: Install cargo-nextest
+        run: cargo install cargo-nextest --locked
         
       - name: Run tests
         run: cargo nextest run --all-features || cargo test --all-features

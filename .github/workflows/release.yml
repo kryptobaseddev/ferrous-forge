@@ -245,32 +245,12 @@ jobs:
           asset_name: ${{ matrix.name }}.zip
           asset_content_type: application/zip
 
-  # Publish to Crates.io
-  publish-crates:
-    name: Publish to Crates.io
-    runs-on: ubuntu-latest
-    needs: [create-release, build]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-        
-      - name: Login to crates.io
-        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
-        
-      - name: Publish
-        run: cargo publish --allow-dirty
 
   # Update Package Managers
   update-packages:
     name: Update Package Managers
     runs-on: ubuntu-latest
-    needs: [create-release, publish-crates]
+    needs: [create-release, build, publish-crates]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

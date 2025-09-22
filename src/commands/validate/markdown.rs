@@ -2,6 +2,7 @@
 
 use super::ai_report::AIReport;
 
+/// Generate a markdown-formatted report from an AI compliance report
 pub fn generate_markdown_report(report: &AIReport) -> String {
     let mut md = String::new();
     
