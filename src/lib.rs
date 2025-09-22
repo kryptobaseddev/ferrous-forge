@@ -35,8 +35,6 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![allow(clippy::unwrap_used)]
-#![allow(clippy::expect_used)]
 
 /// AI-powered violation analysis module
 pub mod ai_analyzer;

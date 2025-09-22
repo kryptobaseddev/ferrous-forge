@@ -199,17 +199,27 @@ impl RustValidator {
         path: &Path,
         rust_files: &mut Vec<PathBuf>,
     ) -> Result<()> {
+        // Skip any path containing target directory
+        if path.to_string_lossy().contains("target/") {
+            return Ok(());
+        }
+        
         if path.is_file() {
             if let Some(ext) = path.extension() {
                 if ext == "rs" {
                     rust_files.push(path.to_path_buf());
                 }
             }
-        } else if path.is_dir() && !path.to_string_lossy().contains("target/") {
+        } else if path.is_dir() {
             let entries = std::fs::read_dir(path)?;
             for entry in entries {
                 let entry = entry?;
-                self.collect_rust_files_recursive(&entry.path(), rust_files)?;
+                let entry_path = entry.path();
+                // Skip target directory entries
+                if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
+                    continue;
+                }
+                self.collect_rust_files_recursive(&entry_path, rust_files)?;
             }
         }
 
@@ -227,15 +237,25 @@ impl RustValidator {
         path: &Path,
         cargo_files: &mut Vec<PathBuf>,
     ) -> Result<()> {
+        // Skip any path containing target directory
+        if path.to_string_lossy().contains("target/") {
+            return Ok(());
+        }
+        
         if path.is_file() {
             if path.file_name().and_then(|n| n.to_str()) == Some("Cargo.toml") {
                 cargo_files.push(path.to_path_buf());
             }
-        } else if path.is_dir() && !path.to_string_lossy().contains("target/") {
+        } else if path.is_dir() {
             let entries = std::fs::read_dir(path)?;
             for entry in entries {
                 let entry = entry?;
-                self.collect_cargo_files_recursive(&entry.path(), cargo_files)?;
+                let entry_path = entry.path();
+                // Skip target directory entries
+                if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
+                    continue;
+                }
+                self.collect_cargo_files_recursive(&entry_path, cargo_files)?;
             }
         }
 

@@ -77,14 +77,11 @@ tower-test = "0.4"
         r#"//! {{project_name}} web service
 use axum::{
     extract::Query,
-    http::StatusCode,
     response::Json,
-    routing::{get, post},
+    routing::get,
     Router,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use tower::ServiceBuilder;
 use tracing::{info, Level};
 
 #[derive(Debug, Deserialize)]
@@ -121,8 +118,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/health", get(health))
-        .route("/hello", get(hello))
-        .layer(ServiceBuilder::new());
+        .route("/hello", get(hello));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
     info!("Server running on http://0.0.0.0:3000");

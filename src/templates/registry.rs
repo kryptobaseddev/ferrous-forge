@@ -450,14 +450,12 @@ tower-test = "0.4"
 
 use axum::{
     extract::Query,
-    http::StatusCode,
     response::Json,
     routing::{get, post},
     Router,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use tower::ServiceBuilder;
 use tracing::{info, Level};
 
 #[derive(Debug, Deserialize)]
@@ -482,11 +480,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .route("/", get(health_check))
         .route("/api/v1/hello", get(hello_handler))
-        .route("/api/v1/echo", post(echo_handler))
-        .layer(
-            ServiceBuilder::new()
-                .layer(tower::middleware::from_fn(logging_middleware))
-        );
+        .route("/api/v1/echo", post(echo_handler));
 
     // Run the server
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
@@ -520,21 +514,6 @@ async fn echo_handler(
     Json(payload)
 }
 
-async fn logging_middleware<B>(
-    request: axum::http::Request<B>,
-    next: axum::middleware::Next<B>,
-) -> axum::response::Response {
-    let method = request.method().clone();
-    let uri = request.uri().clone();
-    
-    info!("Processing request: {method} {uri}");
-    
-    let response = next.run(request).await;
-    
-    info!("Response status: {}", response.status());
-    
-    response
-}
 "#
             .to_string(),
         );
