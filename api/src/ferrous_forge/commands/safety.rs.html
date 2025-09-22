@@ -10,7 +10,7 @@
 <a href=#10 id=10 data-nosnippet>10</a></span><span class="kw">pub async fn </span>handle_install(force: bool, project_path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
 <a href=#11 id=11 data-nosnippet>11</a>    display_install_header();
 <a href=#12 id=12 data-nosnippet>12</a>    <span class="kw">let </span>hooks_dir = validate_git_repo_and_create_hooks_dir(project_path)<span class="question-mark">?</span>;
-<a href=#13 id=13 data-nosnippet>13</a>    
+<a href=#13 id=13 data-nosnippet>13</a>
 <a href=#14 id=14 data-nosnippet>14</a>    install_pre_commit_hook(<span class="kw-2">&amp;</span>hooks_dir, force)<span class="question-mark">?</span>;
 <a href=#15 id=15 data-nosnippet>15</a>    install_pre_push_hook(<span class="kw-2">&amp;</span>hooks_dir, force)<span class="question-mark">?</span>;
 <a href=#16 id=16 data-nosnippet>16</a>    display_install_success();
@@ -41,7 +41,7 @@
 <a href=#41 id=41 data-nosnippet>41</a><span class="doccomment">/// Install pre-commit hook
 <a href=#42 id=42 data-nosnippet>42</a></span><span class="kw">fn </span>install_pre_commit_hook(hooks_dir: <span class="kw-2">&amp;</span>Path, force: bool) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
 <a href=#43 id=43 data-nosnippet>43</a>    <span class="kw">let </span>pre_commit_path = hooks_dir.join(<span class="string">"pre-commit"</span>);
-<a href=#44 id=44 data-nosnippet>44</a>    
+<a href=#44 id=44 data-nosnippet>44</a>
 <a href=#45 id=45 data-nosnippet>45</a>    <span class="kw">if </span>pre_commit_path.exists() &amp;&amp; !force {
 <a href=#46 id=46 data-nosnippet>46</a>        <span class="macro">println!</span>(<span class="string">"⚠️  Pre-commit hook already exists. Use --force to overwrite."</span>);
 <a href=#47 id=47 data-nosnippet>47</a>        <span class="kw">return </span><span class="prelude-val">Ok</span>(());
@@ -56,7 +56,7 @@
 <a href=#56 id=56 data-nosnippet>56</a><span class="doccomment">/// Install pre-push hook
 <a href=#57 id=57 data-nosnippet>57</a></span><span class="kw">fn </span>install_pre_push_hook(hooks_dir: <span class="kw-2">&amp;</span>Path, force: bool) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
 <a href=#58 id=58 data-nosnippet>58</a>    <span class="kw">let </span>pre_push_path = hooks_dir.join(<span class="string">"pre-push"</span>);
-<a href=#59 id=59 data-nosnippet>59</a>    
+<a href=#59 id=59 data-nosnippet>59</a>
 <a href=#60 id=60 data-nosnippet>60</a>    <span class="kw">if </span>pre_push_path.exists() &amp;&amp; !force {
 <a href=#61 id=61 data-nosnippet>61</a>        <span class="macro">println!</span>(<span class="string">"⚠️  Pre-push hook already exists. Use --force to overwrite."</span>);
 <a href=#62 id=62 data-nosnippet>62</a>        <span class="kw">return </span><span class="prelude-val">Ok</span>(());

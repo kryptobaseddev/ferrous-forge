@@ -203,7 +203,7 @@
 <a href=#203 id=203 data-nosnippet>203</a>        </span><span class="kw">if </span>path.to_string_lossy().contains(<span class="string">"target/"</span>) {
 <a href=#204 id=204 data-nosnippet>204</a>            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
 <a href=#205 id=205 data-nosnippet>205</a>        }
-<a href=#206 id=206 data-nosnippet>206</a>        
+<a href=#206 id=206 data-nosnippet>206</a>
 <a href=#207 id=207 data-nosnippet>207</a>        <span class="kw">if </span>path.is_file() {
 <a href=#208 id=208 data-nosnippet>208</a>            <span class="kw">if let </span><span class="prelude-val">Some</span>(ext) = path.extension() {
 <a href=#209 id=209 data-nosnippet>209</a>                <span class="kw">if </span>ext == <span class="string">"rs" </span>{
@@ -241,7 +241,7 @@
 <a href=#241 id=241 data-nosnippet>241</a>        </span><span class="kw">if </span>path.to_string_lossy().contains(<span class="string">"target/"</span>) {
 <a href=#242 id=242 data-nosnippet>242</a>            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
 <a href=#243 id=243 data-nosnippet>243</a>        }
-<a href=#244 id=244 data-nosnippet>244</a>        
+<a href=#244 id=244 data-nosnippet>244</a>
 <a href=#245 id=245 data-nosnippet>245</a>        <span class="kw">if </span>path.is_file() {
 <a href=#246 id=246 data-nosnippet>246</a>            <span class="kw">if </span>path.file_name().and_then(|n| n.to_str()) == <span class="prelude-val">Some</span>(<span class="string">"Cargo.toml"</span>) {
 <a href=#247 id=247 data-nosnippet>247</a>                cargo_files.push(path.to_path_buf());

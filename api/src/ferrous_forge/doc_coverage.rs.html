@@ -68,7 +68,7 @@
 <a href=#68 id=68 data-nosnippet>68</a>    <span class="kw">let </span>output = run_cargo_doc(project_path)<span class="question-mark">?</span>;
 <a href=#69 id=69 data-nosnippet>69</a>    <span class="kw">let </span>missing = find_missing_docs(<span class="kw-2">&amp;</span>output)<span class="question-mark">?</span>;
 <a href=#70 id=70 data-nosnippet>70</a>    <span class="kw">let </span>(total, documented) = count_documentation_items(project_path).<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#71 id=71 data-nosnippet>71</a>    
+<a href=#71 id=71 data-nosnippet>71</a>
 <a href=#72 id=72 data-nosnippet>72</a>    <span class="kw">let </span>coverage_percent = calculate_coverage_percent(documented, total);
 <a href=#73 id=73 data-nosnippet>73</a>
 <a href=#74 id=74 data-nosnippet>74</a>    <span class="prelude-val">Ok</span>(DocCoverage {
@@ -119,7 +119,7 @@
 <a href=#119 id=119 data-nosnippet>119</a>    <span class="kw">for </span>cap <span class="kw">in </span>warning_re.captures_iter(<span class="kw-2">&amp;</span>stderr) {
 <a href=#120 id=120 data-nosnippet>120</a>        missing.push(cap[<span class="number">1</span>].to_string());
 <a href=#121 id=121 data-nosnippet>121</a>    }
-<a href=#122 id=122 data-nosnippet>122</a>    
+<a href=#122 id=122 data-nosnippet>122</a>
 <a href=#123 id=123 data-nosnippet>123</a>    <span class="prelude-val">Ok</span>(missing)
 <a href=#124 id=124 data-nosnippet>124</a>}
 <a href=#125 id=125 data-nosnippet>125</a>

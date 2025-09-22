@@ -89,7 +89,7 @@
 <a href=#89 id=89 data-nosnippet>89</a></span><span class="kw">fn </span>replace_expect_with_question_mark(line: <span class="kw-2">&amp;</span>str, start: usize) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
 <a href=#90 id=90 data-nosnippet>90</a>    <span class="kw">let </span>before = <span class="kw-2">&amp;</span>line[..start];
 <a href=#91 id=91 data-nosnippet>91</a>    <span class="kw">let </span>after_expect = <span class="kw-2">&amp;</span>line[start + <span class="number">8</span>..];
-<a href=#92 id=92 data-nosnippet>92</a>    
+<a href=#92 id=92 data-nosnippet>92</a>
 <a href=#93 id=93 data-nosnippet>93</a>    find_matching_paren(after_expect).map(|end_idx| {
 <a href=#94 id=94 data-nosnippet>94</a>        <span class="kw">let </span>after = <span class="kw-2">&amp;</span>after_expect[end_idx + <span class="number">1</span>..];
 <a href=#95 id=95 data-nosnippet>95</a>        <span class="macro">format!</span>(<span class="string">"{}?{}"</span>, before, after)

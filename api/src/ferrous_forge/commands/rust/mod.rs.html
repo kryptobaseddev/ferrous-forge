@@ -6,8 +6,8 @@
 <a href=#6 id=6 data-nosnippet>6</a><span class="kw">use </span><span class="kw">crate</span>::rust_version::VersionManager;
 <a href=#7 id=7 data-nosnippet>7</a><span class="kw">use </span><span class="kw">crate</span>::Result;
 <a href=#8 id=8 data-nosnippet>8</a><span class="kw">use </span>display::{
-<a href=#9 id=9 data-nosnippet>9</a>    display_recommendation, display_recommendation_details, 
-<a href=#10 id=10 data-nosnippet>10</a>    display_recommendation_header, display_releases_list, display_version_status
+<a href=#9 id=9 data-nosnippet>9</a>    display_recommendation, display_recommendation_details, display_recommendation_header,
+<a href=#10 id=10 data-nosnippet>10</a>    display_releases_list, display_version_status,
 <a href=#11 id=11 data-nosnippet>11</a>};
 <a href=#12 id=12 data-nosnippet>12</a><span class="kw">use </span>utils::{create_spinner, fetch_latest_version};
 <a href=#13 id=13 data-nosnippet>13</a>
@@ -37,7 +37,7 @@
 <a href=#37 id=37 data-nosnippet>37</a></span><span class="kw">pub async fn </span>handle_recommend(stable_only: bool) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
 <a href=#38 id=38 data-nosnippet>38</a>    <span class="kw">let </span>manager = VersionManager::new()<span class="question-mark">?</span>;
 <a href=#39 id=39 data-nosnippet>39</a>    <span class="kw">let </span>current = manager.check_current().<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#40 id=40 data-nosnippet>40</a>    
+<a href=#40 id=40 data-nosnippet>40</a>
 <a href=#41 id=41 data-nosnippet>41</a>    display_recommendation_header(<span class="kw-2">&amp;</span>current);
 <a href=#42 id=42 data-nosnippet>42</a>
 <a href=#43 id=43 data-nosnippet>43</a>    <span class="kw">let </span>recommendation = manager.get_recommendation().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -50,7 +50,7 @@
 <a href=#50 id=50 data-nosnippet>50</a></span><span class="kw">pub async fn </span>handle_list(count: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
 <a href=#51 id=51 data-nosnippet>51</a>    <span class="kw">let </span>manager = VersionManager::new()<span class="question-mark">?</span>;
 <a href=#52 id=52 data-nosnippet>52</a>    <span class="kw">let </span>releases = manager.get_recent_releases(count).<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#53 id=53 data-nosnippet>53</a>    
+<a href=#53 id=53 data-nosnippet>53</a>
 <a href=#54 id=54 data-nosnippet>54</a>    display_releases_list(<span class="kw-2">&amp;</span>releases);
 <a href=#55 id=55 data-nosnippet>55</a>
 <a href=#56 id=56 data-nosnippet>56</a>    <span class="prelude-val">Ok</span>(())

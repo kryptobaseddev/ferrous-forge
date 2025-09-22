@@ -226,7 +226,7 @@
 <a href=#226 id=226 data-nosnippet>226</a><span class="doccomment">/// Parse unformatted files from stderr
 <a href=#227 id=227 data-nosnippet>227</a></span><span class="kw">fn </span>parse_unformatted_files(stderr_str: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;String&gt; {
 <a href=#228 id=228 data-nosnippet>228</a>    <span class="kw">let </span><span class="kw-2">mut </span>unformatted_files = Vec::new();
-<a href=#229 id=229 data-nosnippet>229</a>    
+<a href=#229 id=229 data-nosnippet>229</a>
 <a href=#230 id=230 data-nosnippet>230</a>    <span class="kw">for </span>line <span class="kw">in </span>stderr_str.lines() {
 <a href=#231 id=231 data-nosnippet>231</a>        <span class="kw">if </span>line.starts_with(<span class="string">"Diff in"</span>) {
 <a href=#232 id=232 data-nosnippet>232</a>            <span class="kw">if let </span><span class="prelude-val">Some</span>(file) = line.strip_prefix(<span class="string">"Diff in "</span>) {
@@ -236,14 +236,14 @@
 <a href=#236 id=236 data-nosnippet>236</a>            }
 <a href=#237 id=237 data-nosnippet>237</a>        }
 <a href=#238 id=238 data-nosnippet>238</a>    }
-<a href=#239 id=239 data-nosnippet>239</a>    
+<a href=#239 id=239 data-nosnippet>239</a>
 <a href=#240 id=240 data-nosnippet>240</a>    unformatted_files
 <a href=#241 id=241 data-nosnippet>241</a>}
 <a href=#242 id=242 data-nosnippet>242</a>
 <a href=#243 id=243 data-nosnippet>243</a><span class="doccomment">/// Parse formatting suggestions from stdout
 <a href=#244 id=244 data-nosnippet>244</a></span><span class="kw">fn </span>parse_formatting_suggestions(stdout_str: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;FormatSuggestion&gt; {
 <a href=#245 id=245 data-nosnippet>245</a>    <span class="kw">let </span><span class="kw-2">mut </span>suggestions = Vec::new();
-<a href=#246 id=246 data-nosnippet>246</a>    
+<a href=#246 id=246 data-nosnippet>246</a>
 <a href=#247 id=247 data-nosnippet>247</a>    <span class="kw">for </span>line <span class="kw">in </span>stdout_str.lines() {
 <a href=#248 id=248 data-nosnippet>248</a>        <span class="kw">if </span>line.starts_with(<span class="string">"warning:"</span>) || line.contains(<span class="string">"formatting"</span>) {
 <a href=#249 id=249 data-nosnippet>249</a>            <span class="kw">if let </span><span class="prelude-val">Some</span>(suggestion) = extract_format_suggestion(line) {
@@ -251,7 +251,7 @@
 <a href=#251 id=251 data-nosnippet>251</a>            }
 <a href=#252 id=252 data-nosnippet>252</a>        }
 <a href=#253 id=253 data-nosnippet>253</a>    }
-<a href=#254 id=254 data-nosnippet>254</a>    
+<a href=#254 id=254 data-nosnippet>254</a>
 <a href=#255 id=255 data-nosnippet>255</a>    suggestions
 <a href=#256 id=256 data-nosnippet>256</a>}
 <a href=#257 id=257 data-nosnippet>257</a>

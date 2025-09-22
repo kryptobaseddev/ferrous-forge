@@ -32,7 +32,7 @@
 <a href=#32 id=32 data-nosnippet>32</a>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;UpdateInfo&gt;&gt; {
 <a href=#33 id=33 data-nosnippet>33</a>    <span class="kw">let </span>client = reqwest::Client::new();
 <a href=#34 id=34 data-nosnippet>34</a>    <span class="kw">let </span>url = <span class="string">"https://api.github.com/repos/ferrous-systems/ferrous-forge/releases"</span>;
-<a href=#35 id=35 data-nosnippet>35</a>    
+<a href=#35 id=35 data-nosnippet>35</a>
 <a href=#36 id=36 data-nosnippet>36</a>    <span class="kw">let </span>response = client
 <a href=#37 id=37 data-nosnippet>37</a>        .get(url)
 <a href=#38 id=38 data-nosnippet>38</a>        .header(<span class="string">"User-Agent"</span>, <span class="string">"ferrous-forge"</span>)
@@ -96,7 +96,7 @@
 <a href=#96 id=96 data-nosnippet>96</a></span><span class="kw">fn </span>get_platform_suffix() -&gt; String {
 <a href=#97 id=97 data-nosnippet>97</a>    <span class="kw">let </span>os = std::env::consts::OS;
 <a href=#98 id=98 data-nosnippet>98</a>    <span class="kw">let </span>arch = std::env::consts::ARCH;
-<a href=#99 id=99 data-nosnippet>99</a>    
+<a href=#99 id=99 data-nosnippet>99</a>
 <a href=#100 id=100 data-nosnippet>100</a>    <span class="kw">match </span>(os, arch) {
 <a href=#101 id=101 data-nosnippet>101</a>        (<span class="string">"linux"</span>, <span class="string">"x86_64"</span>) =&gt; <span class="string">"linux-x86_64"</span>,
 <a href=#102 id=102 data-nosnippet>102</a>        (<span class="string">"macos"</span>, <span class="string">"x86_64"</span>) =&gt; <span class="string">"darwin-x86_64"</span>,
