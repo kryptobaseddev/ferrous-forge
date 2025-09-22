@@ -28,7 +28,7 @@ fn test_violation_type_variants() {
 
 #[test]
 fn test_severity_variants() {
-    let severities = [Severity::Error, Severity::Warning, Severity::Info];
+    let severities = [Severity::Error, Severity::Warning];
 
     for severity in severities {
         // Test that Debug formatting works
@@ -42,7 +42,6 @@ fn test_violation_creation() {
         violation_type: ViolationType::UnderscoreBandaid,
         file: std::path::PathBuf::from("test.rs"),
         line: 42,
-        column: Some(10),
         message: "Test violation".to_string(),
         severity: Severity::Error,
     };
@@ -50,7 +49,6 @@ fn test_violation_creation() {
     assert_eq!(violation.violation_type, ViolationType::UnderscoreBandaid);
     assert_eq!(violation.file, std::path::PathBuf::from("test.rs"));
     assert_eq!(violation.line, 42);
-    assert_eq!(violation.column, Some(10));
     assert_eq!(violation.message, "Test violation");
     assert_eq!(violation.severity, Severity::Error);
 }
@@ -72,7 +70,6 @@ fn test_serialization() {
         violation_type: ViolationType::UnderscoreBandaid,
         file: std::path::PathBuf::from("test.rs"),
         line: 42,
-        column: Some(10),
         message: "Test violation".to_string(),
         severity: Severity::Error,
     };

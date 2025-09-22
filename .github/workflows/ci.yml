@@ -28,7 +28,6 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: "1.82"
           components: rustfmt, clippy
           
       - name: Cache dependencies
@@ -50,10 +49,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        rust: ["1.82", "stable", "beta"]
+        rust: ["stable"]
         include:
+          # Test MSRV on Linux only
           - os: ubuntu-latest
-            rust: "nightly"
+            rust: "1.75"  # MSRV - Edition 2021 minimum
+          # Test beta on Linux only to catch upcoming issues
+          - os: ubuntu-latest
+            rust: "beta"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -175,8 +178,6 @@ jobs:
         
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: "1.82"
           
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2

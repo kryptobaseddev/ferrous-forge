@@ -1,8 +1,10 @@
 //! Tests for file validation checks
 
-use crate::validation::rust_validator::file_checks::{validate_cargo_toml, validate_rust_file};
+use crate::validation::rust_validator::{
+    file_checks::{validate_cargo_toml, validate_rust_file},
+    patterns::ValidationPatterns,
+};
 use crate::validation::violation::*;
-use std::path::PathBuf;
 use tempfile::TempDir;
 use tokio::fs;
 
@@ -24,7 +26,8 @@ edition = "2024"
         .await
         .expect("Failed to write Cargo.toml");
 
-    let violations = validate_cargo_toml(&cargo_toml_path)
+    let mut violations = Vec::new();
+    validate_cargo_toml(&cargo_toml_path, &mut violations)
         .await
         .expect("Validation should succeed");
 
@@ -50,7 +53,8 @@ edition = "2021"
         .await
         .expect("Failed to write Cargo.toml");
 
-    let violations = validate_cargo_toml(&cargo_toml_path)
+    let mut violations = Vec::new();
+    validate_cargo_toml(&cargo_toml_path, &mut violations)
         .await
         .expect("Validation should succeed");
 
@@ -78,7 +82,8 @@ version = "0.1.0"
         .await
         .expect("Failed to write Cargo.toml");
 
-    let violations = validate_cargo_toml(&cargo_toml_path)
+    let mut violations = Vec::new();
+    validate_cargo_toml(&cargo_toml_path, &mut violations)
         .await
         .expect("Validation should succeed");
 
@@ -104,7 +109,9 @@ async fn test_validate_rust_file_size_limit() {
         .await
         .expect("Failed to write Rust file");
 
-    let violations = validate_rust_file(&rust_file)
+    let mut violations = Vec::new();
+    let patterns = ValidationPatterns::new().expect("Failed to create patterns");
+    validate_rust_file(&rust_file, &mut violations, &patterns)
         .await
         .expect("Validation should succeed");
 
@@ -126,7 +133,9 @@ async fn test_validate_rust_file_line_length() {
         .await
         .expect("Failed to write Rust file");
 
-    let violations = validate_rust_file(&rust_file)
+    let mut violations = Vec::new();
+    let patterns = ValidationPatterns::new().expect("Failed to create patterns");
+    validate_rust_file(&rust_file, &mut violations, &patterns)
         .await
         .expect("Validation should succeed");
 
@@ -147,7 +156,9 @@ async fn test_validate_rust_file_underscore_bandaid() {
         .await
         .expect("Failed to write Rust file");
 
-    let violations = validate_rust_file(&rust_file)
+    let mut violations = Vec::new();
+    let patterns = ValidationPatterns::new().expect("Failed to create patterns");
+    validate_rust_file(&rust_file, &mut violations, &patterns)
         .await
         .expect("Validation should succeed");
 
@@ -181,7 +192,9 @@ fn production_code() {
         .await
         .expect("Failed to write Rust file");
 
-    let violations = validate_rust_file(&rust_file)
+    let mut violations = Vec::new();
+    let patterns = ValidationPatterns::new().expect("Failed to create patterns");
+    validate_rust_file(&rust_file, &mut violations, &patterns)
         .await
         .expect("Validation should succeed");
 

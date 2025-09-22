@@ -1,7 +1,8 @@
 #[cfg(test)]
 mod tests {
+    use super::super::context::analyze_file_context;
     use super::super::strategies;
-    use super::super::{analyze_file_context, FixResult};
+    use super::super::types::FixResult;
     use crate::validation::{Severity, Violation, ViolationType};
     use std::path::PathBuf;
 
