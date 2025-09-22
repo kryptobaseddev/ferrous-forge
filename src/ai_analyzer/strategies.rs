@@ -24,67 +24,92 @@ pub fn generate_fix_strategies(analyses: &[ViolationAnalysis]) -> Vec<FixStrateg
 
 fn create_strategy(violation_type: ViolationType, count: usize) -> FixStrategy {
     match violation_type {
-        ViolationType::UnwrapInProduction => FixStrategy {
-            violation_type,
-            strategy_name: "Replace unwrap with proper error handling".to_string(),
-            description: format!(
-                "Replace {} instances of .unwrap() with ? operator or proper error handling",
-                count
-            ),
-            implementation_steps: vec![
-                "Identify function return type".to_string(),
-                "If Result type, replace .unwrap() with ?".to_string(),
-                "If not, change return type to Result".to_string(),
-                "Update function callers".to_string(),
-            ],
-            estimated_effort: if count < 10 { "Low" } else { "Medium" }.to_string(),
-            risk_level: "Low".to_string(),
-        },
-        ViolationType::UnderscoreBandaid => FixStrategy {
-            violation_type,
-            strategy_name: "Remove underscore prefixes".to_string(),
-            description: format!("Fix {} underscore parameter warnings properly", count),
-            implementation_steps: vec![
-                "Identify unused parameters".to_string(),
-                "Either use the parameter or remove it".to_string(),
-                "Update function signatures if needed".to_string(),
-            ],
-            estimated_effort: "Low".to_string(),
-            risk_level: "Low".to_string(),
-        },
-        ViolationType::FunctionTooLarge => FixStrategy {
-            violation_type,
-            strategy_name: "Refactor large functions".to_string(),
-            description: format!("Break down {} large functions into smaller ones", count),
-            implementation_steps: vec![
-                "Identify logical sections".to_string(),
-                "Extract helper functions".to_string(),
-                "Improve code organization".to_string(),
-            ],
-            estimated_effort: "High".to_string(),
-            risk_level: "Medium".to_string(),
-        },
-        ViolationType::FileTooLarge => FixStrategy {
-            violation_type,
-            strategy_name: "Split large files into modules".to_string(),
-            description: format!("Modularize {} large files", count),
-            implementation_steps: vec![
-                "Identify logical components".to_string(),
-                "Create module structure".to_string(),
-                "Move code to appropriate modules".to_string(),
-                "Update imports".to_string(),
-            ],
-            estimated_effort: "High".to_string(),
-            risk_level: "Medium".to_string(),
-        },
-        _ => FixStrategy {
-            violation_type,
-            strategy_name: "Generic fix".to_string(),
-            description: format!("Fix {} violations", count),
-            implementation_steps: vec!["Analyze violation".to_string(), "Apply fix".to_string()],
-            estimated_effort: "Medium".to_string(),
-            risk_level: "Low".to_string(),
-        },
+        ViolationType::UnwrapInProduction => create_unwrap_strategy(violation_type, count),
+        ViolationType::UnderscoreBandaid => create_underscore_strategy(violation_type, count),
+        ViolationType::FunctionTooLarge => create_function_refactor_strategy(violation_type, count),
+        ViolationType::FileTooLarge => create_file_refactor_strategy(violation_type, count),
+        _ => create_generic_strategy(violation_type, count),
+    }
+}
+
+/// Create strategy for unwrap violations
+fn create_unwrap_strategy(violation_type: ViolationType, count: usize) -> FixStrategy {
+    FixStrategy {
+        violation_type,
+        strategy_name: "Replace unwrap with proper error handling".to_string(),
+        description: format!(
+            "Replace {} instances of .unwrap() with ? operator or proper error handling",
+            count
+        ),
+        implementation_steps: vec![
+            "Identify function return type".to_string(),
+            "If Result type, replace .unwrap() with ?".to_string(),
+            "If not, change return type to Result".to_string(),
+            "Update function callers".to_string(),
+        ],
+        estimated_effort: if count < 10 { "Low" } else { "Medium" }.to_string(),
+        risk_level: "Low".to_string(),
+    }
+}
+
+/// Create strategy for underscore violations
+fn create_underscore_strategy(violation_type: ViolationType, count: usize) -> FixStrategy {
+    FixStrategy {
+        violation_type,
+        strategy_name: "Remove underscore prefixes".to_string(),
+        description: format!("Fix {} underscore parameter warnings properly", count),
+        implementation_steps: vec![
+            "Identify unused parameters".to_string(),
+            "Either use the parameter or remove it".to_string(),
+            "Update function signatures if needed".to_string(),
+        ],
+        estimated_effort: "Low".to_string(),
+        risk_level: "Low".to_string(),
+    }
+}
+
+/// Create strategy for large function violations
+fn create_function_refactor_strategy(violation_type: ViolationType, count: usize) -> FixStrategy {
+    FixStrategy {
+        violation_type,
+        strategy_name: "Refactor large functions".to_string(),
+        description: format!("Break down {} large functions into smaller ones", count),
+        implementation_steps: vec![
+            "Identify logical sections".to_string(),
+            "Extract helper functions".to_string(),
+            "Improve code organization".to_string(),
+        ],
+        estimated_effort: "High".to_string(),
+        risk_level: "Medium".to_string(),
+    }
+}
+
+/// Create strategy for large file violations
+fn create_file_refactor_strategy(violation_type: ViolationType, count: usize) -> FixStrategy {
+    FixStrategy {
+        violation_type,
+        strategy_name: "Split large files into modules".to_string(),
+        description: format!("Modularize {} large files", count),
+        implementation_steps: vec![
+            "Identify logical components".to_string(),
+            "Create module structure".to_string(),
+            "Move code to appropriate modules".to_string(),
+            "Update imports".to_string(),
+        ],
+        estimated_effort: "High".to_string(),
+        risk_level: "Medium".to_string(),
+    }
+}
+
+/// Create generic strategy for other violations
+fn create_generic_strategy(violation_type: ViolationType, count: usize) -> FixStrategy {
+    FixStrategy {
+        violation_type,
+        strategy_name: "Generic fix".to_string(),
+        description: format!("Fix {} violations", count),
+        implementation_steps: vec!["Analyze violation".to_string(), "Apply fix".to_string()],
+        estimated_effort: "Medium".to_string(),
+        risk_level: "Low".to_string(),
     }
 }
 
@@ -93,15 +118,30 @@ pub fn generate_ai_instructions(
     analyses: &[ViolationAnalysis],
     _strategies: &[FixStrategy],
 ) -> AIInstructions {
-    let summary = format!(
+    let summary = create_analysis_summary(analyses);
+    let prioritized_fixes = categorize_and_prioritize_fixes(analyses);
+    let architectural_recommendations = get_architectural_recommendations();
+    let code_quality_improvements = get_code_quality_improvements();
+
+    AIInstructions {
+        summary,
+        prioritized_fixes,
+        architectural_recommendations,
+        code_quality_improvements,
+    }
+}
+
+/// Create a summary of the analysis results
+fn create_analysis_summary(analyses: &[ViolationAnalysis]) -> String {
+    format!(
         "Analyzed {} violations. {} are AI-fixable with varying complexity.",
         analyses.len(),
         analyses.iter().filter(|a| a.ai_fixable).count()
-    );
+    )
+}
 
-    let mut prioritized_fixes = Vec::new();
-
-    // Prioritize by complexity and confidence
+/// Categorize and prioritize fixes by complexity
+fn categorize_and_prioritize_fixes(analyses: &[ViolationAnalysis]) -> Vec<String> {
     let mut trivial_fixes = Vec::new();
     let mut simple_fixes = Vec::new();
     let mut moderate_fixes = Vec::new();
@@ -127,28 +167,30 @@ pub fn generate_ai_instructions(
         }
     }
 
+    let mut prioritized_fixes = Vec::new();
     prioritized_fixes.extend(trivial_fixes);
     prioritized_fixes.extend(simple_fixes);
     prioritized_fixes.extend(moderate_fixes);
+    
+    prioritized_fixes
+}
 
-    let architectural_recommendations = vec![
+/// Get architectural recommendations
+fn get_architectural_recommendations() -> Vec<String> {
+    vec![
         "Consider adopting consistent error handling patterns".to_string(),
         "Modularize large files to improve maintainability".to_string(),
         "Extract complex logic into well-tested utility functions".to_string(),
-    ];
+    ]
+}
 
-    let code_quality_improvements = vec![
+/// Get code quality improvement suggestions
+fn get_code_quality_improvements() -> Vec<String> {
+    vec![
         "Add comprehensive documentation".to_string(),
         "Increase test coverage".to_string(),
         "Implement CI/CD checks for code standards".to_string(),
-    ];
-
-    AIInstructions {
-        summary,
-        prioritized_fixes,
-        architectural_recommendations,
-        code_quality_improvements,
-    }
+    ]
 }
 
 /// Identify code patterns in the given content

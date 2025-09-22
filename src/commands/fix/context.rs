@@ -41,7 +41,22 @@ pub fn parse_function_signature_multiline(
     lines: &[&str],
     start_idx: usize,
 ) -> Option<FunctionSignature> {
-    // Find the opening brace
+    let (full_signature, brace_line) = collect_signature_lines(lines, start_idx)?;
+    let name = extract_function_name(&full_signature)?;
+    let (returns_result, returns_option) = check_return_types(&full_signature);
+    let line_end = find_function_end(lines, brace_line, start_idx);
+
+    Some(FunctionSignature {
+        name,
+        line_start: start_idx + 1, // Convert to 1-indexed
+        line_end: line_end + 1,    // Convert to 1-indexed
+        returns_result,
+        returns_option,
+    })
+}
+
+/// Collect signature lines until the opening brace is found
+fn collect_signature_lines(lines: &[&str], start_idx: usize) -> Option<(String, usize)> {
     let mut brace_line = start_idx;
     let mut signature_lines = vec![lines[start_idx].to_string()];
 
@@ -55,28 +70,31 @@ pub fn parse_function_signature_multiline(
 
     // Join all signature lines
     let full_signature = signature_lines.join(" ");
+    Some((full_signature, brace_line))
+}
 
-    // Extract function name
-    let name = if let Some(name_start) = full_signature.find("fn ") {
-        let name_part = &full_signature[name_start + 3..];
-        if let Some(end) = name_part.find(['(', '<']) {
-            name_part[..end].trim().to_string()
-        } else {
-            return None;
-        }
-    } else {
-        return None;
-    };
+/// Extract the function name from the full signature
+fn extract_function_name(full_signature: &str) -> Option<String> {
+    let name_start = full_signature.find("fn ")?;
+    let name_part = &full_signature[name_start + 3..];
+    let end = name_part.find(['(', '<'])?;
+    Some(name_part[..end].trim().to_string())
+}
 
-    // Check return type
+/// Check what types the function returns
+fn check_return_types(full_signature: &str) -> (bool, bool) {
     let returns_result = full_signature.contains("-> Result")
         || full_signature.contains("-> anyhow::Result")
         || full_signature.contains("-> std::result::Result")
         || full_signature.contains("-> io::Result");
 
     let returns_option = full_signature.contains("-> Option");
+    
+    (returns_result, returns_option)
+}
 
-    // Find the end of the function (closing brace at the same indentation level)
+/// Find the end of the function (closing brace at the same indentation level)
+fn find_function_end(lines: &[&str], brace_line: usize, start_idx: usize) -> usize {
     let indent = lines[start_idx].len() - lines[start_idx].trim_start().len();
     let mut line_end = brace_line + 1;
     let mut brace_count = 1;
@@ -102,13 +120,7 @@ pub fn parse_function_signature_multiline(
         line_end += 1;
     }
 
-    Some(FunctionSignature {
-        name,
-        line_start: start_idx + 1, // Convert to 1-indexed
-        line_end: line_end + 1,    // Convert to 1-indexed
-        returns_result,
-        returns_option,
-    })
+    line_end
 }
 
 /// Check if the ? operator can be used in this context

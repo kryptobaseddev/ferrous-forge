@@ -47,82 +47,144 @@ pub async fn execute_with_ai(
     ai_analysis: bool,
 ) -> Result<()> {
     let project_path = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
+    
+    print_startup_banner(&project_path, dry_run);
+    
+    let filter_options = parse_filter_options(only, skip);
+    let filtered_violations = validate_and_filter_violations(&project_path, &filter_options, limit).await?;
+    
+    if let Some(violations) = filtered_violations {
+        execute_fix_process(&project_path, violations, ai_analysis, dry_run).await;
+    }
+    
+    Ok(())
+}
 
+/// Configuration for filter options
+struct FilterOptions {
+    only_types: Option<HashSet<String>>,
+    skip_types: Option<HashSet<String>>,
+}
+
+/// Statistics for fix operations
+struct FixStats {
+    total_fixed: usize,
+    total_skipped: usize,
+    files_modified: usize,
+}
+
+/// Validation results with original and filtered violations
+struct ValidationResult {
+    all: Vec<Violation>,
+    filtered: Vec<Violation>,
+}
+
+/// Print startup banner with project information
+fn print_startup_banner(project_path: &Path, dry_run: bool) {
     println!(
         "{}",
         style("🔧 Running Ferrous Forge auto-fix...").bold().cyan()
     );
     println!("📁 Project: {}", project_path.display());
-
+    
     if dry_run {
         println!(
             "{}",
             style("ℹ️ Dry-run mode - no changes will be made").yellow()
         );
     }
+}
 
-    // Parse filter options
+/// Parse filter options from command line arguments
+fn parse_filter_options(only: Option<String>, skip: Option<String>) -> FilterOptions {
     let only_types: Option<HashSet<String>> = only
         .as_ref()
         .map(|s| s.split(',').map(|t| t.trim().to_uppercase()).collect());
-
+    
     let skip_types: Option<HashSet<String>> = skip
         .as_ref()
         .map(|s| s.split(',').map(|t| t.trim().to_uppercase()).collect());
+    
+    FilterOptions {
+        only_types,
+        skip_types,
+    }
+}
 
-    // Create validator and run validation
-    let validator = RustValidator::new(project_path.clone())?;
+/// Validate the project and return violations
+async fn validate_project(project_path: &Path) -> Result<Vec<Violation>> {
+    let validator = RustValidator::new(project_path.to_path_buf())?;
     let violations = validator
         .validate_project()
         .await
         .with_context(|| format!("Failed to validate project at {}", project_path.display()))?;
+    Ok(violations)
+}
 
+/// Validate project and filter violations, returning None if no violations to fix
+async fn validate_and_filter_violations(
+    project_path: &Path,
+    filter_options: &FilterOptions,
+    limit: Option<usize>,
+) -> Result<Option<ValidationResult>> {
+    let violations = validate_project(project_path).await?;
+    
     if violations.is_empty() {
         println!(
             "{}",
             style("✨ No violations found - nothing to fix!").green()
         );
-        return Ok(());
+        return Ok(None);
     }
-
-    // Filter violations based on options
-    let filtered_violations = filter_violations(&violations, &only_types, &skip_types, limit);
-
+    
+    let filtered_violations = filter_violations(&violations, &filter_options.only_types, &filter_options.skip_types, limit);
+    
     if filtered_violations.is_empty() {
         println!("{}", style("📝 No matching violations to fix").yellow());
-        return Ok(());
+        return Ok(None);
     }
+    
+    Ok(Some(ValidationResult {
+        all: violations,
+        filtered: filtered_violations,
+    }))
+}
 
+/// Print summary of found violations
+fn print_violations_summary(violations: &[Violation]) {
     println!(
         "{}",
         style(format!(
             "📊 Found {} potentially fixable violations",
-            filtered_violations.len()
+            violations.len()
         ))
         .cyan()
     );
+}
 
-    if ai_analysis {
+/// Run AI analysis if requested
+async fn run_ai_analysis(project_path: &Path, violations: &[Violation]) {
+    println!(
+        "{}",
+        style("🤖 Running AI-powered analysis...").bold().magenta()
+    );
+    
+    if let Err(e) = ai_analyzer::analyze_and_generate_report(project_path, violations).await {
+        eprintln!(
+            "{}",
+            style(format!("⚠️  AI analysis failed: {}", e)).yellow()
+        );
+    } else {
+        println!("{}", style("✅ AI analysis complete").green());
         println!(
             "{}",
-            style("🤖 Running AI-powered analysis...").bold().magenta()
+            style("   📊 Reports saved to .ferrous-forge/ai-analysis/").dim()
         );
-
-        // Run AI analysis
-        if let Err(e) = ai_analyzer::analyze_and_generate_report(&project_path, &violations).await {
-            eprintln!(
-                "{}",
-                style(format!("⚠️  AI analysis failed: {}", e)).yellow()
-            );
-        } else {
-            println!("{}", style("✅ AI analysis complete").green());
-            println!(
-                "{}",
-                style("   📊 Reports saved to .ferrous-forge/ai-analysis/").dim()
-            );
-        }
     }
+}
 
+/// Print warning banner about experimental features
+fn print_warning_banner() {
     println!();
     println!(
         "{}",
@@ -134,15 +196,17 @@ pub async fn execute_with_ai(
         "{}",
         style("    Please review all changes and ensure your tests still pass.").yellow()
     );
+}
 
-    // Group violations by file
-    let violations_by_file = group_violations_by_file(&filtered_violations);
-
+/// Process all files and return fix statistics
+fn process_all_files(
+    violations_by_file: std::collections::HashMap<PathBuf, Vec<Violation>>,
+    dry_run: bool,
+) -> FixStats {
     let mut total_fixed = 0;
     let mut total_skipped = 0;
     let mut files_modified = 0;
-
-    // Process each file
+    
     for (file_path, file_violations) in violations_by_file {
         match fix_file_violations(&file_path, &file_violations, dry_run) {
             Ok((fixed, skipped)) => {
@@ -178,29 +242,58 @@ pub async fn execute_with_ai(
             }
         }
     }
+    
+    FixStats {
+        total_fixed,
+        total_skipped,
+        files_modified,
+    }
+}
 
-    // Print summary
+/// Execute the main fix process for validated violations
+async fn execute_fix_process(
+    project_path: &Path,
+    violations: ValidationResult,
+    ai_analysis: bool,
+    dry_run: bool,
+) {
+    print_violations_summary(&violations.filtered);
+    
+    if ai_analysis {
+        run_ai_analysis(project_path, &violations.all).await;
+    }
+    
+    print_warning_banner();
+    
+    let violations_by_file = group_violations_by_file(&violations.filtered);
+    let fix_stats = process_all_files(violations_by_file, dry_run);
+    
+    print_final_summary(fix_stats, dry_run);
+}
+
+/// Print final summary of fix operations
+fn print_final_summary(stats: FixStats, dry_run: bool) {
     println!();
     println!("{}", style("─".repeat(50)).dim());
-
+    
     if dry_run {
         println!(
             "{}",
-            style(format!("📝 Would fix {} violations safely", total_fixed)).green()
+            style(format!("📝 Would fix {} violations safely", stats.total_fixed)).green()
         );
-        if total_skipped > 0 {
+        if stats.total_skipped > 0 {
             println!(
                 "{}",
-                style(format!("⚠️ Would skip {} unsafe fixes", total_skipped)).yellow()
+                style(format!("⚠️ Would skip {} unsafe fixes", stats.total_skipped)).yellow()
             );
         }
     } else {
-        if total_fixed > 0 {
+        if stats.total_fixed > 0 {
             println!(
                 "{}",
                 style(format!(
                     "✅ Fixed {} violations in {} files",
-                    total_fixed, files_modified
+                    stats.total_fixed, stats.files_modified
                 ))
                 .green()
                 .bold()
@@ -208,11 +301,11 @@ pub async fn execute_with_ai(
         } else {
             println!("{}", style("No violations were auto-fixed").yellow());
         }
-
-        if total_skipped > 0 {
+        
+        if stats.total_skipped > 0 {
             println!(
                 "{}",
-                style(format!("⚠️ Skipped {} unsafe fixes", total_skipped)).yellow()
+                style(format!("⚠️ Skipped {} unsafe fixes", stats.total_skipped)).yellow()
             );
             println!();
             println!(
@@ -221,8 +314,6 @@ pub async fn execute_with_ai(
             );
         }
     }
-
-    Ok(())
 }
 
 /// Fix violations in a single file

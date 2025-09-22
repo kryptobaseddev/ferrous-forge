@@ -15,13 +15,8 @@ pub async fn handle_migrate(
     let target_edition = Edition::parse_edition(edition_str)?;
     let project_path = std::env::current_dir()?;
 
-    println!("🚀 Edition Migration Assistant\n");
-    println!("  Target:   {}", style(target_edition.to_string()).cyan());
-    println!("  Project:  {}", style(project_path.display()).dim());
-
-    // Check current edition
-    let current_edition = crate::edition::detect_edition(&project_path.join("Cargo.toml")).await?;
-
+    // Validate current state and display initial info
+    let current_edition = validate_and_display_intro(&target_edition, &project_path).await?;
     if current_edition >= target_edition {
         println!(
             "\n{}",
@@ -32,13 +27,42 @@ pub async fn handle_migrate(
         return Ok(());
     }
 
+    // Display migration plan
+    display_migration_plan(&target_edition, no_backup, test);
+
+    // Execute migration
+    let options = create_migration_options(no_backup, test, idioms);
+    let result = execute_migration(&project_path, target_edition, options).await?;
+
+    // Process and display results
+    process_migration_result(&result)
+}
+
+/// Validate current state and display introduction
+async fn validate_and_display_intro(
+    target_edition: &Edition,
+    project_path: &std::path::Path,
+) -> Result<Edition> {
+    println!("🚀 Edition Migration Assistant\n");
+    println!("  Target:   {}", style(target_edition.to_string()).cyan());
+    println!("  Project:  {}", style(project_path.display()).dim());
+
+    let current_edition = crate::edition::detect_edition(&project_path.join("Cargo.toml")).await?;
     println!(
         "  Current:  {}",
         style(current_edition.to_string()).yellow()
     );
     println!();
 
-    // Confirm migration
+    Ok(current_edition)
+}
+
+/// Display the migration plan to the user
+fn display_migration_plan(
+    target_edition: &Edition,
+    no_backup: bool,
+    test: bool,
+) {
     println!("This will:");
     println!(
         "  1. {} of your project",
@@ -62,15 +86,29 @@ pub async fn handle_migrate(
     }
 
     println!("\n{}", style("Starting migration...").bold());
+}
 
-    let migrator = EditionMigrator::new(&project_path);
-
-    let options = MigrationOptions {
+/// Create migration options from command line flags
+fn create_migration_options(
+    no_backup: bool,
+    test: bool,
+    idioms: bool,
+) -> MigrationOptions {
+    MigrationOptions {
         create_backup: !no_backup,
         run_tests: test,
         fix_idioms: idioms,
         ..Default::default()
-    };
+    }
+}
+
+/// Execute the migration with progress indication
+async fn execute_migration(
+    project_path: &std::path::Path,
+    target_edition: Edition,
+    options: MigrationOptions,
+) -> Result<crate::edition::migrator::MigrationResult> {
+    let migrator = EditionMigrator::new(project_path);
 
     let spinner = ProgressBar::new_spinner();
     spinner.set_style(
@@ -85,19 +123,36 @@ pub async fn handle_migrate(
     }
 
     let result = migrator.migrate(target_edition, options).await?;
-
     spinner.finish_and_clear();
 
-    match result.status {
-        crate::edition::migrator::MigrationStatus::Success
-        | crate::edition::migrator::MigrationStatus::Completed => {
+    Ok(result)
+}
+
+/// Process and display migration results
+fn process_migration_result(
+    result: &crate::edition::migrator::MigrationResult,
+) -> Result<()> {
+    display_migration_status(&result.status)?;
+    display_result_messages(result);
+    display_backup_info(result);
+    display_next_steps();
+    Ok(())
+}
+
+/// Display the migration status
+fn display_migration_status(
+    status: &crate::edition::migrator::MigrationStatus,
+) -> Result<()> {
+    use crate::edition::migrator::MigrationStatus;
+    
+    match status {
+        MigrationStatus::Success | MigrationStatus::Completed => {
             println!(
                 "\n{}",
                 style("✅ Migration completed successfully!").green().bold()
             );
         }
-        crate::edition::migrator::MigrationStatus::PartialSuccess
-        | crate::edition::migrator::MigrationStatus::Partial => {
+        MigrationStatus::PartialSuccess | MigrationStatus::Partial => {
             println!(
                 "\n{}",
                 style("⚠️  Migration completed with warnings")
@@ -105,24 +160,28 @@ pub async fn handle_migrate(
                     .bold()
             );
         }
-        crate::edition::migrator::MigrationStatus::AlreadyUpToDate => {
+        MigrationStatus::AlreadyUpToDate => {
             println!("\n{}", style("✅ Already up to date!").green().bold());
             return Ok(());
         }
-        crate::edition::migrator::MigrationStatus::Failed => {
+        MigrationStatus::Failed => {
             println!("\n{}", style("❌ Migration failed").red().bold());
         }
-        crate::edition::migrator::MigrationStatus::Pending => {
+        MigrationStatus::Pending => {
             println!("\n{}", style("⏳ Migration is pending").yellow().bold());
         }
-        crate::edition::migrator::MigrationStatus::NotStarted => {
+        MigrationStatus::NotStarted => {
             println!("\n{}", style("❓ Migration not started").dim().bold());
         }
-        crate::edition::migrator::MigrationStatus::InProgress => {
+        MigrationStatus::InProgress => {
             println!("\n{}", style("🔄 Migration in progress").blue().bold());
         }
     }
+    Ok(())
+}
 
+/// Display messages, warnings, and errors from migration result
+fn display_result_messages(result: &crate::edition::migrator::MigrationResult) {
     // Display messages
     if !result.messages.is_empty() {
         println!("\n📝 Messages:");
@@ -146,14 +205,20 @@ pub async fn handle_migrate(
             println!("  • {}", style(error).red());
         }
     }
+}
 
-    if let Some(backup_path) = result.backup_path {
+/// Display backup information if backup was created
+fn display_backup_info(result: &crate::edition::migrator::MigrationResult) {
+    if let Some(backup_path) = &result.backup_path {
         println!(
             "\n💾 Backup saved to: {}",
             style(backup_path.display()).dim()
         );
     }
+}
 
+/// Display next steps for the user
+fn display_next_steps() {
     println!("\n📋 Next steps:");
     println!("  1. Review the changes made by the migration");
     println!(
@@ -165,6 +230,4 @@ pub async fn handle_migrate(
         style("cargo test").cyan()
     );
     println!("  4. Commit the changes to version control");
-
-    Ok(())
 }

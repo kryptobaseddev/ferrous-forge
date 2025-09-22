@@ -30,84 +30,106 @@ fn fix_unwrap_in_line(line: &str, violation: &Violation, context: &FileContext) 
     }
 
     if line.contains(".unwrap()") {
-        // Don't fix if it's in a string literal
-        if line.contains(r#"".unwrap()""#) || line.contains(r#"'.unwrap()'"#) {
-            return FixResult::Skipped("String literal, not actual code".into());
-        }
-
-        // Check if we're in a function that can use ?
-        let can_use_question_mark = check_can_use_question_mark(context);
-
-        if can_use_question_mark {
-            // Safe to replace with ?
-            return FixResult::Fixed(line.replace(".unwrap()", "?"));
-        } else {
-            // For main functions or examples, use expect
-            if context.is_bin_file || context.is_example_file {
-                let fixed = line.replace(".unwrap()", r#".expect("Failed to complete operation")"#);
-                return FixResult::Fixed(fixed);
-            }
-            return FixResult::Skipped(
-                "Cannot use ? operator - function doesn't return Result/Option".to_string(),
-            );
-        }
+        fix_unwrap_call(line, context)
     } else if line.contains(".expect(") {
-        // For expect, we can potentially replace with ? if the context allows
-        if check_can_use_question_mark(context) {
-            // Find the expect call and replace it
-            if let Some(start) = line.find(".expect(") {
-                let before = &line[..start];
+        fix_expect_call(line, context)
+    } else {
+        FixResult::NotApplicable
+    }
+}
 
-                // Find the matching closing parenthesis
-                let after_expect = &line[start + 8..];
-                let mut paren_count = 1;
-                let mut end_idx = 0;
-                let mut in_string = false;
-                let mut escape_next = false;
+/// Fix .unwrap() calls in a line
+fn fix_unwrap_call(line: &str, context: &FileContext) -> FixResult {
+    // Don't fix if it's in a string literal
+    if line.contains(r#"".unwrap()""#) || line.contains(r#"'.unwrap()'"#) {
+        return FixResult::Skipped("String literal, not actual code".into());
+    }
 
-                for (i, ch) in after_expect.chars().enumerate() {
-                    if escape_next {
-                        escape_next = false;
-                        continue;
-                    }
+    // Check if we're in a function that can use ?
+    let can_use_question_mark = check_can_use_question_mark(context);
 
-                    if ch == '\\' {
-                        escape_next = true;
-                        continue;
-                    }
+    if can_use_question_mark {
+        // Safe to replace with ?
+        FixResult::Fixed(line.replace(".unwrap()", "?"))
+    } else {
+        // For main functions or examples, use expect
+        if context.is_bin_file || context.is_example_file {
+            let fixed = line.replace(".unwrap()", r#".expect("Failed to complete operation")"#);
+            FixResult::Fixed(fixed)
+        } else {
+            FixResult::Skipped(
+                "Cannot use ? operator - function doesn't return Result/Option".to_string(),
+            )
+        }
+    }
+}
 
-                    if ch == '"' {
-                        in_string = !in_string;
-                    }
+/// Fix .expect() calls in a line
+fn fix_expect_call(line: &str, context: &FileContext) -> FixResult {
+    // For expect, we can potentially replace with ? if the context allows
+    if !check_can_use_question_mark(context) {
+        return FixResult::Skipped(
+            "Cannot use ? operator - function doesn't return Result/Option".to_string(),
+        );
+    }
 
-                    if !in_string {
-                        if ch == '(' {
-                            paren_count += 1;
-                        } else if ch == ')' {
-                            paren_count -= 1;
-                            if paren_count == 0 {
-                                end_idx = i;
-                                break;
-                            }
-                        }
-                    }
-                }
+    // Find the expect call and replace it
+    if let Some(start) = line.find(".expect(") {
+        if let Some(fixed) = replace_expect_with_question_mark(line, start) {
+            FixResult::Fixed(fixed)
+        } else {
+            FixResult::Skipped("Complex expect pattern - manual review needed".to_string())
+        }
+    } else {
+        FixResult::NotApplicable
+    }
+}
 
+/// Replace .expect() call with ? operator at the given position
+fn replace_expect_with_question_mark(line: &str, start: usize) -> Option<String> {
+    let before = &line[..start];
+    let after_expect = &line[start + 8..];
+    
+    find_matching_paren(after_expect).map(|end_idx| {
+        let after = &after_expect[end_idx + 1..];
+        format!("{}?{}", before, after)
+    })
+}
+
+/// Find the matching closing parenthesis for an .expect() call
+fn find_matching_paren(text: &str) -> Option<usize> {
+    let mut paren_count = 1;
+    let mut in_string = false;
+    let mut escape_next = false;
+
+    for (i, ch) in text.chars().enumerate() {
+        if escape_next {
+            escape_next = false;
+            continue;
+        }
+
+        if ch == '\\' {
+            escape_next = true;
+            continue;
+        }
+
+        if ch == '"' {
+            in_string = !in_string;
+        }
+
+        if !in_string {
+            if ch == '(' {
+                paren_count += 1;
+            } else if ch == ')' {
+                paren_count -= 1;
                 if paren_count == 0 {
-                    let after = &after_expect[end_idx + 1..];
-                    let fixed = format!("{}?{}", before, after);
-                    return FixResult::Fixed(fixed);
+                    return Some(i);
                 }
             }
-            return FixResult::Skipped("Complex expect pattern - manual review needed".to_string());
-        } else {
-            return FixResult::Skipped(
-                "Cannot use ? operator - function doesn't return Result/Option".to_string(),
-            );
         }
     }
 
-    FixResult::NotApplicable
+    None
 }
 
 /// Fix underscore parameter violations
