@@ -129,6 +129,7 @@ fn find_function_end(lines: &[&str], brace_line: usize, start_idx: usize) -> usi
 }
 
 /// Check if the ? operator can be used in this context
+#[allow(dead_code)]
 pub fn check_can_use_question_mark(context: &FileContext) -> bool {
     // Don't use ? in test functions
     if context.is_test_file {

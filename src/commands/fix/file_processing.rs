@@ -27,7 +27,7 @@ pub fn process_all_files(
 
 /// Process a single file's violations
 fn process_single_file(
-    file_path: &PathBuf,
+    file_path: &Path,
     file_violations: &[Violation],
     dry_run: bool,
     stats: &mut FixStats,
@@ -51,7 +51,7 @@ fn process_single_file(
 
 /// Handle successful fix results
 fn handle_successful_fix(
-    _file_path: &PathBuf,
+    _file_path: &Path,
     fixed_count: usize,
     dry_run: bool,
     stats: &mut FixStats,
@@ -67,7 +67,7 @@ fn handle_successful_fix(
 
 /// Fix violations in a specific file
 fn fix_file_violations(
-    file_path: &PathBuf,
+    file_path: &Path,
     violations: &[Violation],
     dry_run: bool,
 ) -> Result<usize> {

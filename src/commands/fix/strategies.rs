@@ -6,6 +6,7 @@ use super::types::{FileContext, FixResult};
 use crate::validation::{Violation, ViolationType};
 
 /// Fix a violation in a line of code
+#[allow(dead_code)]
 pub fn fix_violation_in_line(
     line: &str,
     violation: &Violation,
@@ -19,6 +20,7 @@ pub fn fix_violation_in_line(
 }
 
 /// Fix unwrap violations in a line
+#[allow(dead_code)]
 fn fix_unwrap_in_line(line: &str, violation: &Violation, context: &FileContext) -> FixResult {
     // Skip test files
     if context.is_test_file {
@@ -39,6 +41,7 @@ fn fix_unwrap_in_line(line: &str, violation: &Violation, context: &FileContext) 
 }
 
 /// Fix .unwrap() calls in a line
+#[allow(dead_code)]
 fn fix_unwrap_call(line: &str, context: &FileContext) -> FixResult {
     // Don't fix if it's in a string literal
     if line.contains(r#"".unwrap()""#) || line.contains(r#"'.unwrap()'"#) {
@@ -65,6 +68,7 @@ fn fix_unwrap_call(line: &str, context: &FileContext) -> FixResult {
 }
 
 /// Fix .expect() calls in a line
+#[allow(dead_code)]
 fn fix_expect_call(line: &str, context: &FileContext) -> FixResult {
     // For expect, we can potentially replace with ? if the context allows
     if !check_can_use_question_mark(context) {
@@ -86,6 +90,7 @@ fn fix_expect_call(line: &str, context: &FileContext) -> FixResult {
 }
 
 /// Replace .expect() call with ? operator at the given position
+#[allow(dead_code)]
 fn replace_expect_with_question_mark(line: &str, start: usize) -> Option<String> {
     let before = &line[..start];
     let after_expect = &line[start + 8..];
@@ -97,6 +102,7 @@ fn replace_expect_with_question_mark(line: &str, start: usize) -> Option<String>
 }
 
 /// Find the matching closing parenthesis for an .expect() call
+#[allow(dead_code)]
 fn find_matching_paren(text: &str) -> Option<usize> {
     let mut paren_count = 1;
     let mut in_string = false;
@@ -133,6 +139,7 @@ fn find_matching_paren(text: &str) -> Option<usize> {
 }
 
 /// Fix underscore parameter violations
+#[allow(dead_code)]
 fn fix_underscore_in_line(line: &str, violation: &Violation, context: &FileContext) -> FixResult {
     // Skip test files
     if context.is_test_file {

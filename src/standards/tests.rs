@@ -14,11 +14,11 @@ fn test_coding_standards_default() {
     assert!(!standards.edition.auto_upgrade);
 
     // Test file limits
-    assert_eq!(standards.file_limits.max_lines, 400);
+    assert_eq!(standards.file_limits.max_lines, 300);
     assert_eq!(standards.file_limits.max_line_length, 100);
 
     // Test function limits
-    assert_eq!(standards.function_limits.max_lines, 230);
+    assert_eq!(standards.function_limits.max_lines, 50);
     assert_eq!(standards.function_limits.max_complexity, 10);
 
     // Test documentation standards

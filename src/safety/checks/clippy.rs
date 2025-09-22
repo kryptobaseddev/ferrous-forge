@@ -54,7 +54,7 @@ fn is_clippy_available() -> bool {
     Command::new("cargo")
         .args(&["clippy", "--version"])
         .output()
-        .map_or(false, |output| output.status.success())
+        .is_ok_and(|output| output.status.success())
 }
 
 /// Run clippy command with strict settings

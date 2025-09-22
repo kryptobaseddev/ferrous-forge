@@ -99,8 +99,8 @@ async fn test_validate_rust_file_size_limit() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let rust_file = temp_dir.path().join("test.rs");
 
-    // Create a file with many lines (over 400)
-    let content: String = (0..450)
+    // Create a file with many lines (over 300)
+    let content: String = (0..350)
         .map(|i| format!("// Line {}", i))
         .collect::<Vec<_>>()
         .join("\n");

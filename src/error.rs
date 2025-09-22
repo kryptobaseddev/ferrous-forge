@@ -160,7 +160,7 @@ impl Error {
 
     /// Create a new IO error from a string
     pub fn io(msg: impl Into<String>) -> Self {
-        Self::Io(std::io::Error::new(std::io::ErrorKind::Other, msg.into()))
+        Self::Io(std::io::Error::other(msg.into()))
     }
 
     /// Create a new security error

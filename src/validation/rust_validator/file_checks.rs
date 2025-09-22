@@ -54,12 +54,12 @@ pub async fn validate_rust_file(
     let (allow_unwrap, allow_expect) = check_allow_attributes(&lines);
 
     // Check file size limit (400 lines)
-    if lines.len() > 400 {
+    if lines.len() > 300 {
         violations.push(Violation {
             violation_type: ViolationType::FileTooLarge,
             file: rust_file.to_path_buf(),
             line: lines.len() - 1,
-            message: format!("File has {} lines, maximum allowed is 400", lines.len()),
+            message: format!("File has {} lines, maximum allowed is 300", lines.len()),
             severity: Severity::Error,
         });
     }
@@ -137,17 +137,18 @@ fn check_allow_attributes(lines: &[&str]) -> (bool, bool) {
 }
 
 /// Validate file size limit
+#[allow(dead_code)]
 fn validate_file_size(
     rust_file: &Path,
     lines: &[&str],
     violations: &mut Vec<Violation>,
 ) -> Result<()> {
-    if lines.len() > 400 {
+    if lines.len() > 300 {
         violations.push(Violation {
             violation_type: ViolationType::FileTooLarge,
             file: rust_file.to_path_buf(),
             line: lines.len() - 1,
-            message: format!("File has {} lines, maximum allowed is 400", lines.len()),
+            message: format!("File has {} lines, maximum allowed is 300", lines.len()),
             severity: Severity::Error,
         });
     }
@@ -212,13 +213,13 @@ fn _legacy_validate_patterns(
             // Check previous function size
             if let Some(start) = current_function_start {
                 let func_lines = i - start;
-                if func_lines > 230 {
+                if func_lines > 50 {
                     violations.push(Violation {
                         violation_type: ViolationType::FunctionTooLarge,
                         file: rust_file.to_path_buf(),
                         line: start + 1,
                         message: format!(
-                            "Function has {} lines, maximum allowed is 70",
+                            "Function has {} lines, maximum allowed is 50",
                             func_lines
                         ),
                         severity: Severity::Error,
@@ -347,7 +348,7 @@ fn _legacy_validate_patterns(
 }
 
 /// Validate code patterns (placeholder)
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, dead_code, clippy::ptr_arg)]
 fn validate_code_patterns(
     _rust_file: &Path,
     _lines: &[&str],

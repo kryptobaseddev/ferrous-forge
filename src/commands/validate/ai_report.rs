@@ -4,7 +4,7 @@ use super::{markdown::generate_markdown_report, utils};
 use crate::{validation::Violation, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tokio::fs;
 
 /// AI-friendly compliance report structure
@@ -110,7 +110,7 @@ pub async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]
     Ok(())
 }
 
-async fn setup_reports_directory(project_path: &PathBuf) -> Result<PathBuf> {
+async fn setup_reports_directory(project_path: &Path) -> Result<PathBuf> {
     let reports_dir = project_path.join(".ferrous-forge").join("reports");
     fs::create_dir_all(&reports_dir).await?;
     Ok(reports_dir)
@@ -226,7 +226,7 @@ fn get_fix_strategy(vtype: &str) -> (String, String, String) {
 }
 
 fn build_ai_report(
-    project_path: &PathBuf,
+    project_path: &Path,
     timestamp: &chrono::DateTime<chrono::Utc>,
     total_violations: usize,
     ai_violations: Vec<AIViolation>,
@@ -257,7 +257,7 @@ fn build_ai_report(
 }
 
 async fn save_and_link_reports(
-    reports_dir: &PathBuf,
+    reports_dir: &Path,
     timestamp_str: &str,
     report: &AIReport,
 ) -> Result<()> {
@@ -278,7 +278,7 @@ async fn save_and_link_reports(
     Ok(())
 }
 
-fn print_report_summary(reports_dir: &PathBuf, timestamp_str: &str) {
+fn print_report_summary(reports_dir: &Path, timestamp_str: &str) {
     println!("🤖 AI compliance report generated:");
     println!(
         "  📄 JSON: {}/ai_compliance_{}.json",

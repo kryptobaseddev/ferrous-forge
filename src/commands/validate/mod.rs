@@ -13,7 +13,7 @@ use crate::{
     Result,
 };
 use console::style;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Execute the validate command
 pub async fn execute(path: Option<PathBuf>, ai_report: bool) -> Result<()> {
@@ -38,7 +38,7 @@ pub async fn execute(path: Option<PathBuf>, ai_report: bool) -> Result<()> {
     Ok(())
 }
 
-fn print_header(project_path: &PathBuf) {
+fn print_header(project_path: &Path) {
     println!();
     println!("{}", style("🦀 Running Ferrous Forge validation...").bold());
     println!();

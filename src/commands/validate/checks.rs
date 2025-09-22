@@ -1,17 +1,17 @@
 //! Additional validation checks (documentation, formatting, security)
 
 use crate::{doc_coverage, formatting, security, validation::RustValidator, Result};
-use std::path::PathBuf;
+use std::path::Path;
 
 /// Run all additional checks (documentation, formatting, security)
-pub async fn run_additional_checks(project_path: &PathBuf) {
+pub async fn run_additional_checks(project_path: &Path) {
     check_documentation_coverage(project_path).await;
     check_code_formatting(project_path).await;
     run_security_audit_check(project_path).await;
 }
 
 /// Check documentation coverage
-async fn check_documentation_coverage(project_path: &PathBuf) {
+async fn check_documentation_coverage(project_path: &Path) {
     println!("📚 Checking documentation coverage...");
 
     // Add small delay to ensure proper output ordering
@@ -32,7 +32,7 @@ async fn check_documentation_coverage(project_path: &PathBuf) {
 }
 
 /// Check code formatting
-async fn check_code_formatting(project_path: &PathBuf) {
+async fn check_code_formatting(project_path: &Path) {
     println!("📝 Checking code formatting...");
 
     match formatting::check_formatting(project_path).await {
@@ -53,7 +53,7 @@ async fn check_code_formatting(project_path: &PathBuf) {
 }
 
 /// Run security audit check
-async fn run_security_audit_check(project_path: &PathBuf) {
+async fn run_security_audit_check(project_path: &Path) {
     println!("🔒 Running security audit...");
 
     match security::run_security_audit(project_path).await {
