@@ -1,7 +1,12 @@
 //! Test coverage module tests
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::module_inception)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::module_inception
+)]
 mod tests {
     use super::super::*;
     use std::collections::HashMap;
