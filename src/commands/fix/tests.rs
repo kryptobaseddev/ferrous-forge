@@ -19,13 +19,16 @@ fn test_safe_unwrap_fix() {
     let context_code = "fn test() -> Result<()> {\n    let x = Some(5).unwrap();\n}";
     let context = analyze_file_context(context_code);
 
-    let fix_result = strategies::attempt_safe_unwrap_fix(&violation, context_code, &context);
+    // Get the specific line for fixing
+    let lines: Vec<&str> = context_code.lines().collect();
+    let line = lines[1]; // Line with unwrap
+    let fix_result = strategies::fix_violation_in_line(line, &violation, &context);
 
     match fix_result {
         FixResult::Fixed(new_code) => {
             assert!(new_code.contains("Some(5)?"));
         }
-        _ => assert!(false, "Expected fix to be applied"),
+        _ => panic!("Expected fix to be applied"),
     }
 }
 
@@ -43,13 +46,16 @@ fn test_safe_unwrap_fix_skip_test() {
     let context_code = "#[test]\nfn test_something() {\n    let x = Some(5).unwrap();\n}";
     let context = analyze_file_context(context_code);
 
-    let fix_result = strategies::attempt_safe_unwrap_fix(&violation, context_code, &context);
+    // Get the specific line for fixing
+    let lines: Vec<&str> = context_code.lines().collect();
+    let line = lines[2]; // Line with unwrap is on third line (index 2)
+    let fix_result = strategies::fix_violation_in_line(line, &violation, &context);
 
     match fix_result {
         FixResult::Skipped(_) => {
             // Expected - test code should be skipped
         }
-        _ => assert!(false, "Expected fix to be skipped for test file"),
+        _ => panic!("Expected fix to be skipped for test file"),
     }
 }
 

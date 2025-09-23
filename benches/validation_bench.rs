@@ -80,7 +80,7 @@ mod tests {
         b.iter(|| {
             rt.block_on(async {
                 let mut violations = Vec::new();
-                let patterns = ValidationPatterns::new();
+                let patterns = ValidationPatterns::new().expect("Failed to create patterns");
                 validate_rust_file(black_box(&rust_file), &mut violations, &patterns)
                     .await
                     .expect("Failed to validate");

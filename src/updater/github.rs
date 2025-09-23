@@ -21,8 +21,8 @@ struct GitHubAsset {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 struct GitHubReleases {
-    #[allow(dead_code)]
     releases: Vec<GitHubRelease>,
 }
 

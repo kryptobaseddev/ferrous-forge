@@ -245,6 +245,7 @@ pub fn suggest_documentation(item_type: &str, item_name: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used, clippy::expect_used)]
     use super::*;
 
     #[test]
