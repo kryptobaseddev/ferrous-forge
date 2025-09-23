@@ -148,26 +148,15 @@
 <a href=#148 id=148 data-nosnippet>148</a>
 <a href=#149 id=149 data-nosnippet>149</a>    <span class="attr">#[test]
 <a href=#150 id=150 data-nosnippet>150</a>    </span><span class="kw">fn </span>test_get_stage_for_check() {
-<a href=#151 id=151 data-nosnippet>151</a>        <span class="kw">let </span>config = SafetyConfig::default();
-<a href=#152 id=152 data-nosnippet>152</a>        <span class="kw">let </span>temp_dir = TempDir::new().unwrap();
-<a href=#153 id=153 data-nosnippet>153</a>        <span class="kw">let </span>bypass_manager = BypassManager::new(<span class="kw-2">&amp;</span>config.bypass).unwrap();
-<a href=#154 id=154 data-nosnippet>154</a>
-<a href=#155 id=155 data-nosnippet>155</a>        <span class="kw">let </span>execution_manager = ExecutionManager::new(<span class="bool-val">false</span>, <span class="bool-val">false</span>);
-<a href=#156 id=156 data-nosnippet>156</a>        <span class="kw">let </span>pipeline = SafetyPipeline {
-<a href=#157 id=157 data-nosnippet>157</a>            config,
-<a href=#158 id=158 data-nosnippet>158</a>            project_path: temp_dir.path().to_path_buf(),
-<a href=#159 id=159 data-nosnippet>159</a>            bypass_manager,
-<a href=#160 id=160 data-nosnippet>160</a>            execution_manager,
-<a href=#161 id=161 data-nosnippet>161</a>        };
-<a href=#162 id=162 data-nosnippet>162</a>
-<a href=#163 id=163 data-nosnippet>163</a>        <span class="macro">assert_eq!</span>(
-<a href=#164 id=164 data-nosnippet>164</a>            get_stage_for_check(CheckType::Format),
-<a href=#165 id=165 data-nosnippet>165</a>            PipelineStage::PreCommit
-<a href=#166 id=166 data-nosnippet>166</a>        );
-<a href=#167 id=167 data-nosnippet>167</a>        <span class="macro">assert_eq!</span>(get_stage_for_check(CheckType::Test), PipelineStage::PrePush);
-<a href=#168 id=168 data-nosnippet>168</a>        <span class="macro">assert_eq!</span>(
-<a href=#169 id=169 data-nosnippet>169</a>            get_stage_for_check(CheckType::Semver),
-<a href=#170 id=170 data-nosnippet>170</a>            PipelineStage::Publish
-<a href=#171 id=171 data-nosnippet>171</a>        );
-<a href=#172 id=172 data-nosnippet>172</a>    }
-<a href=#173 id=173 data-nosnippet>173</a>}</code></pre></div></section></main></body></html>
+<a href=#151 id=151 data-nosnippet>151</a>        <span class="comment">// Test the get_stage_for_check function directly
+<a href=#152 id=152 data-nosnippet>152</a>        </span><span class="macro">assert_eq!</span>(
+<a href=#153 id=153 data-nosnippet>153</a>            get_stage_for_check(CheckType::Format),
+<a href=#154 id=154 data-nosnippet>154</a>            PipelineStage::PreCommit
+<a href=#155 id=155 data-nosnippet>155</a>        );
+<a href=#156 id=156 data-nosnippet>156</a>        <span class="macro">assert_eq!</span>(get_stage_for_check(CheckType::Test), PipelineStage::PrePush);
+<a href=#157 id=157 data-nosnippet>157</a>        <span class="macro">assert_eq!</span>(
+<a href=#158 id=158 data-nosnippet>158</a>            get_stage_for_check(CheckType::Semver),
+<a href=#159 id=159 data-nosnippet>159</a>            PipelineStage::Publish
+<a href=#160 id=160 data-nosnippet>160</a>        );
+<a href=#161 id=161 data-nosnippet>161</a>    }
+<a href=#162 id=162 data-nosnippet>162</a>}</code></pre></div></section></main></body></html>
