@@ -17,10 +17,7 @@ pub fn validate_file_size(
             violation_type: ViolationType::FileTooLarge,
             file: rust_file.to_path_buf(),
             line: line_count,
-            message: format!(
-                "File has {} lines, maximum allowed is 300",
-                line_count
-            ),
+            message: format!("File has {} lines, maximum allowed is 300", line_count),
             severity: Severity::Error,
         });
     }

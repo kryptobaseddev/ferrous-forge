@@ -1,8 +1,8 @@
 //! Project-level formatting operations
 
-use crate::{Error, Result};
 use super::types::FormatResult;
 use super::utils::ensure_rustfmt_installed;
+use crate::{Error, Result};
 use std::path::Path;
 use std::process::Command;
 use tokio::fs;

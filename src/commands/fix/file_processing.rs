@@ -66,11 +66,7 @@ fn handle_successful_fix(
 }
 
 /// Fix violations in a specific file
-fn fix_file_violations(
-    file_path: &Path,
-    violations: &[Violation],
-    dry_run: bool,
-) -> Result<usize> {
+fn fix_file_violations(file_path: &Path, violations: &[Violation], dry_run: bool) -> Result<usize> {
     let content = fs::read_to_string(file_path).map_err(|e| {
         Error::validation(format!(
             "Failed to read file {}: {}",

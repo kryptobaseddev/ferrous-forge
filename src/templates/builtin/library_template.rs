@@ -1,6 +1,8 @@
 //! Library template
 
-use crate::templates::{BuiltinTemplate, TemplateFile, TemplateKind, TemplateManifest, TemplateVariable};
+use crate::templates::{
+    BuiltinTemplate, TemplateFile, TemplateKind, TemplateManifest, TemplateVariable,
+};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -8,7 +10,7 @@ use std::path::PathBuf;
 pub fn create_library_template() -> BuiltinTemplate {
     let manifest = create_library_manifest();
     let files = create_library_files();
-    
+
     BuiltinTemplate { manifest, files }
 }
 
@@ -50,18 +52,21 @@ fn create_library_manifest() -> TemplateManifest {
     // Add post-generate commands
     manifest.add_post_generate("cargo fmt".to_string());
     manifest.add_post_generate("cargo test".to_string());
-    
+
     manifest
 }
 
 /// Create the files for library template
 fn create_library_files() -> HashMap<String, String> {
     let mut files = HashMap::new();
-    
+
     files.insert("Cargo.toml".to_string(), cargo_toml_content());
     files.insert("src/lib.rs".to_string(), lib_rs_content());
-    files.insert(".ferrous-forge/config.toml".to_string(), config_toml_content());
-    
+    files.insert(
+        ".ferrous-forge/config.toml".to_string(),
+        config_toml_content(),
+    );
+
     files
 }
 
@@ -86,7 +91,8 @@ serde = { version = "1.0", features = ["derive"] }
 [dev-dependencies]
 tempfile = "3.10"
 tokio = { version = "1.40", features = ["test-util"] }
-"#.to_string()
+"#
+    .to_string()
 }
 
 /// src/lib.rs content
@@ -142,7 +148,8 @@ mod tests {
         // Add assertions
     }
 }
-"#.to_string()
+"#
+    .to_string()
 }
 
 /// .ferrous-forge/config.toml content
@@ -155,5 +162,6 @@ max_file_length = 300
 max_function_length = 50
 allow_unwrap = false
 allow_expect = false
-"#.to_string()
+"#
+    .to_string()
 }

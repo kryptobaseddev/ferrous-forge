@@ -1,8 +1,8 @@
 //! Cargo.toml operations for edition migration
 
-use crate::Result;
 use super::types::{MigrationResult, MigrationStep};
-use super::{EditionMigrator, Edition};
+use super::{Edition, EditionMigrator};
+use crate::Result;
 use tokio::fs;
 
 impl EditionMigrator {
@@ -17,9 +17,19 @@ impl EditionMigrator {
 
         // Replace edition line
         let new_content = if content.contains("edition") {
-            content.replace("edition = \"2015\"", &format!("edition = \"{}\"", target_edition))
-                .replace("edition = \"2018\"", &format!("edition = \"{}\"", target_edition))
-                .replace("edition = \"2021\"", &format!("edition = \"{}\"", target_edition))
+            content
+                .replace(
+                    "edition = \"2015\"",
+                    &format!("edition = \"{}\"", target_edition),
+                )
+                .replace(
+                    "edition = \"2018\"",
+                    &format!("edition = \"{}\"", target_edition),
+                )
+                .replace(
+                    "edition = \"2021\"",
+                    &format!("edition = \"{}\"", target_edition),
+                )
         } else {
             // Add edition if not present
             let lines: Vec<&str> = content.lines().collect();

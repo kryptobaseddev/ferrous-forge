@@ -1,15 +1,15 @@
 //! File-level validation checks
 
 mod cargo_validation;
-mod test_utils;
-mod size_validation;
 mod pattern_validation;
+mod size_validation;
+mod test_utils;
 
 // Re-export functions
 pub use cargo_validation::validate_cargo_toml;
-use test_utils::{is_test_file, check_allow_attributes};
-use size_validation::validate_file_size;
 use pattern_validation::validate_patterns;
+use size_validation::validate_file_size;
+use test_utils::{check_allow_attributes, is_test_file};
 
 use super::patterns::ValidationPatterns;
 use crate::validation::Violation;

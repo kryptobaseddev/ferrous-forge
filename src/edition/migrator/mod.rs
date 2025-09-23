@@ -1,10 +1,10 @@
 //! Edition migration assistance
 
-pub mod types;
 mod backup;
 mod cargo_ops;
 mod code_migration;
 mod testing;
+pub mod types;
 
 use crate::Result;
 use std::path::{Path, PathBuf};
@@ -51,7 +51,8 @@ impl EditionMigrator {
         result.status = MigrationStatus::InProgress;
 
         // Execute migration steps
-        self.execute_migration_steps(target_edition, &options, &mut result).await?;
+        self.execute_migration_steps(target_edition, &options, &mut result)
+            .await?;
 
         result.status = MigrationStatus::Completed;
         Ok(result)

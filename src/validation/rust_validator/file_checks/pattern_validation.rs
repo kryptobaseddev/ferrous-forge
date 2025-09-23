@@ -44,14 +44,15 @@ pub fn validate_patterns(
         }
 
         // Check if we're entering a test module
-        if (line_stripped.starts_with("mod tests") || 
-            (line_stripped.starts_with("mod ") && line_stripped.contains("test"))) && 
-           next_module_is_test {
+        if (line_stripped.starts_with("mod tests")
+            || (line_stripped.starts_with("mod ") && line_stripped.contains("test")))
+            && next_module_is_test
+        {
             in_test_module = true;
             test_module_depth = Some(brace_depth);
             next_module_is_test = false;
         }
-        
+
         // Also handle case where #[cfg(test)] and mod are on same line
         if line_stripped.contains("#[cfg(test)]") && line_stripped.contains("mod") {
             in_test_module = true;
@@ -97,7 +98,7 @@ pub fn validate_patterns(
 
             // Enhanced string detection
             let not_in_unused_literal = !is_in_string_literal(line, "_unused")
-                && !line.contains("r\"") 
+                && !line.contains("r\"")
                 && !line.contains("r#\"");
             let not_in_param_literal = !is_in_string_literal(line, "_param");
 

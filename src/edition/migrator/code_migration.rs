@@ -1,8 +1,8 @@
 //! Code migration operations for edition upgrades
 
-use crate::Result;
 use super::types::{MigrationResult, MigrationStep};
-use super::{EditionMigrator, Edition};
+use super::{Edition, EditionMigrator};
+use crate::Result;
 use std::process::Command;
 
 impl EditionMigrator {
@@ -16,7 +16,7 @@ impl EditionMigrator {
             Edition::Edition2018 => self.migrate_to_2018(result).await?,
             Edition::Edition2021 => self.migrate_to_2021(result).await?,
             Edition::Edition2024 => self.migrate_to_2024(result).await?,
-            _ => {}, // No migrations needed for older editions
+            _ => {} // No migrations needed for older editions
         }
 
         Ok(())

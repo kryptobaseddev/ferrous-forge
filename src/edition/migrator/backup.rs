@@ -1,8 +1,8 @@
 //! Backup operations for edition migration
 
-use crate::{Error, Result};
 use super::types::{MigrationResult, MigrationStep};
 use super::EditionMigrator;
+use crate::{Error, Result};
 
 impl EditionMigrator {
     /// Create backup of project

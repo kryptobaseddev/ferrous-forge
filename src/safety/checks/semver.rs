@@ -70,10 +70,7 @@ async fn load_cargo_manifest(
 }
 
 /// Validate version information from Cargo.toml
-fn validate_version_from_manifest(
-    manifest: &toml::Value,
-    result: &mut CheckResult,
-) -> Result<()> {
+fn validate_version_from_manifest(manifest: &toml::Value, result: &mut CheckResult) -> Result<()> {
     let version_str = manifest
         .get("package")
         .and_then(|p| p.get("version"))

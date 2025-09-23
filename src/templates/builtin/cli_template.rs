@@ -1,6 +1,8 @@
 //! CLI application template
 
-use crate::templates::{BuiltinTemplate, TemplateFile, TemplateKind, TemplateManifest, TemplateVariable};
+use crate::templates::{
+    BuiltinTemplate, TemplateFile, TemplateKind, TemplateManifest, TemplateVariable,
+};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -8,7 +10,7 @@ use std::path::PathBuf;
 pub fn create_cli_template() -> BuiltinTemplate {
     let manifest = create_cli_manifest();
     let files = create_cli_files();
-    
+
     BuiltinTemplate { manifest, files }
 }
 
@@ -55,19 +57,22 @@ fn create_cli_manifest() -> TemplateManifest {
     // Add post-generate commands
     manifest.add_post_generate("cargo fmt".to_string());
     manifest.add_post_generate("ferrous-forge validate .".to_string());
-    
+
     manifest
 }
 
 /// Create the files for CLI template
 fn create_cli_files() -> HashMap<String, String> {
     let mut files = HashMap::new();
-    
+
     files.insert("Cargo.toml".to_string(), cargo_toml_content());
     files.insert("src/main.rs".to_string(), main_rs_content());
     files.insert("src/lib.rs".to_string(), lib_rs_content());
-    files.insert(".ferrous-forge/config.toml".to_string(), config_toml_content());
-    
+    files.insert(
+        ".ferrous-forge/config.toml".to_string(),
+        config_toml_content(),
+    );
+
     files
 }
 
@@ -95,7 +100,8 @@ tempfile = "3.10"
 [[bin]]
 name = "{{project_name}}"
 path = "src/main.rs"
-"#.to_string()
+"#
+    .to_string()
 }
 
 /// src/main.rs content
@@ -147,7 +153,8 @@ async fn main() -> Result<()> {
     // Run the application
     run(config).await
 }
-"#.to_string()
+"#
+    .to_string()
 }
 
 /// src/lib.rs content
@@ -195,7 +202,8 @@ mod tests {
         assert!(!config.verbose);
     }
 }
-"#.to_string()
+"#
+    .to_string()
 }
 
 /// .ferrous-forge/config.toml content
@@ -208,5 +216,6 @@ max_file_length = 300
 max_function_length = 50
 allow_unwrap = false
 allow_expect = false
-"#.to_string()
+"#
+    .to_string()
 }
