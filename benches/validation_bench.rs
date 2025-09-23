@@ -4,7 +4,13 @@
 #![allow(clippy::expect_used, clippy::unwrap_used)] // Benchmarks need unwrap/expect for setup
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use ferrous_forge::validation::{rust_validator::file_checks::validate_cargo_toml, RustValidator};
+use ferrous_forge::validation::{
+    rust_validator::{
+        file_checks::{validate_cargo_toml, validate_rust_file},
+        patterns::ValidationPatterns,
+    },
+    RustValidator,
+};
 use tempfile::TempDir;
 use tokio::runtime::Runtime;
 
@@ -30,8 +36,6 @@ serde = "1.0"
     c.bench_function("validate_cargo_toml", |b| {
         b.iter(|| {
             rt.block_on(async {
-                let validator = RustValidator::new(temp_dir.path().to_path_buf())
-                    .expect("Failed to create validator");
                 let mut violations = Vec::new();
                 validate_cargo_toml(black_box(&cargo_toml), &mut violations)
                     .await
@@ -75,11 +79,9 @@ mod tests {
     c.bench_function("validate_rust_file", |b| {
         b.iter(|| {
             rt.block_on(async {
-                let validator = RustValidator::new(temp_dir.path().to_path_buf())
-                    .expect("Failed to create validator");
                 let mut violations = Vec::new();
-                validator
-                    .validate_rust_file(black_box(&rust_file), &mut violations)
+                let patterns = ValidationPatterns::new();
+                validate_rust_file(black_box(&rust_file), &mut violations, &patterns)
                     .await
                     .expect("Failed to validate");
                 violations
