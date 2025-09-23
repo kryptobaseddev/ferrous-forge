@@ -104,69 +104,75 @@
 <a href=#104 id=104 data-nosnippet>104</a>        output.push_str(<span class="string">"🎯 Threshold Status:\n"</span>);
 <a href=#105 id=105 data-nosnippet>105</a>        output.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
 <a href=#106 id=106 data-nosnippet>106</a>            <span class="string">"  {} Lines:     {:.1}% (min: {:.1}%)\n"</span>,
-<a href=#107 id=107 data-nosnippet>107</a>            line_status, report.line_coverage, <span class="self">self</span>.config().min_line_coverage
-<a href=#108 id=108 data-nosnippet>108</a>        ));
-<a href=#109 id=109 data-nosnippet>109</a>        output.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-<a href=#110 id=110 data-nosnippet>110</a>            <span class="string">"  {} Functions: {:.1}% (min: {:.1}%)\n"</span>,
-<a href=#111 id=111 data-nosnippet>111</a>            func_status, report.function_coverage, <span class="self">self</span>.config().min_function_coverage
-<a href=#112 id=112 data-nosnippet>112</a>        ));
-<a href=#113 id=113 data-nosnippet>113</a>        output.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-<a href=#114 id=114 data-nosnippet>114</a>            <span class="string">"  {} Branches:  {:.1}% (min: {:.1}%)\n\n"</span>,
-<a href=#115 id=115 data-nosnippet>115</a>            branch_status, report.branch_coverage, <span class="self">self</span>.config().min_branch_coverage
+<a href=#107 id=107 data-nosnippet>107</a>            line_status,
+<a href=#108 id=108 data-nosnippet>108</a>            report.line_coverage,
+<a href=#109 id=109 data-nosnippet>109</a>            <span class="self">self</span>.config().min_line_coverage
+<a href=#110 id=110 data-nosnippet>110</a>        ));
+<a href=#111 id=111 data-nosnippet>111</a>        output.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+<a href=#112 id=112 data-nosnippet>112</a>            <span class="string">"  {} Functions: {:.1}% (min: {:.1}%)\n"</span>,
+<a href=#113 id=113 data-nosnippet>113</a>            func_status,
+<a href=#114 id=114 data-nosnippet>114</a>            report.function_coverage,
+<a href=#115 id=115 data-nosnippet>115</a>            <span class="self">self</span>.config().min_function_coverage
 <a href=#116 id=116 data-nosnippet>116</a>        ));
-<a href=#117 id=117 data-nosnippet>117</a>    }
-<a href=#118 id=118 data-nosnippet>118</a>
-<a href=#119 id=119 data-nosnippet>119</a>    <span class="doccomment">/// Add low coverage files section
-<a href=#120 id=120 data-nosnippet>120</a>    </span><span class="kw">fn </span>add_low_coverage_files(<span class="kw-2">&amp;</span><span class="self">self</span>, output: <span class="kw-2">&amp;mut </span>String, report: <span class="kw-2">&amp;</span>CoverageReport) {
-<a href=#121 id=121 data-nosnippet>121</a>        <span class="kw">let </span><span class="kw-2">mut </span>low_coverage_files: Vec&lt;<span class="kw">_</span>&gt; = report
-<a href=#122 id=122 data-nosnippet>122</a>            .file_coverage
-<a href=#123 id=123 data-nosnippet>123</a>            .values()
-<a href=#124 id=124 data-nosnippet>124</a>            .filter(|file| file.line_coverage &lt; <span class="self">self</span>.config().min_line_coverage)
-<a href=#125 id=125 data-nosnippet>125</a>            .collect();
-<a href=#126 id=126 data-nosnippet>126</a>        low_coverage_files.sort_by(|a, b| {
-<a href=#127 id=127 data-nosnippet>127</a>            a.line_coverage
-<a href=#128 id=128 data-nosnippet>128</a>                .partial_cmp(<span class="kw-2">&amp;</span>b.line_coverage)
-<a href=#129 id=129 data-nosnippet>129</a>                .unwrap_or(std::cmp::Ordering::Equal)
-<a href=#130 id=130 data-nosnippet>130</a>        });
-<a href=#131 id=131 data-nosnippet>131</a>
-<a href=#132 id=132 data-nosnippet>132</a>        <span class="kw">if </span>!low_coverage_files.is_empty() {
-<a href=#133 id=133 data-nosnippet>133</a>            output.push_str(<span class="string">"⚠️  Files Below Threshold:\n"</span>);
-<a href=#134 id=134 data-nosnippet>134</a>            <span class="kw">for </span>file <span class="kw">in </span>low_coverage_files.iter().take(<span class="number">5</span>) {
-<a href=#135 id=135 data-nosnippet>135</a>                output.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-<a href=#136 id=136 data-nosnippet>136</a>                    <span class="string">"  • {}: {:.1}%\n"</span>,
-<a href=#137 id=137 data-nosnippet>137</a>                    file.file_path, file.line_coverage
-<a href=#138 id=138 data-nosnippet>138</a>                ));
-<a href=#139 id=139 data-nosnippet>139</a>            }
-<a href=#140 id=140 data-nosnippet>140</a>            <span class="kw">if </span>low_coverage_files.len() &gt; <span class="number">5 </span>{
+<a href=#117 id=117 data-nosnippet>117</a>        output.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+<a href=#118 id=118 data-nosnippet>118</a>            <span class="string">"  {} Branches:  {:.1}% (min: {:.1}%)\n\n"</span>,
+<a href=#119 id=119 data-nosnippet>119</a>            branch_status,
+<a href=#120 id=120 data-nosnippet>120</a>            report.branch_coverage,
+<a href=#121 id=121 data-nosnippet>121</a>            <span class="self">self</span>.config().min_branch_coverage
+<a href=#122 id=122 data-nosnippet>122</a>        ));
+<a href=#123 id=123 data-nosnippet>123</a>    }
+<a href=#124 id=124 data-nosnippet>124</a>
+<a href=#125 id=125 data-nosnippet>125</a>    <span class="doccomment">/// Add low coverage files section
+<a href=#126 id=126 data-nosnippet>126</a>    </span><span class="kw">fn </span>add_low_coverage_files(<span class="kw-2">&amp;</span><span class="self">self</span>, output: <span class="kw-2">&amp;mut </span>String, report: <span class="kw-2">&amp;</span>CoverageReport) {
+<a href=#127 id=127 data-nosnippet>127</a>        <span class="kw">let </span><span class="kw-2">mut </span>low_coverage_files: Vec&lt;<span class="kw">_</span>&gt; = report
+<a href=#128 id=128 data-nosnippet>128</a>            .file_coverage
+<a href=#129 id=129 data-nosnippet>129</a>            .values()
+<a href=#130 id=130 data-nosnippet>130</a>            .filter(|file| file.line_coverage &lt; <span class="self">self</span>.config().min_line_coverage)
+<a href=#131 id=131 data-nosnippet>131</a>            .collect();
+<a href=#132 id=132 data-nosnippet>132</a>        low_coverage_files.sort_by(|a, b| {
+<a href=#133 id=133 data-nosnippet>133</a>            a.line_coverage
+<a href=#134 id=134 data-nosnippet>134</a>                .partial_cmp(<span class="kw-2">&amp;</span>b.line_coverage)
+<a href=#135 id=135 data-nosnippet>135</a>                .unwrap_or(std::cmp::Ordering::Equal)
+<a href=#136 id=136 data-nosnippet>136</a>        });
+<a href=#137 id=137 data-nosnippet>137</a>
+<a href=#138 id=138 data-nosnippet>138</a>        <span class="kw">if </span>!low_coverage_files.is_empty() {
+<a href=#139 id=139 data-nosnippet>139</a>            output.push_str(<span class="string">"⚠️  Files Below Threshold:\n"</span>);
+<a href=#140 id=140 data-nosnippet>140</a>            <span class="kw">for </span>file <span class="kw">in </span>low_coverage_files.iter().take(<span class="number">5</span>) {
 <a href=#141 id=141 data-nosnippet>141</a>                output.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-<a href=#142 id=142 data-nosnippet>142</a>                    <span class="string">"  ... and {} more files\n"</span>,
-<a href=#143 id=143 data-nosnippet>143</a>                    low_coverage_files.len() - <span class="number">5
-<a href=#144 id=144 data-nosnippet>144</a>                </span>));
+<a href=#142 id=142 data-nosnippet>142</a>                    <span class="string">"  • {}: {:.1}%\n"</span>,
+<a href=#143 id=143 data-nosnippet>143</a>                    file.file_path, file.line_coverage
+<a href=#144 id=144 data-nosnippet>144</a>                ));
 <a href=#145 id=145 data-nosnippet>145</a>            }
-<a href=#146 id=146 data-nosnippet>146</a>            output.push(<span class="string">'\n'</span>);
-<a href=#147 id=147 data-nosnippet>147</a>        }
-<a href=#148 id=148 data-nosnippet>148</a>    }
-<a href=#149 id=149 data-nosnippet>149</a>
-<a href=#150 id=150 data-nosnippet>150</a>    <span class="doccomment">/// Add improvement suggestions section
-<a href=#151 id=151 data-nosnippet>151</a>    </span><span class="kw">fn </span>add_improvement_suggestions(<span class="kw-2">&amp;</span><span class="self">self</span>, output: <span class="kw-2">&amp;mut </span>String) {
-<a href=#152 id=152 data-nosnippet>152</a>        output.push_str(<span class="string">"💡 To improve coverage:\n"</span>);
-<a href=#153 id=153 data-nosnippet>153</a>        output.push_str(<span class="string">"  • Add tests for uncovered code paths\n"</span>);
-<a href=#154 id=154 data-nosnippet>154</a>        output.push_str(<span class="string">"  • Remove dead code\n"</span>);
-<a href=#155 id=155 data-nosnippet>155</a>        output.push_str(<span class="string">"  • Test error conditions and edge cases\n"</span>);
-<a href=#156 id=156 data-nosnippet>156</a>        output.push_str(<span class="string">"  • Use property-based testing\n"</span>);
-<a href=#157 id=157 data-nosnippet>157</a>    }
-<a href=#158 id=158 data-nosnippet>158</a>
-<a href=#159 id=159 data-nosnippet>159</a>    <span class="doccomment">/// Check coverage for a project
-<a href=#160 id=160 data-nosnippet>160</a>    </span><span class="kw">pub async fn </span>check_project_coverage(<span class="kw-2">&amp;</span><span class="self">self</span>, project_path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-<a href=#161 id=161 data-nosnippet>161</a>        <span class="macro">println!</span>(<span class="string">"🧪 Checking test coverage..."</span>);
-<a href=#162 id=162 data-nosnippet>162</a>
-<a href=#163 id=163 data-nosnippet>163</a>        <span class="kw">let </span>report = <span class="self">self</span>.run_coverage(project_path).<span class="kw">await</span><span class="question-mark">?</span>;
+<a href=#146 id=146 data-nosnippet>146</a>            <span class="kw">if </span>low_coverage_files.len() &gt; <span class="number">5 </span>{
+<a href=#147 id=147 data-nosnippet>147</a>                output.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+<a href=#148 id=148 data-nosnippet>148</a>                    <span class="string">"  ... and {} more files\n"</span>,
+<a href=#149 id=149 data-nosnippet>149</a>                    low_coverage_files.len() - <span class="number">5
+<a href=#150 id=150 data-nosnippet>150</a>                </span>));
+<a href=#151 id=151 data-nosnippet>151</a>            }
+<a href=#152 id=152 data-nosnippet>152</a>            output.push(<span class="string">'\n'</span>);
+<a href=#153 id=153 data-nosnippet>153</a>        }
+<a href=#154 id=154 data-nosnippet>154</a>    }
+<a href=#155 id=155 data-nosnippet>155</a>
+<a href=#156 id=156 data-nosnippet>156</a>    <span class="doccomment">/// Add improvement suggestions section
+<a href=#157 id=157 data-nosnippet>157</a>    </span><span class="kw">fn </span>add_improvement_suggestions(<span class="kw-2">&amp;</span><span class="self">self</span>, output: <span class="kw-2">&amp;mut </span>String) {
+<a href=#158 id=158 data-nosnippet>158</a>        output.push_str(<span class="string">"💡 To improve coverage:\n"</span>);
+<a href=#159 id=159 data-nosnippet>159</a>        output.push_str(<span class="string">"  • Add tests for uncovered code paths\n"</span>);
+<a href=#160 id=160 data-nosnippet>160</a>        output.push_str(<span class="string">"  • Remove dead code\n"</span>);
+<a href=#161 id=161 data-nosnippet>161</a>        output.push_str(<span class="string">"  • Test error conditions and edge cases\n"</span>);
+<a href=#162 id=162 data-nosnippet>162</a>        output.push_str(<span class="string">"  • Use property-based testing\n"</span>);
+<a href=#163 id=163 data-nosnippet>163</a>    }
 <a href=#164 id=164 data-nosnippet>164</a>
-<a href=#165 id=165 data-nosnippet>165</a>        <span class="macro">println!</span>(<span class="string">"{}"</span>, <span class="self">self</span>.format_coverage_report(<span class="kw-2">&amp;</span>report));
-<a href=#166 id=166 data-nosnippet>166</a>
-<a href=#167 id=167 data-nosnippet>167</a>        <span class="self">self</span>.validate_coverage(<span class="kw-2">&amp;</span>report)<span class="question-mark">?</span>;
+<a href=#165 id=165 data-nosnippet>165</a>    <span class="doccomment">/// Check coverage for a project
+<a href=#166 id=166 data-nosnippet>166</a>    </span><span class="kw">pub async fn </span>check_project_coverage(<span class="kw-2">&amp;</span><span class="self">self</span>, project_path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<a href=#167 id=167 data-nosnippet>167</a>        <span class="macro">println!</span>(<span class="string">"🧪 Checking test coverage..."</span>);
 <a href=#168 id=168 data-nosnippet>168</a>
-<a href=#169 id=169 data-nosnippet>169</a>        <span class="macro">println!</span>(<span class="string">"✅ Coverage check completed successfully"</span>);
-<a href=#170 id=170 data-nosnippet>170</a>        <span class="prelude-val">Ok</span>(())
-<a href=#171 id=171 data-nosnippet>171</a>    }
-<a href=#172 id=172 data-nosnippet>172</a>}</code></pre></div></section></main></body></html>
+<a href=#169 id=169 data-nosnippet>169</a>        <span class="kw">let </span>report = <span class="self">self</span>.run_coverage(project_path).<span class="kw">await</span><span class="question-mark">?</span>;
+<a href=#170 id=170 data-nosnippet>170</a>
+<a href=#171 id=171 data-nosnippet>171</a>        <span class="macro">println!</span>(<span class="string">"{}"</span>, <span class="self">self</span>.format_coverage_report(<span class="kw-2">&amp;</span>report));
+<a href=#172 id=172 data-nosnippet>172</a>
+<a href=#173 id=173 data-nosnippet>173</a>        <span class="self">self</span>.validate_coverage(<span class="kw-2">&amp;</span>report)<span class="question-mark">?</span>;
+<a href=#174 id=174 data-nosnippet>174</a>
+<a href=#175 id=175 data-nosnippet>175</a>        <span class="macro">println!</span>(<span class="string">"✅ Coverage check completed successfully"</span>);
+<a href=#176 id=176 data-nosnippet>176</a>        <span class="prelude-val">Ok</span>(())
+<a href=#177 id=177 data-nosnippet>177</a>    }
+<a href=#178 id=178 data-nosnippet>178</a>}</code></pre></div></section></main></body></html>
