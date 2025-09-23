@@ -11,7 +11,6 @@ mod strategies;
 mod types;
 mod utils;
 
-
 use execution::execute_fix_process;
 pub use types::{FileContext, FilterOptions, FixConfig, FixResult, FunctionSignature};
 
