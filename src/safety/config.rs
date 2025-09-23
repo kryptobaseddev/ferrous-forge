@@ -200,30 +200,30 @@ impl SafetyConfig {
 
     /// Set stage-specific configuration values
     fn set_stage_config(&mut self, key: &str, value: &str) -> Result<()> {
-        let (stage, field) = key.split_once('.')
+        let (stage, field) = key
+            .split_once('.')
             .ok_or_else(|| Error::config(format!("Invalid config key format: {}", key)))?;
-        
+
         match (stage, field) {
             ("pre_commit", "enabled") => {
                 self.pre_commit.enabled = self.parse_bool(value, "pre_commit.enabled")?;
             }
             ("pre_commit", "timeout_seconds") => {
-                self.pre_commit.timeout_seconds = 
+                self.pre_commit.timeout_seconds =
                     self.parse_u64(value, "pre_commit.timeout_seconds")?;
             }
             ("pre_push", "enabled") => {
                 self.pre_push.enabled = self.parse_bool(value, "pre_push.enabled")?;
             }
             ("pre_push", "timeout_seconds") => {
-                self.pre_push.timeout_seconds = 
+                self.pre_push.timeout_seconds =
                     self.parse_u64(value, "pre_push.timeout_seconds")?;
             }
             ("publish", "enabled") => {
                 self.publish.enabled = self.parse_bool(value, "publish.enabled")?;
             }
             ("publish", "timeout_seconds") => {
-                self.publish.timeout_seconds = 
-                    self.parse_u64(value, "publish.timeout_seconds")?;
+                self.publish.timeout_seconds = self.parse_u64(value, "publish.timeout_seconds")?;
             }
             _ => return Err(Error::config(format!("Unknown safety config key: {}", key))),
         }
@@ -243,13 +243,15 @@ impl SafetyConfig {
 
     /// Parse boolean value with error context
     fn parse_bool(&self, value: &str, field: &str) -> Result<bool> {
-        value.parse()
+        value
+            .parse()
             .map_err(|_| Error::config(format!("Invalid boolean value for {}", field)))
     }
 
     /// Parse u64 value with error context
     fn parse_u64(&self, value: &str, field: &str) -> Result<u64> {
-        value.parse()
+        value
+            .parse()
             .map_err(|_| Error::config(format!("Invalid number for {}", field)))
     }
 

@@ -104,15 +104,21 @@ impl CoverageAnalyzer {
         output.push_str("🎯 Threshold Status:\n");
         output.push_str(&format!(
             "  {} Lines:     {:.1}% (min: {:.1}%)\n",
-            line_status, report.line_coverage, self.config().min_line_coverage
+            line_status,
+            report.line_coverage,
+            self.config().min_line_coverage
         ));
         output.push_str(&format!(
             "  {} Functions: {:.1}% (min: {:.1}%)\n",
-            func_status, report.function_coverage, self.config().min_function_coverage
+            func_status,
+            report.function_coverage,
+            self.config().min_function_coverage
         ));
         output.push_str(&format!(
             "  {} Branches:  {:.1}% (min: {:.1}%)\n\n",
-            branch_status, report.branch_coverage, self.config().min_branch_coverage
+            branch_status,
+            report.branch_coverage,
+            self.config().min_branch_coverage
         ));
     }
 

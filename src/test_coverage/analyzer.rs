@@ -191,25 +191,23 @@ fn process_file_coverage(
     let mut total_functions = 0;
 
     for (file_path, file_data) in files {
-        let (estimated_functions, estimated_functions_tested) = 
+        let (estimated_functions, estimated_functions_tested) =
             estimate_function_coverage(file_data);
 
         total_functions += estimated_functions;
         total_functions_tested += estimated_functions_tested;
 
         let coverage = create_file_coverage(
-            file_path, 
-            file_data, 
-            estimated_functions, 
+            file_path,
+            file_data,
+            estimated_functions,
             estimated_functions_tested,
         );
         file_coverage.insert(file_path.clone(), coverage);
     }
 
-    let function_coverage = calculate_function_coverage_percentage(
-        total_functions_tested, 
-        total_functions,
-    );
+    let function_coverage =
+        calculate_function_coverage_percentage(total_functions_tested, total_functions);
 
     (
         file_coverage,

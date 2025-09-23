@@ -6,10 +6,8 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use super::{
-    bypass::BypassManager,
-    config::SafetyConfig,
-    execution::ExecutionManager,
-    report::SafetyReport, PipelineStage, SafetyResult,
+    bypass::BypassManager, config::SafetyConfig, execution::ExecutionManager, report::SafetyReport,
+    PipelineStage, SafetyResult,
 };
 
 /// Main safety pipeline coordinator
@@ -81,7 +79,6 @@ impl SafetyPipeline {
         None
     }
 
-
     /// Finalize the report with duration and save
     async fn finalize_report(&self, report: &mut SafetyReport, start_time: Instant) {
         report.total_duration = start_time.elapsed();
@@ -120,8 +117,6 @@ impl SafetyPipeline {
             })
         }
     }
-
-
 
     /// Check if safety pipeline is enabled
     pub fn is_enabled(&self) -> bool {
@@ -167,10 +162,7 @@ mod tests {
             get_stage_for_check(CheckType::Format),
             PipelineStage::PreCommit
         );
-        assert_eq!(
-            get_stage_for_check(CheckType::Test),
-            PipelineStage::PrePush
-        );
+        assert_eq!(get_stage_for_check(CheckType::Test), PipelineStage::PrePush);
         assert_eq!(
             get_stage_for_check(CheckType::Semver),
             PipelineStage::Publish

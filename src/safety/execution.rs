@@ -39,7 +39,10 @@ impl ExecutionManager {
             None
         };
 
-        println!("🛡️  Ferrous Forge Safety Pipeline - {}", stage.display_name());
+        println!(
+            "🛡️  Ferrous Forge Safety Pipeline - {}",
+            stage.display_name()
+        );
         println!("{}", "=".repeat(50));
 
         multi_progress

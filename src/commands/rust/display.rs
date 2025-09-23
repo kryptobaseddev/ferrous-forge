@@ -120,8 +120,7 @@ pub fn display_recommendation_details(recommendation: &UpdateRecommendation, sta
         UpdateRecommendation::UpToDate => {
             display_up_to_date_recommendation(stable_only);
         }
-        UpdateRecommendation::MinorUpdate(info)
-        | UpdateRecommendation::MajorUpdate(info) => {
+        UpdateRecommendation::MinorUpdate(info) | UpdateRecommendation::MajorUpdate(info) => {
             display_update_recommendation(&info.latest);
         }
         UpdateRecommendation::SecurityUpdate(info) => {

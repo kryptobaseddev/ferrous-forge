@@ -9,7 +9,7 @@ use std::path::PathBuf;
 pub fn create_web_service_template() -> BuiltinTemplate {
     let manifest = create_web_service_manifest();
     let files = create_web_service_files();
-    
+
     BuiltinTemplate { manifest, files }
 }
 
@@ -71,7 +71,10 @@ fn create_web_service_files() -> HashMap<String, String> {
     files.insert("Cargo.toml".to_string(), create_cargo_toml_content());
     files.insert("src/main.rs".to_string(), create_main_rs_content());
     files.insert("src/lib.rs".to_string(), create_lib_rs_content());
-    files.insert(".ferrous-forge/config.toml".to_string(), create_config_toml_content());
+    files.insert(
+        ".ferrous-forge/config.toml".to_string(),
+        create_config_toml_content(),
+    );
 
     files
 }
@@ -95,7 +98,8 @@ tracing-subscriber = "0.3"
 
 [dev-dependencies]
 tower-test = "0.4"
-"#.to_string()
+"#
+    .to_string()
 }
 
 /// Create main.rs content
@@ -168,7 +172,8 @@ async fn echo_handler(
     Json(payload)
 }
 
-"#.to_string()
+"#
+    .to_string()
 }
 
 /// Create lib.rs content
@@ -227,7 +232,8 @@ mod tests {
         assert!(result.is_err());
     }
 }
-"#.to_string()
+"#
+    .to_string()
 }
 
 /// Create config.toml content
@@ -251,5 +257,6 @@ pre_push = true
 # Auto-fix settings
 conservative_mode = true
 backup_files = true
-"#.to_string()
+"#
+    .to_string()
 }
