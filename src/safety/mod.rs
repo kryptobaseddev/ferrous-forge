@@ -11,6 +11,7 @@ use std::time::Duration;
 pub mod bypass;
 pub mod checks;
 pub mod config;
+pub mod execution;
 // pub mod installer;  // TODO: Implement installer
 pub mod pipeline;
 pub mod report;
@@ -143,32 +144,45 @@ impl CheckType {
     /// Get the checks for a specific pipeline stage
     pub fn for_stage(stage: PipelineStage) -> Vec<Self> {
         match stage {
-            PipelineStage::PreCommit => {
-                vec![Self::Format, Self::Clippy, Self::Build, Self::Standards]
-            }
-            PipelineStage::PrePush => vec![
-                Self::Format,
-                Self::Clippy,
-                Self::Build,
-                Self::Standards,
-                Self::Test,
-                Self::Audit,
-                Self::Doc,
-            ],
-            PipelineStage::Publish => vec![
-                Self::Format,
-                Self::Clippy,
-                Self::Build,
-                Self::Standards,
-                Self::Test,
-                Self::Audit,
-                Self::Doc,
-                Self::PublishDryRun,
-                Self::DocCoverage,
-                Self::License,
-                Self::Semver,
-            ],
+            PipelineStage::PreCommit => Self::pre_commit_checks(),
+            PipelineStage::PrePush => Self::pre_push_checks(),
+            PipelineStage::Publish => Self::publish_checks(),
         }
+    }
+
+    /// Get pre-commit checks (fast, essential)
+    fn pre_commit_checks() -> Vec<Self> {
+        vec![Self::Format, Self::Clippy, Self::Build, Self::Standards]
+    }
+
+    /// Get pre-push checks (comprehensive)
+    fn pre_push_checks() -> Vec<Self> {
+        vec![
+            Self::Format,
+            Self::Clippy,
+            Self::Build,
+            Self::Standards,
+            Self::Test,
+            Self::Audit,
+            Self::Doc,
+        ]
+    }
+
+    /// Get publish checks (exhaustive)
+    fn publish_checks() -> Vec<Self> {
+        vec![
+            Self::Format,
+            Self::Clippy,
+            Self::Build,
+            Self::Standards,
+            Self::Test,
+            Self::Audit,
+            Self::Doc,
+            Self::PublishDryRun,
+            Self::DocCoverage,
+            Self::License,
+            Self::Semver,
+        ]
     }
 }
 

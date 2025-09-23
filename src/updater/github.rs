@@ -31,6 +31,12 @@ pub async fn fetch_update_info(
     current_version: &Version,
     channel: &UpdateChannel,
 ) -> Result<Option<UpdateInfo>> {
+    let releases = fetch_github_releases().await?;
+    find_suitable_update(current_version, channel, &releases)
+}
+
+/// Fetch releases from GitHub API
+async fn fetch_github_releases() -> Result<Vec<GitHubRelease>> {
     let client = reqwest::Client::new();
     let url = "https://api.github.com/repos/ferrous-systems/ferrous-forge/releases";
 
@@ -48,49 +54,63 @@ pub async fn fetch_update_info(
         )));
     }
 
-    let releases: Vec<GitHubRelease> = response
+    response
         .json()
         .await
-        .map_err(|e| Error::network(format!("Failed to parse GitHub response: {}", e)))?;
+        .map_err(|e| Error::network(format!("Failed to parse GitHub response: {}", e)))
+}
 
+/// Find a suitable update from the list of releases
+fn find_suitable_update(
+    current_version: &Version,
+    channel: &UpdateChannel,
+    releases: &[GitHubRelease],
+) -> Result<Option<UpdateInfo>> {
     for release in releases {
-        // Skip prereleases for stable channel
-        if matches!(channel, UpdateChannel::Stable) && release.prerelease {
+        if !is_release_suitable(release, channel) {
             continue;
         }
 
-        // Parse version from tag
-        let tag_version = release.tag_name.trim_start_matches('v');
-        let version = match Version::parse(tag_version) {
-            Ok(v) => v,
-            Err(_) => continue, // Skip invalid versions
-        };
+        if let Some(version) = parse_release_version(&release.tag_name) {
+            if version <= *current_version {
+                continue;
+            }
 
-        // Only consider newer versions
-        if version <= *current_version {
-            continue;
-        }
-
-        // Find appropriate asset for current platform
-        let platform_suffix = get_platform_suffix();
-        let asset = release
-            .assets
-            .iter()
-            .find(|asset| asset.name.contains(&platform_suffix));
-
-        if let Some(asset) = asset {
-            return Ok(Some(UpdateInfo {
-                version,
-                download_url: asset.browser_download_url.clone(),
-                size: asset.size,
-                sha256: None, // GitHub doesn't provide SHA256 in API
-                notes: release.body,
-                critical: false, // Would need to parse from release notes
-            }));
+            if let Some(update_info) = create_update_info(version, release) {
+                return Ok(Some(update_info));
+            }
         }
     }
-
     Ok(None)
+}
+
+/// Check if a release is suitable for the given channel
+fn is_release_suitable(release: &GitHubRelease, channel: &UpdateChannel) -> bool {
+    !matches!(channel, UpdateChannel::Stable) || !release.prerelease
+}
+
+/// Parse version from release tag
+fn parse_release_version(tag_name: &str) -> Option<Version> {
+    let tag_version = tag_name.trim_start_matches('v');
+    Version::parse(tag_version).ok()
+}
+
+/// Create update info from release data
+fn create_update_info(version: Version, release: &GitHubRelease) -> Option<UpdateInfo> {
+    let platform_suffix = get_platform_suffix();
+    let asset = release
+        .assets
+        .iter()
+        .find(|asset| asset.name.contains(&platform_suffix))?;
+
+    Some(UpdateInfo {
+        version,
+        download_url: asset.browser_download_url.clone(),
+        size: asset.size,
+        sha256: None, // GitHub doesn't provide SHA256 in API
+        notes: release.body.clone(),
+        critical: false, // Would need to parse from release notes
+    })
 }
 
 /// Get platform-specific binary suffix

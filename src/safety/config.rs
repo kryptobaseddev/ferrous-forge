@@ -172,65 +172,85 @@ impl SafetyConfig {
     /// Set a configuration value
     pub fn set(&mut self, key: &str, value: &str) -> Result<()> {
         match key {
+            key if key.starts_with("bypass.") => self.set_bypass_config(key, value),
+            key if key.contains('.') => self.set_stage_config(key, value),
+            _ => self.set_main_config(key, value),
+        }
+    }
+
+    /// Set main configuration values
+    fn set_main_config(&mut self, key: &str, value: &str) -> Result<()> {
+        match key {
             "enabled" => {
-                self.enabled = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid boolean value for enabled"))?;
+                self.enabled = self.parse_bool(value, "enabled")?;
             }
             "strict_mode" => {
-                self.strict_mode = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid boolean value for strict_mode"))?;
+                self.strict_mode = self.parse_bool(value, "strict_mode")?;
             }
             "show_progress" => {
-                self.show_progress = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid boolean value for show_progress"))?;
+                self.show_progress = self.parse_bool(value, "show_progress")?;
             }
             "parallel_checks" => {
-                self.parallel_checks = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid boolean value for parallel_checks"))?;
-            }
-            "pre_commit.enabled" => {
-                self.pre_commit.enabled = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid boolean value for pre_commit.enabled"))?;
-            }
-            "pre_commit.timeout_seconds" => {
-                self.pre_commit.timeout_seconds = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid number for pre_commit.timeout_seconds"))?;
-            }
-            "pre_push.enabled" => {
-                self.pre_push.enabled = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid boolean value for pre_push.enabled"))?;
-            }
-            "pre_push.timeout_seconds" => {
-                self.pre_push.timeout_seconds = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid number for pre_push.timeout_seconds"))?;
-            }
-            "publish.enabled" => {
-                self.publish.enabled = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid boolean value for publish.enabled"))?;
-            }
-            "publish.timeout_seconds" => {
-                self.publish.timeout_seconds = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid number for publish.timeout_seconds"))?;
-            }
-            "bypass.enabled" => {
-                self.bypass.enabled = value
-                    .parse()
-                    .map_err(|_| Error::config("Invalid boolean value for bypass.enabled"))?;
+                self.parallel_checks = self.parse_bool(value, "parallel_checks")?;
             }
             _ => return Err(Error::config(format!("Unknown safety config key: {}", key))),
         }
-
         Ok(())
+    }
+
+    /// Set stage-specific configuration values
+    fn set_stage_config(&mut self, key: &str, value: &str) -> Result<()> {
+        let (stage, field) = key.split_once('.')
+            .ok_or_else(|| Error::config(format!("Invalid config key format: {}", key)))?;
+        
+        match (stage, field) {
+            ("pre_commit", "enabled") => {
+                self.pre_commit.enabled = self.parse_bool(value, "pre_commit.enabled")?;
+            }
+            ("pre_commit", "timeout_seconds") => {
+                self.pre_commit.timeout_seconds = 
+                    self.parse_u64(value, "pre_commit.timeout_seconds")?;
+            }
+            ("pre_push", "enabled") => {
+                self.pre_push.enabled = self.parse_bool(value, "pre_push.enabled")?;
+            }
+            ("pre_push", "timeout_seconds") => {
+                self.pre_push.timeout_seconds = 
+                    self.parse_u64(value, "pre_push.timeout_seconds")?;
+            }
+            ("publish", "enabled") => {
+                self.publish.enabled = self.parse_bool(value, "publish.enabled")?;
+            }
+            ("publish", "timeout_seconds") => {
+                self.publish.timeout_seconds = 
+                    self.parse_u64(value, "publish.timeout_seconds")?;
+            }
+            _ => return Err(Error::config(format!("Unknown safety config key: {}", key))),
+        }
+        Ok(())
+    }
+
+    /// Set bypass configuration values
+    fn set_bypass_config(&mut self, key: &str, value: &str) -> Result<()> {
+        match key {
+            "bypass.enabled" => {
+                self.bypass.enabled = self.parse_bool(value, "bypass.enabled")?;
+            }
+            _ => return Err(Error::config(format!("Unknown safety config key: {}", key))),
+        }
+        Ok(())
+    }
+
+    /// Parse boolean value with error context
+    fn parse_bool(&self, value: &str, field: &str) -> Result<bool> {
+        value.parse()
+            .map_err(|_| Error::config(format!("Invalid boolean value for {}", field)))
+    }
+
+    /// Parse u64 value with error context
+    fn parse_u64(&self, value: &str, field: &str) -> Result<u64> {
+        value.parse()
+            .map_err(|_| Error::config(format!("Invalid number for {}", field)))
     }
 
     /// Get a configuration value

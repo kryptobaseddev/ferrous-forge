@@ -132,71 +132,92 @@ async fn ensure_cargo_audit_installed() -> Result<()> {
 fn parse_audit_output(output: &[u8]) -> Result<AuditReport> {
     let output_str = String::from_utf8_lossy(output);
 
-    // Try to parse as JSON
+    // Try to parse as JSON first
     if let Ok(json) = serde_json::from_str::<serde_json::Value>(&output_str) {
-        let mut vulnerabilities = Vec::new();
+        parse_json_audit_output(&json)
+    } else {
+        parse_text_audit_output(&output_str)
+    }
+}
 
-        // Extract vulnerabilities from the JSON structure
-        if let Some(vulns) = json["vulnerabilities"]["list"].as_array() {
-            for vuln in vulns {
-                if let Some(advisory) = vuln["advisory"].as_object() {
-                    vulnerabilities.push(Vulnerability {
-                        package: vuln["package"]["name"]
-                            .as_str()
-                            .unwrap_or("unknown")
-                            .to_string(),
-                        version: vuln["package"]["version"]
-                            .as_str()
-                            .unwrap_or("unknown")
-                            .to_string(),
-                        severity: advisory["severity"]
-                            .as_str()
-                            .unwrap_or("unknown")
-                            .to_string(),
-                        title: advisory["title"]
-                            .as_str()
-                            .unwrap_or("Security vulnerability")
-                            .to_string(),
-                        description: advisory["description"]
-                            .as_str()
-                            .unwrap_or("No description available")
-                            .to_string(),
-                        cve: advisory["id"].as_str().map(String::from),
-                        cvss: advisory["cvss"].as_f64().map(|v| v as f32),
-                    });
-                }
+/// Parse JSON-formatted audit output
+fn parse_json_audit_output(json: &serde_json::Value) -> Result<AuditReport> {
+    let vulnerabilities = extract_vulnerabilities_from_json(json);
+    let dependencies_count = json["dependencies"]["count"].as_u64().unwrap_or(0) as usize;
+
+    Ok(AuditReport {
+        passed: vulnerabilities.is_empty(),
+        vulnerabilities,
+        dependencies_count,
+    })
+}
+
+/// Extract vulnerabilities from JSON structure
+fn extract_vulnerabilities_from_json(json: &serde_json::Value) -> Vec<Vulnerability> {
+    let mut vulnerabilities = Vec::new();
+
+    if let Some(vulns) = json["vulnerabilities"]["list"].as_array() {
+        for vuln in vulns {
+            if let Some(advisory) = vuln["advisory"].as_object() {
+                vulnerabilities.push(create_vulnerability_from_json(vuln, advisory));
             }
         }
+    }
 
-        let dependencies_count = json["dependencies"]["count"].as_u64().unwrap_or(0) as usize;
+    vulnerabilities
+}
 
+/// Create a vulnerability from JSON data
+fn create_vulnerability_from_json(
+    vuln: &serde_json::Value,
+    advisory: &serde_json::Map<String, serde_json::Value>,
+) -> Vulnerability {
+    Vulnerability {
+        package: vuln["package"]["name"]
+            .as_str()
+            .unwrap_or("unknown")
+            .to_string(),
+        version: vuln["package"]["version"]
+            .as_str()
+            .unwrap_or("unknown")
+            .to_string(),
+        severity: advisory["severity"]
+            .as_str()
+            .unwrap_or("unknown")
+            .to_string(),
+        title: advisory["title"]
+            .as_str()
+            .unwrap_or("Security vulnerability")
+            .to_string(),
+        description: advisory["description"]
+            .as_str()
+            .unwrap_or("No description available")
+            .to_string(),
+        cve: advisory["id"].as_str().map(String::from),
+        cvss: advisory["cvss"].as_f64().map(|v| v as f32),
+    }
+}
+
+/// Parse text-formatted audit output (fallback)
+fn parse_text_audit_output(output_str: &str) -> Result<AuditReport> {
+    if output_str.contains("0 vulnerabilities") || output_str.contains("Success") {
         Ok(AuditReport {
-            passed: vulnerabilities.is_empty(),
-            vulnerabilities,
-            dependencies_count,
+            vulnerabilities: vec![],
+            dependencies_count: 0,
+            passed: true,
         })
     } else {
-        // Fallback: If JSON parsing fails, check for success/failure in text
-        if output_str.contains("0 vulnerabilities") || output_str.contains("Success") {
-            Ok(AuditReport {
-                vulnerabilities: vec![],
-                dependencies_count: 0,
-                passed: true,
-            })
+        let vuln_count = if output_str.contains("vulnerability") {
+            1
         } else {
-            // Try to extract vulnerability count from text
-            let vuln_count = if output_str.contains("vulnerability") {
-                1
-            } else {
-                0
-            };
+            0
+        };
 
-            Ok(AuditReport {
-                vulnerabilities: vec![],
-                dependencies_count: 0,
-                passed: vuln_count == 0,
-            })
-        }
+        Ok(AuditReport {
+            vulnerabilities: vec![],
+            dependencies_count: 0,
+            passed: vuln_count == 0,
+        })
     }
 }
 

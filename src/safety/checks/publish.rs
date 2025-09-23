@@ -39,47 +39,61 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     result.set_duration(start.elapsed());
 
     if !output.status.success() {
-        result.add_error("Publish dry run failed");
-        result.add_suggestion("Fix publish issues before attempting real publish");
-
-        // Parse publish errors
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        let mut error_count = 0;
-
-        for line in stderr.lines() {
-            if line.starts_with("error:") && error_count < 3 {
-                result.add_error(format!("Publish: {}", line.trim()));
-                error_count += 1;
-            } else if line.contains("warning:") && line.contains("ignoring") {
-                result.add_context(line.trim().to_string());
-            }
-        }
-
-        if error_count >= 3 {
-            result.add_error("... and more publish errors (showing first 3)");
-        }
-
-        result.add_suggestion("Run 'cargo publish --dry-run' to see detailed output");
-        result.add_suggestion("Check Cargo.toml metadata and file inclusions");
+        handle_publish_failure(&mut result, &output.stderr);
     } else {
-        result.add_context("Ready for crates.io publication");
-
-        // Check for warnings in successful dry run
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        let warning_count = stderr
-            .lines()
-            .filter(|line| line.starts_with("warning:"))
-            .count();
-
-        if warning_count > 0 {
-            result.add_context(format!(
-                "Publish dry run completed with {} warnings",
-                warning_count
-            ));
-        }
+        handle_publish_success(&mut result, &output.stderr);
     }
 
     Ok(result)
+}
+
+/// Handle publish dry run failure
+fn handle_publish_failure(result: &mut CheckResult, stderr: &[u8]) {
+    result.add_error("Publish dry run failed");
+    result.add_suggestion("Fix publish issues before attempting real publish");
+
+    parse_publish_errors(result, stderr);
+
+    result.add_suggestion("Run 'cargo publish --dry-run' to see detailed output");
+    result.add_suggestion("Check Cargo.toml metadata and file inclusions");
+}
+
+/// Parse publish errors from stderr
+fn parse_publish_errors(result: &mut CheckResult, stderr: &[u8]) {
+    let stderr = String::from_utf8_lossy(stderr);
+    let mut error_count = 0;
+
+    for line in stderr.lines() {
+        if line.starts_with("error:") && error_count < 3 {
+            result.add_error(format!("Publish: {}", line.trim()));
+            error_count += 1;
+        } else if line.contains("warning:") && line.contains("ignoring") {
+            result.add_context(line.trim().to_string());
+        }
+    }
+
+    if error_count >= 3 {
+        result.add_error("... and more publish errors (showing first 3)");
+    }
+}
+
+/// Handle publish dry run success
+fn handle_publish_success(result: &mut CheckResult, stderr: &[u8]) {
+    result.add_context("Ready for crates.io publication");
+
+    // Check for warnings in successful dry run
+    let stderr = String::from_utf8_lossy(stderr);
+    let warning_count = stderr
+        .lines()
+        .filter(|line| line.starts_with("warning:"))
+        .count();
+
+    if warning_count > 0 {
+        result.add_context(format!(
+            "Publish dry run completed with {} warnings",
+            warning_count
+        ));
+    }
 }
 
 #[cfg(test)]

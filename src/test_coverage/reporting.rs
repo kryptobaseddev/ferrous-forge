@@ -50,10 +50,24 @@ impl CoverageAnalyzer {
     pub fn format_coverage_report(&self, report: &CoverageReport) -> String {
         let mut output = String::new();
 
+        self.add_report_header(&mut output);
+        self.add_overall_coverage(&mut output, report);
+        self.add_threshold_status(&mut output, report);
+        self.add_low_coverage_files(&mut output, report);
+        self.add_improvement_suggestions(&mut output);
+
+        output
+    }
+
+    /// Add report header section
+    fn add_report_header(&self, output: &mut String) {
         output.push_str("📊 Test Coverage Report\n");
         output.push_str("=".repeat(39).as_str());
         output.push_str("\n\n");
+    }
 
+    /// Add overall coverage statistics
+    fn add_overall_coverage(&self, output: &mut String, report: &CoverageReport) {
         output.push_str(&format!("📈 Overall Coverage:\n"));
         output.push_str(&format!(
             "  • Lines:     {:.1}% ({}/{})\n",
@@ -67,8 +81,10 @@ impl CoverageAnalyzer {
             "  • Branches:  {:.1}% ({}/{})\n\n",
             report.branch_coverage, report.branches_tested, report.total_branches
         ));
+    }
 
-        // Coverage status
+    /// Add threshold status section
+    fn add_threshold_status(&self, output: &mut String, report: &CoverageReport) {
         let line_status = if report.line_coverage >= self.config().min_line_coverage {
             "✅"
         } else {
@@ -88,24 +104,20 @@ impl CoverageAnalyzer {
         output.push_str("🎯 Threshold Status:\n");
         output.push_str(&format!(
             "  {} Lines:     {:.1}% (min: {:.1}%)\n",
-            line_status,
-            report.line_coverage,
-            self.config().min_line_coverage
+            line_status, report.line_coverage, self.config().min_line_coverage
         ));
         output.push_str(&format!(
             "  {} Functions: {:.1}% (min: {:.1}%)\n",
-            func_status,
-            report.function_coverage,
-            self.config().min_function_coverage
+            func_status, report.function_coverage, self.config().min_function_coverage
         ));
         output.push_str(&format!(
             "  {} Branches:  {:.1}% (min: {:.1}%)\n\n",
-            branch_status,
-            report.branch_coverage,
-            self.config().min_branch_coverage
+            branch_status, report.branch_coverage, self.config().min_branch_coverage
         ));
+    }
 
-        // Top files with low coverage
+    /// Add low coverage files section
+    fn add_low_coverage_files(&self, output: &mut String, report: &CoverageReport) {
         let mut low_coverage_files: Vec<_> = report
             .file_coverage
             .values()
@@ -133,14 +145,15 @@ impl CoverageAnalyzer {
             }
             output.push('\n');
         }
+    }
 
+    /// Add improvement suggestions section
+    fn add_improvement_suggestions(&self, output: &mut String) {
         output.push_str("💡 To improve coverage:\n");
         output.push_str("  • Add tests for uncovered code paths\n");
         output.push_str("  • Remove dead code\n");
         output.push_str("  • Test error conditions and edge cases\n");
         output.push_str("  • Use property-based testing\n");
-
-        output
     }
 
     /// Check coverage for a project

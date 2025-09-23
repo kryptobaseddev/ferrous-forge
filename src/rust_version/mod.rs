@@ -41,40 +41,30 @@ impl std::fmt::Display for Channel {
     }
 }
 
+/// Update information for available version
+#[derive(Debug, Clone)]
+pub struct UpdateInfo {
+    /// Current Rust version
+    pub current: Version,
+    /// Latest available version
+    pub latest: Version,
+    /// URL to the release page
+    pub release_url: String,
+    /// Security update details (if applicable)
+    pub security_details: Option<String>,
+}
+
 /// Version update recommendation
 #[derive(Debug, Clone)]
 pub enum UpdateRecommendation {
     /// Already on latest version
     UpToDate,
     /// Minor update available
-    MinorUpdate {
-        /// Current Rust version
-        current: Version,
-        /// Latest available version
-        latest: Version,
-        /// URL to the release page
-        release_url: String,
-    },
+    MinorUpdate(UpdateInfo),
     /// Major update available
-    MajorUpdate {
-        /// Current Rust version
-        current: Version,
-        /// Latest available version
-        latest: Version,
-        /// URL to the release page
-        release_url: String,
-    },
+    MajorUpdate(UpdateInfo),
     /// Security update available
-    SecurityUpdate {
-        /// Current Rust version
-        current: Version,
-        /// Latest available version
-        latest: Version,
-        /// URL to the release page
-        release_url: String,
-        /// Security update details
-        details: String,
-    },
+    SecurityUpdate(UpdateInfo),
 }
 
 /// Version manager for checking and recommending updates
@@ -131,39 +121,85 @@ impl VersionManager {
         let current = self.check_current().await?;
         let latest = self.get_latest_stable().await?;
 
-        // Compare versions
+        // Check if already up to date
         if latest.version <= current.version {
             return Ok(UpdateRecommendation::UpToDate);
         }
 
-        // Check if it's a security update
-        let is_security = latest.body.to_lowercase().contains("security")
-            || latest.name.to_lowercase().contains("security");
+        // Determine update type based on release content and version difference
+        self.determine_update_type(&current, &latest)
+    }
 
-        if is_security {
-            return Ok(UpdateRecommendation::SecurityUpdate {
-                current: current.version.clone(),
-                latest: latest.version.clone(),
-                release_url: latest.html_url.clone(),
-                details: self.extract_security_details(&latest.body),
-            });
+    /// Determine the type of update based on version comparison and release content
+    fn determine_update_type(
+        &self,
+        current: &RustVersion,
+        latest: &GitHubRelease,
+    ) -> Result<UpdateRecommendation> {
+        if self.is_security_update(latest) {
+            Ok(self.create_security_update(current, latest))
+        } else if self.is_major_update(current, latest) {
+            Ok(self.create_major_update(current, latest))
+        } else {
+            Ok(self.create_minor_update(current, latest))
         }
+    }
 
-        // Check if it's a major update
-        if latest.version.major > current.version.major {
-            return Ok(UpdateRecommendation::MajorUpdate {
-                current: current.version.clone(),
-                latest: latest.version.clone(),
-                release_url: latest.html_url.clone(),
-            });
-        }
+    /// Check if the release contains security-related updates
+    fn is_security_update(&self, release: &GitHubRelease) -> bool {
+        let body_lower = release.body.to_lowercase();
+        let name_lower = release.name.to_lowercase();
+        body_lower.contains("security") || name_lower.contains("security")
+    }
 
-        // It's a minor/patch update
-        Ok(UpdateRecommendation::MinorUpdate {
+    /// Check if this is a major version update
+    fn is_major_update(&self, current: &RustVersion, latest: &GitHubRelease) -> bool {
+        latest.version.major > current.version.major
+    }
+
+    /// Create a security update recommendation
+    fn create_security_update(
+        &self,
+        current: &RustVersion,
+        latest: &GitHubRelease,
+    ) -> UpdateRecommendation {
+        let info = UpdateInfo {
             current: current.version.clone(),
             latest: latest.version.clone(),
             release_url: latest.html_url.clone(),
-        })
+            security_details: Some(self.extract_security_details(&latest.body)),
+        };
+        UpdateRecommendation::SecurityUpdate(info)
+    }
+
+    /// Create a major update recommendation
+    fn create_major_update(
+        &self,
+        current: &RustVersion,
+        latest: &GitHubRelease,
+    ) -> UpdateRecommendation {
+        let info = UpdateInfo {
+            current: current.version.clone(),
+            latest: latest.version.clone(),
+            release_url: latest.html_url.clone(),
+            security_details: None,
+        };
+        UpdateRecommendation::MajorUpdate(info)
+    }
+
+    /// Create a minor/patch update recommendation
+    fn create_minor_update(
+        &self,
+        current: &RustVersion,
+        latest: &GitHubRelease,
+    ) -> UpdateRecommendation {
+        let info = UpdateInfo {
+            current: current.version.clone(),
+            latest: latest.version.clone(),
+            release_url: latest.html_url.clone(),
+            security_details: None,
+        };
+        UpdateRecommendation::MinorUpdate(info)
     }
 
     /// Get multiple recent releases

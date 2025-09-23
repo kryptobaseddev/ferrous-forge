@@ -111,94 +111,19 @@ impl CoverageAnalyzer {
 
     /// Parse cargo-tarpaulin JSON output
     fn parse_tarpaulin_output(&self, output: &str) -> Result<CoverageReport> {
-        #[derive(Deserialize)]
-        struct TarpaulinOutput {
-            #[serde(rename = "coverage")]
-            line_coverage: f64,
-            #[serde(rename = "linesCovered")]
-            lines_covered: u32,
-            #[serde(rename = "linesTotal")]
-            lines_total: u32,
-            #[serde(rename = "branchesCovered")]
-            branches_covered: Option<u32>,
-            #[serde(rename = "branchesTotal")]
-            branches_total: Option<u32>,
-            #[serde(rename = "files")]
-            files: HashMap<String, TarpaulinFile>,
-        }
-
-        #[derive(Deserialize)]
-        struct TarpaulinFile {
-            #[serde(rename = "coverage")]
-            line_coverage: f64,
-            #[serde(rename = "linesCovered")]
-            lines_covered: u32,
-            #[serde(rename = "linesTotal")]
-            lines_total: u32,
-        }
-
-        let tarpaulin_data: TarpaulinOutput = serde_json::from_str(output)
-            .map_err(|e| Error::validation(format!("Failed to parse coverage output: {}", e)))?;
-
-        let mut file_coverage = HashMap::new();
-        let mut total_functions_tested = 0;
-        let mut total_functions = 0;
-
-        for (file_path, file_data) in tarpaulin_data.files {
-            // Estimate function coverage (tarpaulin doesn't provide this directly)
-            let estimated_functions = (file_data.lines_total / 10).max(1); // Rough estimate
-            let estimated_functions_tested =
-                ((file_data.line_coverage / 100.0) * estimated_functions as f64) as u32;
-
-            total_functions += estimated_functions;
-            total_functions_tested += estimated_functions_tested;
-
-            file_coverage.insert(
-                file_path.clone(),
-                FileCoverage {
-                    file_path,
-                    line_coverage: file_data.line_coverage,
-                    function_coverage: if estimated_functions > 0 {
-                        (estimated_functions_tested as f64 / estimated_functions as f64) * 100.0
-                    } else {
-                        100.0
-                    },
-                    lines_tested: file_data.lines_covered,
-                    total_lines: file_data.lines_total,
-                    functions_tested: estimated_functions_tested,
-                    total_functions: estimated_functions,
-                },
-            );
-        }
-
-        let function_coverage = if total_functions > 0 {
-            (total_functions_tested as f64 / total_functions as f64) * 100.0
-        } else {
-            100.0
-        };
-
-        let branch_coverage = if let (Some(covered), Some(total)) = (
-            tarpaulin_data.branches_covered,
-            tarpaulin_data.branches_total,
-        ) {
-            if total > 0 {
-                (covered as f64 / total as f64) * 100.0
-            } else {
-                100.0
-            }
-        } else {
-            tarpaulin_data.line_coverage // Fallback to line coverage
-        };
+        let tarpaulin_data = parse_tarpaulin_json(output)?;
+        let (file_coverage, function_stats) = process_file_coverage(&tarpaulin_data.files);
+        let branch_coverage = calculate_branch_coverage(&tarpaulin_data);
 
         Ok(CoverageReport {
             line_coverage: tarpaulin_data.line_coverage,
-            function_coverage,
+            function_coverage: function_stats.coverage,
             branch_coverage,
             file_coverage,
             lines_tested: tarpaulin_data.lines_covered,
             total_lines: tarpaulin_data.lines_total,
-            functions_tested: total_functions_tested,
-            total_functions,
+            functions_tested: function_stats.tested,
+            total_functions: function_stats.total,
             branches_tested: tarpaulin_data.branches_covered.unwrap_or(0),
             total_branches: tarpaulin_data.branches_total.unwrap_or(0),
         })
@@ -213,5 +138,139 @@ impl CoverageAnalyzer {
 impl Default for CoverageAnalyzer {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// Tarpaulin JSON output structure
+#[derive(Deserialize)]
+struct TarpaulinOutput {
+    #[serde(rename = "coverage")]
+    line_coverage: f64,
+    #[serde(rename = "linesCovered")]
+    lines_covered: u32,
+    #[serde(rename = "linesTotal")]
+    lines_total: u32,
+    #[serde(rename = "branchesCovered")]
+    branches_covered: Option<u32>,
+    #[serde(rename = "branchesTotal")]
+    branches_total: Option<u32>,
+    #[serde(rename = "files")]
+    files: HashMap<String, TarpaulinFile>,
+}
+
+/// Tarpaulin file coverage data
+#[derive(Deserialize)]
+struct TarpaulinFile {
+    #[serde(rename = "coverage")]
+    line_coverage: f64,
+    #[serde(rename = "linesCovered")]
+    lines_covered: u32,
+    #[serde(rename = "linesTotal")]
+    lines_total: u32,
+}
+
+/// Function coverage statistics
+struct FunctionStats {
+    coverage: f64,
+    tested: u32,
+    total: u32,
+}
+
+/// Parse tarpaulin JSON output
+fn parse_tarpaulin_json(output: &str) -> Result<TarpaulinOutput> {
+    serde_json::from_str(output)
+        .map_err(|e| Error::validation(format!("Failed to parse coverage output: {}", e)))
+}
+
+/// Process file coverage data and calculate function statistics
+fn process_file_coverage(
+    files: &HashMap<String, TarpaulinFile>,
+) -> (HashMap<String, FileCoverage>, FunctionStats) {
+    let mut file_coverage = HashMap::new();
+    let mut total_functions_tested = 0;
+    let mut total_functions = 0;
+
+    for (file_path, file_data) in files {
+        let (estimated_functions, estimated_functions_tested) = 
+            estimate_function_coverage(file_data);
+
+        total_functions += estimated_functions;
+        total_functions_tested += estimated_functions_tested;
+
+        let coverage = create_file_coverage(
+            file_path, 
+            file_data, 
+            estimated_functions, 
+            estimated_functions_tested,
+        );
+        file_coverage.insert(file_path.clone(), coverage);
+    }
+
+    let function_coverage = calculate_function_coverage_percentage(
+        total_functions_tested, 
+        total_functions,
+    );
+
+    (
+        file_coverage,
+        FunctionStats {
+            coverage: function_coverage,
+            tested: total_functions_tested,
+            total: total_functions,
+        },
+    )
+}
+
+/// Estimate function coverage from line coverage data
+fn estimate_function_coverage(file_data: &TarpaulinFile) -> (u32, u32) {
+    let estimated_functions = (file_data.lines_total / 10).max(1);
+    let estimated_functions_tested =
+        ((file_data.line_coverage / 100.0) * estimated_functions as f64) as u32;
+    (estimated_functions, estimated_functions_tested)
+}
+
+/// Create file coverage object
+fn create_file_coverage(
+    file_path: &str,
+    file_data: &TarpaulinFile,
+    estimated_functions: u32,
+    estimated_functions_tested: u32,
+) -> FileCoverage {
+    FileCoverage {
+        file_path: file_path.to_string(),
+        line_coverage: file_data.line_coverage,
+        function_coverage: calculate_function_coverage_percentage(
+            estimated_functions_tested,
+            estimated_functions,
+        ),
+        lines_tested: file_data.lines_covered,
+        total_lines: file_data.lines_total,
+        functions_tested: estimated_functions_tested,
+        total_functions: estimated_functions,
+    }
+}
+
+/// Calculate function coverage percentage
+fn calculate_function_coverage_percentage(tested: u32, total: u32) -> f64 {
+    if total > 0 {
+        (tested as f64 / total as f64) * 100.0
+    } else {
+        100.0
+    }
+}
+
+/// Calculate branch coverage from tarpaulin data
+fn calculate_branch_coverage(tarpaulin_data: &TarpaulinOutput) -> f64 {
+    if let (Some(covered), Some(total)) = (
+        tarpaulin_data.branches_covered,
+        tarpaulin_data.branches_total,
+    ) {
+        if total > 0 {
+            (covered as f64 / total as f64) * 100.0
+        } else {
+            100.0
+        }
+    } else {
+        tarpaulin_data.line_coverage // Fallback to line coverage
     }
 }

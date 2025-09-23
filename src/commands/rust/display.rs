@@ -39,27 +39,18 @@ pub fn display_recommendation(recommendation: &UpdateRecommendation) {
         UpdateRecommendation::UpToDate => {
             println!("{}", style("✅ No update needed").green().bold());
         }
-        UpdateRecommendation::MinorUpdate {
-            current: _,
-            latest,
-            release_url,
-        } => {
-            display_minor_update(latest, release_url);
+        UpdateRecommendation::MinorUpdate(info) => {
+            display_minor_update(&info.latest, &info.release_url);
         }
-        UpdateRecommendation::MajorUpdate {
-            current: _,
-            latest,
-            release_url,
-        } => {
-            display_major_update(latest, release_url);
+        UpdateRecommendation::MajorUpdate(info) => {
+            display_major_update(&info.latest, &info.release_url);
         }
-        UpdateRecommendation::SecurityUpdate {
-            current: _,
-            latest,
-            release_url,
-            details,
-        } => {
-            display_security_update(latest, release_url, details);
+        UpdateRecommendation::SecurityUpdate(info) => {
+            let security_details = info
+                .security_details
+                .as_deref()
+                .unwrap_or("Security update available");
+            display_security_update(&info.latest, &info.release_url, security_details);
         }
     }
 }
@@ -129,15 +120,15 @@ pub fn display_recommendation_details(recommendation: &UpdateRecommendation, sta
         UpdateRecommendation::UpToDate => {
             display_up_to_date_recommendation(stable_only);
         }
-        UpdateRecommendation::MinorUpdate { latest, .. }
-        | UpdateRecommendation::MajorUpdate { latest, .. } => {
-            display_update_recommendation(latest);
+        UpdateRecommendation::MinorUpdate(info)
+        | UpdateRecommendation::MajorUpdate(info) => {
+            display_update_recommendation(&info.latest);
         }
-        UpdateRecommendation::SecurityUpdate {
-            latest, details, ..
-        } => {
-            display_security_recommendation(latest);
-            println!("Security details: {}", details);
+        UpdateRecommendation::SecurityUpdate(info) => {
+            display_security_recommendation(&info.latest);
+            if let Some(details) = &info.security_details {
+                println!("Security details: {}", details);
+            }
         }
     }
 

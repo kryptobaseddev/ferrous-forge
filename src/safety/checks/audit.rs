@@ -31,58 +31,84 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let mut result = CheckResult::new(CheckType::Audit);
 
     // Check if cargo-audit is available
+    if let Err(error_msg) = check_audit_availability() {
+        result.add_error(&error_msg);
+        result.add_suggestion("Install with: cargo install cargo-audit");
+        result.set_duration(start.elapsed());
+        return Ok(result);
+    }
+
+    // Execute audit and process results
+    let output = execute_audit(project_path)?;
+    result.set_duration(start.elapsed());
+
+    if output.status.success() {
+        result.add_context("No security vulnerabilities found");
+    } else {
+        process_audit_failures(&mut result, &output);
+    }
+
+    Ok(result)
+}
+
+/// Check if cargo-audit is available on the system
+fn check_audit_availability() -> std::result::Result<(), String> {
     let audit_check = Command::new("cargo").args(&["audit", "--version"]).output();
 
     if audit_check
         .as_ref()
         .map_or(true, |output| !output.status.success())
     {
-        result.add_error("cargo-audit not available");
-        result.add_suggestion("Install with: cargo install cargo-audit");
-        result.set_duration(start.elapsed());
-        return Ok(result);
+        Err("cargo-audit not available".to_string())
+    } else {
+        Ok(())
     }
+}
 
-    // Run cargo audit
-    let output = Command::new("cargo")
+/// Execute cargo audit command
+fn execute_audit(project_path: &Path) -> Result<std::process::Output> {
+    Command::new("cargo")
         .current_dir(project_path)
         .args(&["audit"])
-        .output()?;
+        .output()
+        .map_err(Into::into)
+}
 
-    result.set_duration(start.elapsed());
+/// Process audit command failures and parse vulnerabilities
+fn process_audit_failures(result: &mut CheckResult, output: &std::process::Output) {
+    result.add_error("Security vulnerabilities found");
+    result.add_suggestion("Update vulnerable dependencies");
 
-    if !output.status.success() {
-        result.add_error("Security vulnerabilities found");
-        result.add_suggestion("Update vulnerable dependencies");
+    parse_audit_output(result, output);
+    add_remediation_suggestions(result);
+}
 
-        // Parse audit output
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
+/// Parse audit output and extract vulnerability information
+fn parse_audit_output(result: &mut CheckResult, output: &std::process::Output) {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let mut vuln_count = 0;
 
-        let mut vuln_count = 0;
-
-        for line in stdout.lines().chain(stderr.lines()) {
-            if line.contains("vulnerability") || line.contains("RUSTSEC") {
-                if vuln_count < 3 {
-                    result.add_error(format!("Security: {}", line.trim()));
-                    vuln_count += 1;
-                }
-            } else if line.contains("Crate:") || line.contains("Version:") {
-                result.add_context(line.trim().to_string());
+    for line in stdout.lines().chain(stderr.lines()) {
+        if line.contains("vulnerability") || line.contains("RUSTSEC") {
+            if vuln_count < 3 {
+                result.add_error(format!("Security: {}", line.trim()));
+                vuln_count += 1;
             }
+        } else if line.contains("Crate:") || line.contains("Version:") {
+            result.add_context(line.trim().to_string());
         }
-
-        if vuln_count >= 3 {
-            result.add_error("... and more vulnerabilities (showing first 3)");
-        }
-
-        result.add_suggestion("Run 'cargo audit fix' to attempt automatic fixes");
-        result.add_suggestion("Check https://rustsec.org for vulnerability details");
-    } else {
-        result.add_context("No security vulnerabilities found");
     }
 
-    Ok(result)
+    if vuln_count >= 3 {
+        result.add_error("... and more vulnerabilities (showing first 3)");
+    }
+}
+
+/// Add remediation suggestions for audit failures
+fn add_remediation_suggestions(result: &mut CheckResult) {
+    result.add_suggestion("Run 'cargo audit fix' to attempt automatic fixes");
+    result.add_suggestion("Check https://rustsec.org for vulnerability details");
 }
 
 #[cfg(test)]

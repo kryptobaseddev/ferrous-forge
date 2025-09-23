@@ -7,12 +7,28 @@ use std::path::PathBuf;
 
 /// Create the web service template
 pub fn create_web_service_template() -> BuiltinTemplate {
+    let manifest = create_web_service_manifest();
+    let files = create_web_service_files();
+    
+    BuiltinTemplate { manifest, files }
+}
+
+/// Create the template manifest with metadata and configuration
+fn create_web_service_manifest() -> TemplateManifest {
     let mut manifest = TemplateManifest::new("web-service".to_string(), TemplateKind::WebService);
 
     manifest.description = "Web service with axum and tokio".to_string();
     manifest.author = "Ferrous Forge Team".to_string();
 
-    // Add variables
+    add_template_variables(&mut manifest);
+    add_template_files(&mut manifest);
+    add_post_generate_commands(&mut manifest);
+
+    manifest
+}
+
+/// Add template variables to the manifest
+fn add_template_variables(manifest: &mut TemplateManifest) {
     manifest.add_variable(TemplateVariable::required(
         "project_name".to_string(),
         "Name of the project".to_string(),
@@ -23,38 +39,46 @@ pub fn create_web_service_template() -> BuiltinTemplate {
         "Author name".to_string(),
         "Unknown".to_string(),
     ));
+}
 
-    // Add files
-    manifest.add_file(TemplateFile::new(
-        PathBuf::from("Cargo.toml"),
-        PathBuf::from("Cargo.toml"),
-    ));
+/// Add template files to the manifest
+fn add_template_files(manifest: &mut TemplateManifest) {
+    let files = [
+        ("Cargo.toml", "Cargo.toml"),
+        ("src/main.rs", "src/main.rs"),
+        ("src/lib.rs", "src/lib.rs"),
+        (".ferrous-forge/config.toml", ".ferrous-forge/config.toml"),
+    ];
 
-    manifest.add_file(TemplateFile::new(
-        PathBuf::from("src/main.rs"),
-        PathBuf::from("src/main.rs"),
-    ));
+    for (source, dest) in &files {
+        manifest.add_file(TemplateFile::new(
+            PathBuf::from(source),
+            PathBuf::from(dest),
+        ));
+    }
+}
 
-    manifest.add_file(TemplateFile::new(
-        PathBuf::from("src/lib.rs"),
-        PathBuf::from("src/lib.rs"),
-    ));
-
-    manifest.add_file(TemplateFile::new(
-        PathBuf::from(".ferrous-forge/config.toml"),
-        PathBuf::from(".ferrous-forge/config.toml"),
-    ));
-
-    // Add post-generate commands
+/// Add post-generate commands to the manifest
+fn add_post_generate_commands(manifest: &mut TemplateManifest) {
     manifest.add_post_generate("cargo fmt".to_string());
     manifest.add_post_generate("ferrous-forge validate .".to_string());
+}
 
-    // Create file contents
+/// Create all template file contents
+fn create_web_service_files() -> HashMap<String, String> {
     let mut files = HashMap::new();
 
-    files.insert(
-        "Cargo.toml".to_string(),
-        r#"[package]
+    files.insert("Cargo.toml".to_string(), create_cargo_toml_content());
+    files.insert("src/main.rs".to_string(), create_main_rs_content());
+    files.insert("src/lib.rs".to_string(), create_lib_rs_content());
+    files.insert(".ferrous-forge/config.toml".to_string(), create_config_toml_content());
+
+    files
+}
+
+/// Create Cargo.toml content
+fn create_cargo_toml_content() -> String {
+    r#"[package]
 name = "{{project_name}}"
 version = "0.1.0"
 edition = "2024"
@@ -71,13 +95,12 @@ tracing-subscriber = "0.3"
 
 [dev-dependencies]
 tower-test = "0.4"
-"#
-        .to_string(),
-    );
+"#.to_string()
+}
 
-    files.insert(
-        "src/main.rs".to_string(),
-        r#"//! {{project_name}} web service
+/// Create main.rs content
+fn create_main_rs_content() -> String {
+    r#"//! {{project_name}} web service
 
 use axum::{
     extract::Query,
@@ -145,13 +168,12 @@ async fn echo_handler(
     Json(payload)
 }
 
-"#
-        .to_string(),
-    );
+"#.to_string()
+}
 
-    files.insert(
-        "src/lib.rs".to_string(),
-        r#"//! {{project_name}} library
+/// Create lib.rs content
+fn create_lib_rs_content() -> String {
+    r#"//! {{project_name}} library
 
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -205,13 +227,12 @@ mod tests {
         assert!(result.is_err());
     }
 }
-"#
-        .to_string(),
-    );
+"#.to_string()
+}
 
-    files.insert(
-        ".ferrous-forge/config.toml".to_string(),
-        r#"# Ferrous Forge configuration for {{project_name}}
+/// Create config.toml content
+fn create_config_toml_content() -> String {
+    r#"# Ferrous Forge configuration for {{project_name}}
 
 [validation]
 # Validation settings
@@ -230,9 +251,5 @@ pre_push = true
 # Auto-fix settings
 conservative_mode = true
 backup_files = true
-"#
-        .to_string(),
-    );
-
-    BuiltinTemplate { manifest, files }
+"#.to_string()
 }

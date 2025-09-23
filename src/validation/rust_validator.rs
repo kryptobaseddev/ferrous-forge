@@ -77,7 +77,17 @@ impl RustValidator {
             violations.len()
         );
 
-        // Group by violation type
+        let grouped_violations = self.group_violations_by_type(violations);
+        self.add_violation_sections(&mut report, grouped_violations);
+
+        report
+    }
+
+    /// Group violations by their type
+    fn group_violations_by_type<'a>(
+        &self,
+        violations: &'a [Violation],
+    ) -> std::collections::HashMap<&'a ViolationType, Vec<&'a Violation>> {
         let mut by_type = std::collections::HashMap::new();
         for violation in violations {
             by_type
@@ -85,8 +95,16 @@ impl RustValidator {
                 .or_insert_with(Vec::new)
                 .push(violation);
         }
+        by_type
+    }
 
-        for (violation_type, violations) in by_type {
+    /// Add violation sections to the report
+    fn add_violation_sections(
+        &self,
+        report: &mut String,
+        grouped_violations: std::collections::HashMap<&ViolationType, Vec<&Violation>>,
+    ) {
+        for (violation_type, violations) in grouped_violations {
             let type_name = format!("{:?}", violation_type)
                 .to_uppercase()
                 .replace('_', " ");
@@ -97,23 +115,25 @@ impl RustValidator {
                 violations.len()
             ));
 
-            for violation in violations.iter().take(10) {
-                report.push_str(&format!(
-                    "  {}:{} - {}\n",
-                    violation.file.display(),
-                    violation.line + 1,
-                    violation.message
-                ));
-            }
-
-            if violations.len() > 10 {
-                report.push_str(&format!("  ... and {} more\n", violations.len() - 10));
-            }
-
+            self.add_violation_details(report, &violations);
             report.push('\n');
         }
+    }
 
-        report
+    /// Add individual violation details to the report
+    fn add_violation_details(&self, report: &mut String, violations: &[&Violation]) {
+        for violation in violations.iter().take(10) {
+            report.push_str(&format!(
+                "  {}:{} - {}\n",
+                violation.file.display(),
+                violation.line + 1,
+                violation.message
+            ));
+        }
+
+        if violations.len() > 10 {
+            report.push_str(&format!("  ... and {} more\n", violations.len() - 10));
+        }
     }
 
     /// Run clippy with strict configuration

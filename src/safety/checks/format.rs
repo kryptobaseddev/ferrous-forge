@@ -30,48 +30,71 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Format);
 
-    // Check if rustfmt is available
-    if which::which("cargo").is_err() {
-        result.add_error("cargo not found in PATH");
+    // Check if cargo is available
+    if let Err(error_msg) = check_cargo_availability() {
+        result.add_error(&error_msg);
         result.add_suggestion("Install Rust and cargo from https://rustup.rs");
         result.set_duration(start.elapsed());
         return Ok(result);
     }
 
-    // Run cargo fmt --check
-    let output = Command::new("cargo")
-        .current_dir(project_path)
-        .args(&["fmt", "--check"])
-        .output()?;
-
+    // Execute format check and process results
+    let output = execute_format_check(project_path)?;
     result.set_duration(start.elapsed());
 
-    if !output.status.success() {
-        result.add_error("Code formatting violations found");
-        result.add_suggestion("Run 'cargo fmt' to fix formatting automatically");
-
-        // Parse formatting violations from output
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
-
-        // Look for diff output
-        for line in stdout.lines().chain(stderr.lines()) {
-            if line.starts_with("Diff in") {
-                result.add_error(format!("Formatting issue: {}", line));
-            } else if line.contains("rustfmt") && line.contains("failed") {
-                result.add_error(line.to_string());
-            }
-        }
-
-        // If no specific errors found, add general message
-        if result.errors.len() == 1 {
-            result.add_context("Run 'cargo fmt' to see detailed formatting issues");
-        }
-    } else {
+    if output.status.success() {
         result.add_context("All code is properly formatted");
+    } else {
+        process_format_violations(&mut result, &output);
     }
 
     Ok(result)
+}
+
+/// Check if cargo is available in PATH
+fn check_cargo_availability() -> std::result::Result<(), String> {
+    which::which("cargo")
+        .map_err(|_| "cargo not found in PATH".to_string())
+        .map(|_| ())
+}
+
+/// Execute cargo fmt --check command
+fn execute_format_check(project_path: &Path) -> Result<std::process::Output> {
+    Command::new("cargo")
+        .current_dir(project_path)
+        .args(&["fmt", "--check"])
+        .output()
+        .map_err(Into::into)
+}
+
+/// Process format check violations and parse output
+fn process_format_violations(result: &mut CheckResult, output: &std::process::Output) {
+    result.add_error("Code formatting violations found");
+    result.add_suggestion("Run 'cargo fmt' to fix formatting automatically");
+
+    parse_format_output(result, output);
+    add_format_context_if_needed(result);
+}
+
+/// Parse format check output and extract violation details
+fn parse_format_output(result: &mut CheckResult, output: &std::process::Output) {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    for line in stdout.lines().chain(stderr.lines()) {
+        if line.starts_with("Diff in") {
+            result.add_error(format!("Formatting issue: {}", line));
+        } else if line.contains("rustfmt") && line.contains("failed") {
+            result.add_error(line.to_string());
+        }
+    }
+}
+
+/// Add additional context for format violations if no specific errors were found
+fn add_format_context_if_needed(result: &mut CheckResult) {
+    if result.errors.len() == 1 {
+        result.add_context("Run 'cargo fmt' to see detailed formatting issues");
+    }
 }
 
 #[cfg(test)]
