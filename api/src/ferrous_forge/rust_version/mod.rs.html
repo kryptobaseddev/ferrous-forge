@@ -187,14 +187,15 @@
 <a href=#187 id=187 data-nosnippet>187</a>}
 <a href=#188 id=188 data-nosnippet>188</a>
 <a href=#189 id=189 data-nosnippet>189</a><span class="attr">#[cfg(test)]
-<a href=#190 id=190 data-nosnippet>190</a></span><span class="kw">mod </span>tests {
-<a href=#191 id=191 data-nosnippet>191</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
-<a href=#192 id=192 data-nosnippet>192</a>
-<a href=#193 id=193 data-nosnippet>193</a>    <span class="attr">#[test]
-<a href=#194 id=194 data-nosnippet>194</a>    </span><span class="kw">fn </span>test_channel_display() {
-<a href=#195 id=195 data-nosnippet>195</a>        <span class="macro">assert_eq!</span>(Channel::Stable.to_string(), <span class="string">"stable"</span>);
-<a href=#196 id=196 data-nosnippet>196</a>        <span class="macro">assert_eq!</span>(Channel::Beta.to_string(), <span class="string">"beta"</span>);
-<a href=#197 id=197 data-nosnippet>197</a>        <span class="macro">assert_eq!</span>(Channel::Nightly.to_string(), <span class="string">"nightly"</span>);
-<a href=#198 id=198 data-nosnippet>198</a>        <span class="macro">assert_eq!</span>(Channel::Custom(<span class="string">"custom"</span>.to_string()).to_string(), <span class="string">"custom"</span>);
-<a href=#199 id=199 data-nosnippet>199</a>    }
-<a href=#200 id=200 data-nosnippet>200</a>}</code></pre></div></section></main></body></html>
+<a href=#190 id=190 data-nosnippet>190</a>#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+<a href=#191 id=191 data-nosnippet>191</a></span><span class="kw">mod </span>tests {
+<a href=#192 id=192 data-nosnippet>192</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#193 id=193 data-nosnippet>193</a>
+<a href=#194 id=194 data-nosnippet>194</a>    <span class="attr">#[test]
+<a href=#195 id=195 data-nosnippet>195</a>    </span><span class="kw">fn </span>test_channel_display() {
+<a href=#196 id=196 data-nosnippet>196</a>        <span class="macro">assert_eq!</span>(Channel::Stable.to_string(), <span class="string">"stable"</span>);
+<a href=#197 id=197 data-nosnippet>197</a>        <span class="macro">assert_eq!</span>(Channel::Beta.to_string(), <span class="string">"beta"</span>);
+<a href=#198 id=198 data-nosnippet>198</a>        <span class="macro">assert_eq!</span>(Channel::Nightly.to_string(), <span class="string">"nightly"</span>);
+<a href=#199 id=199 data-nosnippet>199</a>        <span class="macro">assert_eq!</span>(Channel::Custom(<span class="string">"custom"</span>.to_string()).to_string(), <span class="string">"custom"</span>);
+<a href=#200 id=200 data-nosnippet>200</a>    }
+<a href=#201 id=201 data-nosnippet>201</a>}</code></pre></div></section></main></body></html>

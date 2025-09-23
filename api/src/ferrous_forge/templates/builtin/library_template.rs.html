@@ -139,29 +139,30 @@
 <a href=#139 id=139 data-nosnippet>139</a>}
 <a href=#140 id=140 data-nosnippet>140</a>
 <a href=#141 id=141 data-nosnippet>141</a>#[cfg(test)]
-<a href=#142 id=142 data-nosnippet>142</a>mod tests {
-<a href=#143 id=143 data-nosnippet>143</a>    use super::*;
-<a href=#144 id=144 data-nosnippet>144</a>
-<a href=#145 id=145 data-nosnippet>145</a>    #[test]
-<a href=#146 id=146 data-nosnippet>146</a>    fn test_new() {
-<a href=#147 id=147 data-nosnippet>147</a>        let instance = {{project_pascal}}::new();
-<a href=#148 id=148 data-nosnippet>148</a>        // Add assertions
-<a href=#149 id=149 data-nosnippet>149</a>    }
-<a href=#150 id=150 data-nosnippet>150</a>}
-<a href=#151 id=151 data-nosnippet>151</a>"#
-<a href=#152 id=152 data-nosnippet>152</a>    </span>.to_string()
-<a href=#153 id=153 data-nosnippet>153</a>}
-<a href=#154 id=154 data-nosnippet>154</a>
-<a href=#155 id=155 data-nosnippet>155</a><span class="doccomment">/// .ferrous-forge/config.toml content
-<a href=#156 id=156 data-nosnippet>156</a></span><span class="kw">fn </span>config_toml_content() -&gt; String {
-<a href=#157 id=157 data-nosnippet>157</a>    <span class="string">r#"# Ferrous Forge configuration
-<a href=#158 id=158 data-nosnippet>158</a>
-<a href=#159 id=159 data-nosnippet>159</a>[validation]
-<a href=#160 id=160 data-nosnippet>160</a>max_line_length = 100
-<a href=#161 id=161 data-nosnippet>161</a>max_file_length = 300
-<a href=#162 id=162 data-nosnippet>162</a>max_function_length = 50
-<a href=#163 id=163 data-nosnippet>163</a>allow_unwrap = false
-<a href=#164 id=164 data-nosnippet>164</a>allow_expect = false
-<a href=#165 id=165 data-nosnippet>165</a>"#
-<a href=#166 id=166 data-nosnippet>166</a>    </span>.to_string()
-<a href=#167 id=167 data-nosnippet>167</a>}</code></pre></div></section></main></body></html>
+<a href=#142 id=142 data-nosnippet>142</a>#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+<a href=#143 id=143 data-nosnippet>143</a>mod tests {
+<a href=#144 id=144 data-nosnippet>144</a>    use super::*;
+<a href=#145 id=145 data-nosnippet>145</a>
+<a href=#146 id=146 data-nosnippet>146</a>    #[test]
+<a href=#147 id=147 data-nosnippet>147</a>    fn test_new() {
+<a href=#148 id=148 data-nosnippet>148</a>        let instance = {{project_pascal}}::new();
+<a href=#149 id=149 data-nosnippet>149</a>        // Add assertions
+<a href=#150 id=150 data-nosnippet>150</a>    }
+<a href=#151 id=151 data-nosnippet>151</a>}
+<a href=#152 id=152 data-nosnippet>152</a>"#
+<a href=#153 id=153 data-nosnippet>153</a>    </span>.to_string()
+<a href=#154 id=154 data-nosnippet>154</a>}
+<a href=#155 id=155 data-nosnippet>155</a>
+<a href=#156 id=156 data-nosnippet>156</a><span class="doccomment">/// .ferrous-forge/config.toml content
+<a href=#157 id=157 data-nosnippet>157</a></span><span class="kw">fn </span>config_toml_content() -&gt; String {
+<a href=#158 id=158 data-nosnippet>158</a>    <span class="string">r#"# Ferrous Forge configuration
+<a href=#159 id=159 data-nosnippet>159</a>
+<a href=#160 id=160 data-nosnippet>160</a>[validation]
+<a href=#161 id=161 data-nosnippet>161</a>max_line_length = 100
+<a href=#162 id=162 data-nosnippet>162</a>max_file_length = 300
+<a href=#163 id=163 data-nosnippet>163</a>max_function_length = 50
+<a href=#164 id=164 data-nosnippet>164</a>allow_unwrap = false
+<a href=#165 id=165 data-nosnippet>165</a>allow_expect = false
+<a href=#166 id=166 data-nosnippet>166</a>"#
+<a href=#167 id=167 data-nosnippet>167</a>    </span>.to_string()
+<a href=#168 id=168 data-nosnippet>168</a>}</code></pre></div></section></main></body></html>

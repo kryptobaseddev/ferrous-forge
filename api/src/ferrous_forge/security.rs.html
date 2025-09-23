@@ -216,34 +216,35 @@
 <a href=#216 id=216 data-nosnippet>216</a>}
 <a href=#217 id=217 data-nosnippet>217</a>
 <a href=#218 id=218 data-nosnippet>218</a><span class="attr">#[cfg(test)]
-<a href=#219 id=219 data-nosnippet>219</a></span><span class="kw">mod </span>tests {
-<a href=#220 id=220 data-nosnippet>220</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
-<a href=#221 id=221 data-nosnippet>221</a>
-<a href=#222 id=222 data-nosnippet>222</a>    <span class="attr">#[test]
-<a href=#223 id=223 data-nosnippet>223</a>    </span><span class="kw">fn </span>test_vulnerability_severity_classification() {
-<a href=#224 id=224 data-nosnippet>224</a>        <span class="kw">let </span>vuln = Vulnerability {
-<a href=#225 id=225 data-nosnippet>225</a>            package: <span class="string">"test"</span>.to_string(),
-<a href=#226 id=226 data-nosnippet>226</a>            version: <span class="string">"1.0.0"</span>.to_string(),
-<a href=#227 id=227 data-nosnippet>227</a>            severity: <span class="string">"critical"</span>.to_string(),
-<a href=#228 id=228 data-nosnippet>228</a>            title: <span class="string">"Test vulnerability"</span>.to_string(),
-<a href=#229 id=229 data-nosnippet>229</a>            description: <span class="string">"Test description"</span>.to_string(),
-<a href=#230 id=230 data-nosnippet>230</a>            cve: <span class="prelude-val">Some</span>(<span class="string">"CVE-2024-0001"</span>.to_string()),
-<a href=#231 id=231 data-nosnippet>231</a>            cvss: <span class="prelude-val">Some</span>(<span class="number">9.5</span>),
-<a href=#232 id=232 data-nosnippet>232</a>        };
-<a href=#233 id=233 data-nosnippet>233</a>
-<a href=#234 id=234 data-nosnippet>234</a>        <span class="macro">assert_eq!</span>(vuln.severity, <span class="string">"critical"</span>);
-<a href=#235 id=235 data-nosnippet>235</a>        <span class="macro">assert!</span>(vuln.cvss.unwrap_or(<span class="number">0.0</span>) &gt; <span class="number">9.0</span>);
-<a href=#236 id=236 data-nosnippet>236</a>    }
-<a href=#237 id=237 data-nosnippet>237</a>
-<a href=#238 id=238 data-nosnippet>238</a>    <span class="attr">#[test]
-<a href=#239 id=239 data-nosnippet>239</a>    </span><span class="kw">fn </span>test_audit_report_passed() {
-<a href=#240 id=240 data-nosnippet>240</a>        <span class="kw">let </span>report = AuditReport {
-<a href=#241 id=241 data-nosnippet>241</a>            vulnerabilities: <span class="macro">vec!</span>[],
-<a href=#242 id=242 data-nosnippet>242</a>            dependencies_count: <span class="number">10</span>,
-<a href=#243 id=243 data-nosnippet>243</a>            passed: <span class="bool-val">true</span>,
-<a href=#244 id=244 data-nosnippet>244</a>        };
-<a href=#245 id=245 data-nosnippet>245</a>
-<a href=#246 id=246 data-nosnippet>246</a>        <span class="macro">assert!</span>(report.passed);
-<a href=#247 id=247 data-nosnippet>247</a>        <span class="macro">assert!</span>(report.vulnerabilities.is_empty());
-<a href=#248 id=248 data-nosnippet>248</a>    }
-<a href=#249 id=249 data-nosnippet>249</a>}</code></pre></div></section></main></body></html>
+<a href=#219 id=219 data-nosnippet>219</a>#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+<a href=#220 id=220 data-nosnippet>220</a></span><span class="kw">mod </span>tests {
+<a href=#221 id=221 data-nosnippet>221</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#222 id=222 data-nosnippet>222</a>
+<a href=#223 id=223 data-nosnippet>223</a>    <span class="attr">#[test]
+<a href=#224 id=224 data-nosnippet>224</a>    </span><span class="kw">fn </span>test_vulnerability_severity_classification() {
+<a href=#225 id=225 data-nosnippet>225</a>        <span class="kw">let </span>vuln = Vulnerability {
+<a href=#226 id=226 data-nosnippet>226</a>            package: <span class="string">"test"</span>.to_string(),
+<a href=#227 id=227 data-nosnippet>227</a>            version: <span class="string">"1.0.0"</span>.to_string(),
+<a href=#228 id=228 data-nosnippet>228</a>            severity: <span class="string">"critical"</span>.to_string(),
+<a href=#229 id=229 data-nosnippet>229</a>            title: <span class="string">"Test vulnerability"</span>.to_string(),
+<a href=#230 id=230 data-nosnippet>230</a>            description: <span class="string">"Test description"</span>.to_string(),
+<a href=#231 id=231 data-nosnippet>231</a>            cve: <span class="prelude-val">Some</span>(<span class="string">"CVE-2024-0001"</span>.to_string()),
+<a href=#232 id=232 data-nosnippet>232</a>            cvss: <span class="prelude-val">Some</span>(<span class="number">9.5</span>),
+<a href=#233 id=233 data-nosnippet>233</a>        };
+<a href=#234 id=234 data-nosnippet>234</a>
+<a href=#235 id=235 data-nosnippet>235</a>        <span class="macro">assert_eq!</span>(vuln.severity, <span class="string">"critical"</span>);
+<a href=#236 id=236 data-nosnippet>236</a>        <span class="macro">assert!</span>(vuln.cvss.unwrap_or(<span class="number">0.0</span>) &gt; <span class="number">9.0</span>);
+<a href=#237 id=237 data-nosnippet>237</a>    }
+<a href=#238 id=238 data-nosnippet>238</a>
+<a href=#239 id=239 data-nosnippet>239</a>    <span class="attr">#[test]
+<a href=#240 id=240 data-nosnippet>240</a>    </span><span class="kw">fn </span>test_audit_report_passed() {
+<a href=#241 id=241 data-nosnippet>241</a>        <span class="kw">let </span>report = AuditReport {
+<a href=#242 id=242 data-nosnippet>242</a>            vulnerabilities: <span class="macro">vec!</span>[],
+<a href=#243 id=243 data-nosnippet>243</a>            dependencies_count: <span class="number">10</span>,
+<a href=#244 id=244 data-nosnippet>244</a>            passed: <span class="bool-val">true</span>,
+<a href=#245 id=245 data-nosnippet>245</a>        };
+<a href=#246 id=246 data-nosnippet>246</a>
+<a href=#247 id=247 data-nosnippet>247</a>        <span class="macro">assert!</span>(report.passed);
+<a href=#248 id=248 data-nosnippet>248</a>        <span class="macro">assert!</span>(report.vulnerabilities.is_empty());
+<a href=#249 id=249 data-nosnippet>249</a>    }
+<a href=#250 id=250 data-nosnippet>250</a>}</code></pre></div></section></main></body></html>

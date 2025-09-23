@@ -162,32 +162,33 @@
 <a href=#162 id=162 data-nosnippet>162</a>}
 <a href=#163 id=163 data-nosnippet>163</a>
 <a href=#164 id=164 data-nosnippet>164</a><span class="attr">#[cfg(test)]
-<a href=#165 id=165 data-nosnippet>165</a></span><span class="kw">mod </span>tests {
-<a href=#166 id=166 data-nosnippet>166</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
-<a href=#167 id=167 data-nosnippet>167</a>
-<a href=#168 id=168 data-nosnippet>168</a>    <span class="attr">#[test]
-<a href=#169 id=169 data-nosnippet>169</a>    </span><span class="kw">fn </span>test_parse_version_from_tag() {
-<a href=#170 id=170 data-nosnippet>170</a>        <span class="kw">let </span>client = GitHubClient::new(<span class="prelude-val">None</span>).unwrap();
-<a href=#171 id=171 data-nosnippet>171</a>
-<a href=#172 id=172 data-nosnippet>172</a>        <span class="macro">assert_eq!</span>(
-<a href=#173 id=173 data-nosnippet>173</a>            client.parse_version_from_tag(<span class="string">"1.90.0"</span>).unwrap(),
-<a href=#174 id=174 data-nosnippet>174</a>            Version::new(<span class="number">1</span>, <span class="number">90</span>, <span class="number">0</span>)
-<a href=#175 id=175 data-nosnippet>175</a>        );
-<a href=#176 id=176 data-nosnippet>176</a>
-<a href=#177 id=177 data-nosnippet>177</a>        <span class="macro">assert_eq!</span>(
-<a href=#178 id=178 data-nosnippet>178</a>            client.parse_version_from_tag(<span class="string">"v1.90.0"</span>).unwrap(),
-<a href=#179 id=179 data-nosnippet>179</a>            Version::new(<span class="number">1</span>, <span class="number">90</span>, <span class="number">0</span>)
-<a href=#180 id=180 data-nosnippet>180</a>        );
-<a href=#181 id=181 data-nosnippet>181</a>    }
-<a href=#182 id=182 data-nosnippet>182</a>
-<a href=#183 id=183 data-nosnippet>183</a>    <span class="attr">#[tokio::test]
-<a href=#184 id=184 data-nosnippet>184</a>    #[ignore] </span><span class="comment">// Requires network access
-<a href=#185 id=185 data-nosnippet>185</a>    </span><span class="kw">async fn </span>test_get_latest_release() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-<a href=#186 id=186 data-nosnippet>186</a>        <span class="kw">let </span>client = GitHubClient::new(<span class="prelude-val">None</span>)<span class="question-mark">?</span>;
-<a href=#187 id=187 data-nosnippet>187</a>        <span class="kw">let </span>release = client.get_latest_release().<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#188 id=188 data-nosnippet>188</a>
-<a href=#189 id=189 data-nosnippet>189</a>        <span class="macro">assert!</span>(!release.tag_name.is_empty());
-<a href=#190 id=190 data-nosnippet>190</a>        <span class="macro">assert!</span>(release.version.major &gt;= <span class="number">1</span>);
-<a href=#191 id=191 data-nosnippet>191</a>        <span class="prelude-val">Ok</span>(())
-<a href=#192 id=192 data-nosnippet>192</a>    }
-<a href=#193 id=193 data-nosnippet>193</a>}</code></pre></div></section></main></body></html>
+<a href=#165 id=165 data-nosnippet>165</a>#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+<a href=#166 id=166 data-nosnippet>166</a></span><span class="kw">mod </span>tests {
+<a href=#167 id=167 data-nosnippet>167</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#168 id=168 data-nosnippet>168</a>
+<a href=#169 id=169 data-nosnippet>169</a>    <span class="attr">#[test]
+<a href=#170 id=170 data-nosnippet>170</a>    </span><span class="kw">fn </span>test_parse_version_from_tag() {
+<a href=#171 id=171 data-nosnippet>171</a>        <span class="kw">let </span>client = GitHubClient::new(<span class="prelude-val">None</span>).unwrap();
+<a href=#172 id=172 data-nosnippet>172</a>
+<a href=#173 id=173 data-nosnippet>173</a>        <span class="macro">assert_eq!</span>(
+<a href=#174 id=174 data-nosnippet>174</a>            client.parse_version_from_tag(<span class="string">"1.90.0"</span>).unwrap(),
+<a href=#175 id=175 data-nosnippet>175</a>            Version::new(<span class="number">1</span>, <span class="number">90</span>, <span class="number">0</span>)
+<a href=#176 id=176 data-nosnippet>176</a>        );
+<a href=#177 id=177 data-nosnippet>177</a>
+<a href=#178 id=178 data-nosnippet>178</a>        <span class="macro">assert_eq!</span>(
+<a href=#179 id=179 data-nosnippet>179</a>            client.parse_version_from_tag(<span class="string">"v1.90.0"</span>).unwrap(),
+<a href=#180 id=180 data-nosnippet>180</a>            Version::new(<span class="number">1</span>, <span class="number">90</span>, <span class="number">0</span>)
+<a href=#181 id=181 data-nosnippet>181</a>        );
+<a href=#182 id=182 data-nosnippet>182</a>    }
+<a href=#183 id=183 data-nosnippet>183</a>
+<a href=#184 id=184 data-nosnippet>184</a>    <span class="attr">#[tokio::test]
+<a href=#185 id=185 data-nosnippet>185</a>    #[ignore] </span><span class="comment">// Requires network access
+<a href=#186 id=186 data-nosnippet>186</a>    </span><span class="kw">async fn </span>test_get_latest_release() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<a href=#187 id=187 data-nosnippet>187</a>        <span class="kw">let </span>client = GitHubClient::new(<span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+<a href=#188 id=188 data-nosnippet>188</a>        <span class="kw">let </span>release = client.get_latest_release().<span class="kw">await</span><span class="question-mark">?</span>;
+<a href=#189 id=189 data-nosnippet>189</a>
+<a href=#190 id=190 data-nosnippet>190</a>        <span class="macro">assert!</span>(!release.tag_name.is_empty());
+<a href=#191 id=191 data-nosnippet>191</a>        <span class="macro">assert!</span>(release.version.major &gt;= <span class="number">1</span>);
+<a href=#192 id=192 data-nosnippet>192</a>        <span class="prelude-val">Ok</span>(())
+<a href=#193 id=193 data-nosnippet>193</a>    }
+<a href=#194 id=194 data-nosnippet>194</a>}</code></pre></div></section></main></body></html>

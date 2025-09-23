@@ -235,42 +235,43 @@
 <a href=#235 id=235 data-nosnippet>235</a>}
 <a href=#236 id=236 data-nosnippet>236</a>
 <a href=#237 id=237 data-nosnippet>237</a><span class="attr">#[cfg(test)]
-<a href=#238 id=238 data-nosnippet>238</a></span><span class="kw">mod </span>tests {
-<a href=#239 id=239 data-nosnippet>239</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
-<a href=#240 id=240 data-nosnippet>240</a>    <span class="kw">use </span>tempfile::TempDir;
-<a href=#241 id=241 data-nosnippet>241</a>
-<a href=#242 id=242 data-nosnippet>242</a>    <span class="attr">#[tokio::test]
-<a href=#243 id=243 data-nosnippet>243</a>    </span><span class="kw">async fn </span>test_pipeline_creation() {
-<a href=#244 id=244 data-nosnippet>244</a>        <span class="kw">let </span>temp_dir = TempDir::new().unwrap();
-<a href=#245 id=245 data-nosnippet>245</a>        <span class="kw">let </span>pipeline = SafetyPipeline::new(temp_dir.path()).<span class="kw">await</span>;
-<a href=#246 id=246 data-nosnippet>246</a>
-<a href=#247 id=247 data-nosnippet>247</a>        <span class="comment">// Should succeed even if config doesn't exist
-<a href=#248 id=248 data-nosnippet>248</a>        </span><span class="macro">assert!</span>(pipeline.is_ok());
-<a href=#249 id=249 data-nosnippet>249</a>    }
-<a href=#250 id=250 data-nosnippet>250</a>
-<a href=#251 id=251 data-nosnippet>251</a>    <span class="attr">#[test]
-<a href=#252 id=252 data-nosnippet>252</a>    </span><span class="kw">fn </span>test_get_stage_for_check() {
-<a href=#253 id=253 data-nosnippet>253</a>        <span class="kw">let </span>config = SafetyConfig::default();
-<a href=#254 id=254 data-nosnippet>254</a>        <span class="kw">let </span>temp_dir = TempDir::new().unwrap();
-<a href=#255 id=255 data-nosnippet>255</a>        <span class="kw">let </span>bypass_manager = BypassManager::new(<span class="kw-2">&amp;</span>config.bypass).unwrap();
-<a href=#256 id=256 data-nosnippet>256</a>
-<a href=#257 id=257 data-nosnippet>257</a>        <span class="kw">let </span>pipeline = SafetyPipeline {
-<a href=#258 id=258 data-nosnippet>258</a>            config,
-<a href=#259 id=259 data-nosnippet>259</a>            project_path: temp_dir.path().to_path_buf(),
-<a href=#260 id=260 data-nosnippet>260</a>            bypass_manager,
-<a href=#261 id=261 data-nosnippet>261</a>        };
-<a href=#262 id=262 data-nosnippet>262</a>
-<a href=#263 id=263 data-nosnippet>263</a>        <span class="macro">assert_eq!</span>(
-<a href=#264 id=264 data-nosnippet>264</a>            pipeline.get_stage_for_check(CheckType::Format),
-<a href=#265 id=265 data-nosnippet>265</a>            PipelineStage::PreCommit
-<a href=#266 id=266 data-nosnippet>266</a>        );
-<a href=#267 id=267 data-nosnippet>267</a>        <span class="macro">assert_eq!</span>(
-<a href=#268 id=268 data-nosnippet>268</a>            pipeline.get_stage_for_check(CheckType::Test),
-<a href=#269 id=269 data-nosnippet>269</a>            PipelineStage::PrePush
-<a href=#270 id=270 data-nosnippet>270</a>        );
-<a href=#271 id=271 data-nosnippet>271</a>        <span class="macro">assert_eq!</span>(
-<a href=#272 id=272 data-nosnippet>272</a>            pipeline.get_stage_for_check(CheckType::Semver),
-<a href=#273 id=273 data-nosnippet>273</a>            PipelineStage::Publish
-<a href=#274 id=274 data-nosnippet>274</a>        );
-<a href=#275 id=275 data-nosnippet>275</a>    }
-<a href=#276 id=276 data-nosnippet>276</a>}</code></pre></div></section></main></body></html>
+<a href=#238 id=238 data-nosnippet>238</a>#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+<a href=#239 id=239 data-nosnippet>239</a></span><span class="kw">mod </span>tests {
+<a href=#240 id=240 data-nosnippet>240</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#241 id=241 data-nosnippet>241</a>    <span class="kw">use </span>tempfile::TempDir;
+<a href=#242 id=242 data-nosnippet>242</a>
+<a href=#243 id=243 data-nosnippet>243</a>    <span class="attr">#[tokio::test]
+<a href=#244 id=244 data-nosnippet>244</a>    </span><span class="kw">async fn </span>test_pipeline_creation() {
+<a href=#245 id=245 data-nosnippet>245</a>        <span class="kw">let </span>temp_dir = TempDir::new().unwrap();
+<a href=#246 id=246 data-nosnippet>246</a>        <span class="kw">let </span>pipeline = SafetyPipeline::new(temp_dir.path()).<span class="kw">await</span>;
+<a href=#247 id=247 data-nosnippet>247</a>
+<a href=#248 id=248 data-nosnippet>248</a>        <span class="comment">// Should succeed even if config doesn't exist
+<a href=#249 id=249 data-nosnippet>249</a>        </span><span class="macro">assert!</span>(pipeline.is_ok());
+<a href=#250 id=250 data-nosnippet>250</a>    }
+<a href=#251 id=251 data-nosnippet>251</a>
+<a href=#252 id=252 data-nosnippet>252</a>    <span class="attr">#[test]
+<a href=#253 id=253 data-nosnippet>253</a>    </span><span class="kw">fn </span>test_get_stage_for_check() {
+<a href=#254 id=254 data-nosnippet>254</a>        <span class="kw">let </span>config = SafetyConfig::default();
+<a href=#255 id=255 data-nosnippet>255</a>        <span class="kw">let </span>temp_dir = TempDir::new().unwrap();
+<a href=#256 id=256 data-nosnippet>256</a>        <span class="kw">let </span>bypass_manager = BypassManager::new(<span class="kw-2">&amp;</span>config.bypass).unwrap();
+<a href=#257 id=257 data-nosnippet>257</a>
+<a href=#258 id=258 data-nosnippet>258</a>        <span class="kw">let </span>pipeline = SafetyPipeline {
+<a href=#259 id=259 data-nosnippet>259</a>            config,
+<a href=#260 id=260 data-nosnippet>260</a>            project_path: temp_dir.path().to_path_buf(),
+<a href=#261 id=261 data-nosnippet>261</a>            bypass_manager,
+<a href=#262 id=262 data-nosnippet>262</a>        };
+<a href=#263 id=263 data-nosnippet>263</a>
+<a href=#264 id=264 data-nosnippet>264</a>        <span class="macro">assert_eq!</span>(
+<a href=#265 id=265 data-nosnippet>265</a>            pipeline.get_stage_for_check(CheckType::Format),
+<a href=#266 id=266 data-nosnippet>266</a>            PipelineStage::PreCommit
+<a href=#267 id=267 data-nosnippet>267</a>        );
+<a href=#268 id=268 data-nosnippet>268</a>        <span class="macro">assert_eq!</span>(
+<a href=#269 id=269 data-nosnippet>269</a>            pipeline.get_stage_for_check(CheckType::Test),
+<a href=#270 id=270 data-nosnippet>270</a>            PipelineStage::PrePush
+<a href=#271 id=271 data-nosnippet>271</a>        );
+<a href=#272 id=272 data-nosnippet>272</a>        <span class="macro">assert_eq!</span>(
+<a href=#273 id=273 data-nosnippet>273</a>            pipeline.get_stage_for_check(CheckType::Semver),
+<a href=#274 id=274 data-nosnippet>274</a>            PipelineStage::Publish
+<a href=#275 id=275 data-nosnippet>275</a>        );
+<a href=#276 id=276 data-nosnippet>276</a>    }
+<a href=#277 id=277 data-nosnippet>277</a>}</code></pre></div></section></main></body></html>
