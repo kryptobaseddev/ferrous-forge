@@ -133,8 +133,8 @@ impl SafetyPipeline {
 #[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod tests {
     use super::*;
-    use crate::safety::CheckType;
     use crate::safety::execution::get_stage_for_check;
+    use crate::safety::CheckType;
     use tempfile::TempDir;
 
     #[tokio::test]
