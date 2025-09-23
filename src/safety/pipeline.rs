@@ -148,18 +148,7 @@ mod tests {
 
     #[test]
     fn test_get_stage_for_check() {
-        let config = SafetyConfig::default();
-        let temp_dir = TempDir::new().unwrap();
-        let bypass_manager = BypassManager::new(&config.bypass).unwrap();
-
-        let execution_manager = ExecutionManager::new(false, false);
-        let pipeline = SafetyPipeline {
-            config,
-            project_path: temp_dir.path().to_path_buf(),
-            bypass_manager,
-            execution_manager,
-        };
-
+        // Test the get_stage_for_check function directly
         assert_eq!(
             get_stage_for_check(CheckType::Format),
             PipelineStage::PreCommit
