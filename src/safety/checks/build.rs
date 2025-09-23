@@ -39,44 +39,60 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     result.set_duration(start.elapsed());
 
     if !output.status.success() {
-        result.add_error("Build failed");
-        result.add_suggestion("Fix compilation errors before proceeding");
-
-        // Parse build errors
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        let mut error_count = 0;
-
-        for line in stderr.lines() {
-            if line.starts_with("error") && error_count < 3 {
-                result.add_error(format!("Build: {}", line.trim()));
-                error_count += 1;
-            } else if line.trim().starts_with("-->") && error_count <= 3 {
-                result.add_context(format!("Location: {}", line.trim()));
-            }
-        }
-
-        if error_count >= 3 {
-            result.add_error("... and more build errors (showing first 3)");
-        }
-
-        result.add_suggestion("Run 'cargo build' to see detailed error messages");
-        result.add_suggestion("Check for missing dependencies or syntax errors");
+        handle_build_failure(&mut result, &output);
     } else {
-        result.add_context("Project builds successfully in release mode");
-
-        // Check for warnings
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        let warning_count = stderr
-            .lines()
-            .filter(|line| line.starts_with("warning:"))
-            .count();
-
-        if warning_count > 0 {
-            result.add_context(format!("Build completed with {} warnings", warning_count));
-        }
+        handle_build_success(&mut result, &output);
     }
 
     Ok(result)
+}
+
+/// Handle build failure output
+fn handle_build_failure(result: &mut CheckResult, output: &std::process::Output) {
+    result.add_error("Build failed");
+    result.add_suggestion("Fix compilation errors before proceeding");
+
+    let error_count = parse_build_errors(result, &output.stderr);
+
+    if error_count >= 3 {
+        result.add_error("... and more build errors (showing first 3)");
+    }
+
+    result.add_suggestion("Run 'cargo build' to see detailed error messages");
+    result.add_suggestion("Check for missing dependencies or syntax errors");
+}
+
+/// Parse build errors from stderr
+fn parse_build_errors(result: &mut CheckResult, stderr: &[u8]) -> usize {
+    let stderr = String::from_utf8_lossy(stderr);
+    let mut error_count = 0;
+
+    for line in stderr.lines() {
+        if line.starts_with("error") && error_count < 3 {
+            result.add_error(format!("Build: {}", line.trim()));
+            error_count += 1;
+        } else if line.trim().starts_with("-->") && error_count <= 3 {
+            result.add_context(format!("Location: {}", line.trim()));
+        }
+    }
+
+    error_count
+}
+
+/// Handle successful build output
+fn handle_build_success(result: &mut CheckResult, output: &std::process::Output) {
+    result.add_context("Project builds successfully in release mode");
+
+    // Check for warnings
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let warning_count = stderr
+        .lines()
+        .filter(|line| line.starts_with("warning:"))
+        .count();
+
+    if warning_count > 0 {
+        result.add_context(format!("Build completed with {} warnings", warning_count));
+    }
 }
 
 #[cfg(test)]

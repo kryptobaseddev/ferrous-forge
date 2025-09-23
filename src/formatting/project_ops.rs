@@ -1,7 +1,7 @@
 //! Project-level formatting operations
 
 use crate::{Error, Result};
-use super::types::{FormatResult, FormatSuggestion};
+use super::types::FormatResult;
 use super::utils::ensure_rustfmt_installed;
 use std::path::Path;
 use std::process::Command;

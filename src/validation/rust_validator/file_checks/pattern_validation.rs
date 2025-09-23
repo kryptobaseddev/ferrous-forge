@@ -1,6 +1,6 @@
 //! Code pattern validation
 
-use super::patterns::{is_in_string_literal, ValidationPatterns};
+use super::super::patterns::{is_in_string_literal, ValidationPatterns};
 use crate::validation::{Severity, Violation, ViolationType};
 use crate::Result;
 use std::path::Path;
@@ -111,7 +111,8 @@ pub fn validate_patterns(
                     violation_type: ViolationType::UnderscoreBandaid,
                     file: rust_file.to_path_buf(),
                     line: i + 1,
-                    message: "BANNED: Underscore parameter (_param) - fix the design instead of hiding warnings"
+                    message: "BANNED: Underscore parameter (_param) - \
+                             fix the design instead of hiding warnings"
                         .to_string(),
                     severity: Severity::Error,
                 });

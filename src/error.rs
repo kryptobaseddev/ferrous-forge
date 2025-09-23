@@ -187,6 +187,11 @@ impl Error {
     pub fn safety_blocked(msg: impl Into<String>) -> Self {
         Self::SafetyBlocked(msg.into())
     }
+
+    /// Create a new tool not found error
+    pub fn tool_not_found(tool: impl Into<String>) -> Self {
+        Self::Process(format!("Tool not found: {}", tool.into()))
+    }
 }
 
 /// Convert anyhow errors to our error type

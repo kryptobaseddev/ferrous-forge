@@ -19,10 +19,14 @@ impl EditionMigrator {
         let stderr = String::from_utf8_lossy(&output.stderr);
 
         // Parse test output
+        let passed = stdout.matches("test result: ok").count();
+        let failed = stdout.matches("FAILED").count();
+        let ignored = stdout.matches("ignored").count();
         let test_results = TestResults {
-            passed: stdout.matches("test result: ok").count(),
-            failed: stdout.matches("FAILED").count(),
-            ignored: stdout.matches("ignored").count(),
+            total: passed + failed + ignored,
+            passed,
+            failed,
+            ignored,
             filtered_out: 0,
         };
 

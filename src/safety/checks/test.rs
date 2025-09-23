@@ -39,53 +39,66 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     result.set_duration(start.elapsed());
 
     if !output.status.success() {
-        result.add_error("Tests failed");
-        result.add_suggestion("Fix failing tests before proceeding");
-
-        // Parse test failures
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
-
-        let mut failure_count = 0;
-        let mut in_failure = false;
-
-        for line in stdout.lines().chain(stderr.lines()) {
-            if line.starts_with("test ") && line.contains("FAILED") && failure_count < 5 {
-                result.add_error(format!("Test failure: {}", line.trim()));
-                failure_count += 1;
-            } else if line.starts_with("---- ") && line.contains("stdout ----") {
-                in_failure = true;
-            } else if in_failure && !line.trim().is_empty() && failure_count <= 5 {
-                result.add_context(format!("Test output: {}", line.trim()));
-                in_failure = false;
-            } else if line.contains("test result:") && line.contains("FAILED") {
-                result.add_error(line.trim().to_string());
-            }
-        }
-
-        if failure_count >= 5 {
-            result.add_error("... and more test failures (showing first 5)");
-        }
-
-        result.add_suggestion("Run 'cargo test' to see detailed test output");
-        result.add_suggestion("Check test logic and fix failing assertions");
+        handle_test_failures(&mut result, &output);
     } else {
-        // Parse successful test output
-        let stdout = String::from_utf8_lossy(&output.stdout);
-
-        for line in stdout.lines() {
-            if line.contains("test result: ok.") {
-                result.add_context(format!("Tests: {}", line.trim()));
-                break;
-            }
-        }
-
-        if result.context.is_empty() {
-            result.add_context("All tests passed");
-        }
+        handle_test_success(&mut result, &output);
     }
 
     Ok(result)
+}
+
+/// Handle test failure output
+fn handle_test_failures(result: &mut CheckResult, output: &std::process::Output) {
+    result.add_error("Tests failed");
+    result.add_suggestion("Fix failing tests before proceeding");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    let failure_count = parse_test_failures(result, &stdout, &stderr);
+
+    if failure_count >= 5 {
+        result.add_error("... and more test failures (showing first 5)");
+    }
+
+    result.add_suggestion("Run 'cargo test' to see detailed test output");
+    result.add_suggestion("Check test logic and fix failing assertions");
+}
+
+/// Parse test failure output
+fn parse_test_failures(result: &mut CheckResult, stdout: &str, stderr: &str) -> usize {
+    let mut failure_count = 0;
+    let mut in_failure = false;
+
+    for line in stdout.lines().chain(stderr.lines()) {
+        if line.starts_with("test ") && line.contains("FAILED") && failure_count < 5 {
+            result.add_error(format!("Test failure: {}", line.trim()));
+            failure_count += 1;
+        } else if line.starts_with("---- ") && line.contains("stdout ----") {
+            in_failure = true;
+        } else if in_failure && !line.trim().is_empty() && failure_count <= 5 {
+            result.add_context(format!("Test output: {}", line.trim()));
+            in_failure = false;
+        } else if line.contains("test result:") && line.contains("FAILED") {
+            result.add_error(line.trim().to_string());
+        }
+    }
+
+    failure_count
+}
+
+/// Handle successful test output
+fn handle_test_success(result: &mut CheckResult, output: &std::process::Output) {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    for line in stdout.lines() {
+        if line.contains("test result: ok.") {
+            result.add_context(format!("Tests: {}", line.trim()));
+            return;
+        }
+    }
+
+    result.add_context("All tests passed");
 }
 
 #[cfg(test)]

@@ -1,12 +1,19 @@
-//! CLI application template definition
+//! CLI application template
 
-use crate::templates::manifest::{TemplateFile, TemplateKind, TemplateManifest, TemplateVariable};
-use crate::templates::registry::BuiltinTemplate;
+use crate::templates::{BuiltinTemplate, TemplateFile, TemplateKind, TemplateManifest, TemplateVariable};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
 /// Create the CLI application template
 pub fn create_cli_template() -> BuiltinTemplate {
+    let manifest = create_cli_manifest();
+    let files = create_cli_files();
+    
+    BuiltinTemplate { manifest, files }
+}
+
+/// Create the manifest for CLI template
+fn create_cli_manifest() -> TemplateManifest {
     let mut manifest = TemplateManifest::new("cli-app".to_string(), TemplateKind::CliApp);
 
     manifest.description = "Command-line application with clap and tokio".to_string();
@@ -48,13 +55,25 @@ pub fn create_cli_template() -> BuiltinTemplate {
     // Add post-generate commands
     manifest.add_post_generate("cargo fmt".to_string());
     manifest.add_post_generate("ferrous-forge validate .".to_string());
+    
+    manifest
+}
 
-    // Create file contents
+/// Create the files for CLI template
+fn create_cli_files() -> HashMap<String, String> {
     let mut files = HashMap::new();
+    
+    files.insert("Cargo.toml".to_string(), cargo_toml_content());
+    files.insert("src/main.rs".to_string(), main_rs_content());
+    files.insert("src/lib.rs".to_string(), lib_rs_content());
+    files.insert(".ferrous-forge/config.toml".to_string(), config_toml_content());
+    
+    files
+}
 
-    files.insert(
-        "Cargo.toml".to_string(),
-        r#"[package]
+/// Cargo.toml content
+fn cargo_toml_content() -> String {
+    r#"[package]
 name = "{{project_name}}"
 version = "0.1.0"
 edition = "2024"
@@ -76,13 +95,12 @@ tempfile = "3.10"
 [[bin]]
 name = "{{project_name}}"
 path = "src/main.rs"
-"#
-        .to_string(),
-    );
+"#.to_string()
+}
 
-    files.insert(
-        "src/main.rs".to_string(),
-        r#"//! {{project_name}} - A Ferrous Forge compliant CLI application
+/// src/main.rs content
+fn main_rs_content() -> String {
+    r#"//! {{project_name}} - A Ferrous Forge compliant CLI application
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
@@ -129,52 +147,40 @@ async fn main() -> Result<()> {
     // Run the application
     run(config).await
 }
-"#
-        .to_string(),
-    );
+"#.to_string()
+}
 
-    files.insert(
-        "src/lib.rs".to_string(),
-        r#"//! Core library for {{project_name}}
+/// src/lib.rs content
+fn lib_rs_content() -> String {
+    r#"//! {{project_name}} library implementation
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 
 /// Application configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
-    /// Application name
-    pub name: String,
-    /// Debug mode
-    pub debug: bool,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            name: "{{project_name}}".to_string(),
-            debug: false,
-        }
-    }
+    /// Verbosity level
+    pub verbose: bool,
 }
 
 impl Config {
     /// Load configuration from file
     pub fn from_file(path: &str) -> Result<Self> {
         let content = std::fs::read_to_string(path)?;
-        let config = toml::from_str(&content)?;
+        let config: Self = toml::from_str(&content)?;
         Ok(config)
     }
 }
 
 /// Main application logic
 pub async fn run(config: Config) -> Result<()> {
-    tracing::info!("Starting {} with config: {:?}", config.name, config);
+    tracing::info!("Running with config: {:?}", config);
     
-    // Application logic here
-    println!("Hello from {}!", config.name);
+    // TODO: Implement your application logic here
     
     Ok(())
 }
@@ -186,33 +192,21 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = Config::default();
-        assert_eq!(config.name, "{{project_name}}");
-        assert!(!config.debug);
+        assert!(!config.verbose);
     }
 }
-"#
-        .to_string(),
-    );
+"#.to_string()
+}
 
-    files.insert(
-        ".ferrous-forge/config.toml".to_string(),
-        r#"# Ferrous Forge configuration
+/// .ferrous-forge/config.toml content
+fn config_toml_content() -> String {
+    r#"# Ferrous Forge configuration
+
 [validation]
-enabled = true
-strict = true
-
-[standards]
-edition = "2024"
 max_line_length = 100
-max_function_lines = 50
-max_file_lines = 300
-
-[hooks]
-pre_commit = true
-pre_push = true
-"#
-        .to_string(),
-    );
-
-    BuiltinTemplate { manifest, files }
+max_file_length = 300
+max_function_length = 50
+allow_unwrap = false
+allow_expect = false
+"#.to_string()
 }

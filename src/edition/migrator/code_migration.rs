@@ -13,9 +13,9 @@ impl EditionMigrator {
         result: &mut MigrationResult,
     ) -> Result<()> {
         match target_edition {
-            Edition::E2018 => self.migrate_to_2018(result).await?,
-            Edition::E2021 => self.migrate_to_2021(result).await?,
-            Edition::E2024 => self.migrate_to_2024(result).await?,
+            Edition::Edition2018 => self.migrate_to_2018(result).await?,
+            Edition::Edition2021 => self.migrate_to_2021(result).await?,
+            Edition::Edition2024 => self.migrate_to_2024(result).await?,
             _ => {}, // No migrations needed for older editions
         }
 

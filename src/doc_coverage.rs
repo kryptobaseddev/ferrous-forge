@@ -260,7 +260,7 @@ pub struct DocStruct {}
 
 pub struct UndocStruct {}
 ";
-        let (total, documented) = count_items_in_file(content).expect("Should count items");
+        let (total, documented) = count_items_in_file(content).unwrap();
         assert_eq!(total, 4);
         assert_eq!(documented, 2);
     }

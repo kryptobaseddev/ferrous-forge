@@ -53,7 +53,7 @@ impl EditionMigrator {
         // Execute migration steps
         self.execute_migration_steps(target_edition, &options, &mut result).await?;
 
-        result.status = MigrationStatus::Complete;
+        result.status = MigrationStatus::Completed;
         Ok(result)
     }
 
@@ -66,8 +66,10 @@ impl EditionMigrator {
         let current_edition = super::detect_edition(&manifest_path).await?;
 
         if current_edition >= target_edition {
-            let mut result = MigrationResult::default();
-            result.status = MigrationStatus::AlreadyUpToDate;
+            let result = MigrationResult {
+                status: MigrationStatus::AlreadyUpToDate,
+                ..Default::default()
+            };
             return Ok(Some(result));
         }
 

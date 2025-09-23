@@ -19,6 +19,12 @@ pub struct MigrationOptions {
     pub auto_commit: bool,
     /// Fix edition-specific idioms
     pub fix_idioms: bool,
+    /// Apply code migrations
+    pub apply_code_migrations: bool,
+    /// Format code after migration
+    pub format_code: bool,
+    /// Commit changes after migration
+    pub commit_changes: bool,
     /// Custom migration rules
     pub custom_rules: Vec<MigrationRule>,
 }
@@ -94,6 +100,8 @@ pub struct TestResults {
     pub failed: usize,
     /// Ignored tests
     pub ignored: usize,
+    /// Filtered out tests
+    pub filtered_out: usize,
 }
 
 /// Migration step
