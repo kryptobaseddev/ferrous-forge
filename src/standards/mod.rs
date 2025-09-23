@@ -6,6 +6,7 @@
 mod defaults;
 mod implementation;
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod tests;
 mod types;
 

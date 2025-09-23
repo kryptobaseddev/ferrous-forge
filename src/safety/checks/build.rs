@@ -96,6 +96,7 @@ fn handle_build_success(result: &mut CheckResult, output: &std::process::Output)
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod tests {
     use super::*;
     use tempfile::TempDir;

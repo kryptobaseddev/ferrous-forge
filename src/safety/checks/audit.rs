@@ -86,6 +86,7 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod tests {
     use super::*;
 

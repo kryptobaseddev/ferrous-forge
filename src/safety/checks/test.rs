@@ -102,6 +102,7 @@ fn handle_test_success(result: &mut CheckResult, output: &std::process::Output) 
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod tests {
     use super::*;
     use tempfile::TempDir;
@@ -134,6 +135,7 @@ pub fn add(a: i32, b: i32) -> i32 {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod tests {
     use super::*;
     

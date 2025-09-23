@@ -216,6 +216,7 @@ pub async fn quick_security_check(project_path: &Path) -> Result<bool> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod tests {
     use super::*;
 
