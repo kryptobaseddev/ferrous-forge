@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["CheckType","PipelineStage","SafetyResult"],"mod":["bypass","checks","config","pipeline","report"]};
+window.SIDEBAR_ITEMS = {"enum":["CheckType","PipelineStage","SafetyResult"],"mod":["bypass","checks","config","execution","pipeline","report"]};
