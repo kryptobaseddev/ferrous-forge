@@ -64,7 +64,7 @@ impl AIAnalyzer {
         let fix_complexity = assess_fix_complexity(violation, &code_context, &semantic_analysis);
 
         let (ai_fixable, confidence_score) = self.assess_fixability(
-            &violation,
+            violation,
             &code_context,
             &semantic_analysis,
             &fix_complexity,
