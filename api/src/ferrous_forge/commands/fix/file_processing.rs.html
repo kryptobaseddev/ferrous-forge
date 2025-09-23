@@ -27,7 +27,7 @@
 <a href=#27 id=27 data-nosnippet>27</a>
 <a href=#28 id=28 data-nosnippet>28</a><span class="doccomment">/// Process a single file's violations
 <a href=#29 id=29 data-nosnippet>29</a></span><span class="kw">fn </span>process_single_file(
-<a href=#30 id=30 data-nosnippet>30</a>    file_path: <span class="kw-2">&amp;</span>PathBuf,
+<a href=#30 id=30 data-nosnippet>30</a>    file_path: <span class="kw-2">&amp;</span>Path,
 <a href=#31 id=31 data-nosnippet>31</a>    file_violations: <span class="kw-2">&amp;</span>[Violation],
 <a href=#32 id=32 data-nosnippet>32</a>    dry_run: bool,
 <a href=#33 id=33 data-nosnippet>33</a>    stats: <span class="kw-2">&amp;mut </span>FixStats,
@@ -51,7 +51,7 @@
 <a href=#51 id=51 data-nosnippet>51</a>
 <a href=#52 id=52 data-nosnippet>52</a><span class="doccomment">/// Handle successful fix results
 <a href=#53 id=53 data-nosnippet>53</a></span><span class="kw">fn </span>handle_successful_fix(
-<a href=#54 id=54 data-nosnippet>54</a>    _file_path: <span class="kw-2">&amp;</span>PathBuf,
+<a href=#54 id=54 data-nosnippet>54</a>    _file_path: <span class="kw-2">&amp;</span>Path,
 <a href=#55 id=55 data-nosnippet>55</a>    fixed_count: usize,
 <a href=#56 id=56 data-nosnippet>56</a>    dry_run: bool,
 <a href=#57 id=57 data-nosnippet>57</a>    stats: <span class="kw-2">&amp;mut </span>FixStats,
@@ -67,7 +67,7 @@
 <a href=#67 id=67 data-nosnippet>67</a>
 <a href=#68 id=68 data-nosnippet>68</a><span class="doccomment">/// Fix violations in a specific file
 <a href=#69 id=69 data-nosnippet>69</a></span><span class="kw">fn </span>fix_file_violations(
-<a href=#70 id=70 data-nosnippet>70</a>    file_path: <span class="kw-2">&amp;</span>PathBuf,
+<a href=#70 id=70 data-nosnippet>70</a>    file_path: <span class="kw-2">&amp;</span>Path,
 <a href=#71 id=71 data-nosnippet>71</a>    violations: <span class="kw-2">&amp;</span>[Violation],
 <a href=#72 id=72 data-nosnippet>72</a>    dry_run: bool,
 <a href=#73 id=73 data-nosnippet>73</a>) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
