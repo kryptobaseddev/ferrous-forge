@@ -139,7 +139,10 @@ edition = "2021"
         if !result.passed {
             // If it didn't pass, it should only be due to minor format differences
             // not actual errors. We accept this on beta.
-            println!("Format check had issues (likely beta Rust differences): {:?}", result.errors);
+            println!(
+                "Format check had issues (likely beta Rust differences): {:?}",
+                result.errors
+            );
         }
         // We still want to ensure the check ran successfully
         assert!(result.check_type == CheckType::Format);
