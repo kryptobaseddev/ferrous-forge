@@ -139,15 +139,18 @@
 <a href=#139 id=139 data-nosnippet>139</a>        </span><span class="kw">if </span>!result.passed {
 <a href=#140 id=140 data-nosnippet>140</a>            <span class="comment">// If it didn't pass, it should only be due to minor format differences
 <a href=#141 id=141 data-nosnippet>141</a>            // not actual errors. We accept this on beta.
-<a href=#142 id=142 data-nosnippet>142</a>            </span><span class="macro">println!</span>(<span class="string">"Format check had issues (likely beta Rust differences): {:?}"</span>, result.errors);
-<a href=#143 id=143 data-nosnippet>143</a>        }
-<a href=#144 id=144 data-nosnippet>144</a>        <span class="comment">// We still want to ensure the check ran successfully
-<a href=#145 id=145 data-nosnippet>145</a>        </span><span class="macro">assert!</span>(result.check_type == CheckType::Format);
-<a href=#146 id=146 data-nosnippet>146</a>    }
-<a href=#147 id=147 data-nosnippet>147</a>
-<a href=#148 id=148 data-nosnippet>148</a>    <span class="attr">#[test]
-<a href=#149 id=149 data-nosnippet>149</a>    </span><span class="kw">fn </span>test_format_check_struct() {
-<a href=#150 id=150 data-nosnippet>150</a>        <span class="macro">assert_eq!</span>(FormatCheck::name(), <span class="string">"format"</span>);
-<a href=#151 id=151 data-nosnippet>151</a>        <span class="macro">assert!</span>(!FormatCheck::description().is_empty());
-<a href=#152 id=152 data-nosnippet>152</a>    }
-<a href=#153 id=153 data-nosnippet>153</a>}</code></pre></div></section></main></body></html>
+<a href=#142 id=142 data-nosnippet>142</a>            </span><span class="macro">println!</span>(
+<a href=#143 id=143 data-nosnippet>143</a>                <span class="string">"Format check had issues (likely beta Rust differences): {:?}"</span>,
+<a href=#144 id=144 data-nosnippet>144</a>                result.errors
+<a href=#145 id=145 data-nosnippet>145</a>            );
+<a href=#146 id=146 data-nosnippet>146</a>        }
+<a href=#147 id=147 data-nosnippet>147</a>        <span class="comment">// We still want to ensure the check ran successfully
+<a href=#148 id=148 data-nosnippet>148</a>        </span><span class="macro">assert!</span>(result.check_type == CheckType::Format);
+<a href=#149 id=149 data-nosnippet>149</a>    }
+<a href=#150 id=150 data-nosnippet>150</a>
+<a href=#151 id=151 data-nosnippet>151</a>    <span class="attr">#[test]
+<a href=#152 id=152 data-nosnippet>152</a>    </span><span class="kw">fn </span>test_format_check_struct() {
+<a href=#153 id=153 data-nosnippet>153</a>        <span class="macro">assert_eq!</span>(FormatCheck::name(), <span class="string">"format"</span>);
+<a href=#154 id=154 data-nosnippet>154</a>        <span class="macro">assert!</span>(!FormatCheck::description().is_empty());
+<a href=#155 id=155 data-nosnippet>155</a>    }
+<a href=#156 id=156 data-nosnippet>156</a>}</code></pre></div></section></main></body></html>
