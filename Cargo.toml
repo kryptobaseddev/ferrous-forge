@@ -49,6 +49,10 @@ toml = "0.8"
 tokio = { version = "1.40", features = ["full"] }
 reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
 
+# Performance optimizations
+rayon = "1.10"
+dashmap = "6.1"
+
 # Error handling
 anyhow = "1.0"
 thiserror = "2.0"

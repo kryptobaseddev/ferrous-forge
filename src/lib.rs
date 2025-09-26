@@ -48,6 +48,8 @@ pub mod edition;
 pub mod error;
 pub mod formatting;
 pub mod git_hooks;
+/// Performance optimizations for validation
+pub mod performance;
 pub mod rust_version;
 pub mod safety;
 pub mod security;
