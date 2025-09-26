@@ -51,9 +51,9 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         rust: ["stable"]
         include:
-          # Test MSRV on Linux only - 3 versions back from stable
+          # Test MSRV on Linux only - Our minimum supported version
           - os: ubuntu-latest
-            rust: "1.87"  # MSRV - Stable minus ~3 versions
+            rust: "1.88"  # MSRV - Required for Edition 2024
           # Test beta on Linux only to catch upcoming issues
           - os: ubuntu-latest
             rust: "beta"
