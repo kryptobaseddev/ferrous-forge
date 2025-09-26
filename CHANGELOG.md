@@ -5,6 +5,19 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2025-09-25 🚀 CI/CD FIXES
+
+### Fixed
+- **CI/CD Issues**: Fixed all GitHub Actions failures
+  - Fixed formatting issue in safety/tests.rs (missing newline)
+  - Aligned rust-version with CI MSRV tests (1.88)
+  - All CI checks now passing: format, clippy, tests, docs, build
+
+### Verified
+- **Pre-push validation**: All checks run and pass locally before push
+- **CI/CD Pipeline**: 100% green across all jobs
+- **Edition 2024**: Maintained with Rust 1.88 compatibility
+
 ## [1.4.1] - 2025-09-25 🔧 CRITICAL BUG FIX & DOGFOODING
 
 ### Fixed
