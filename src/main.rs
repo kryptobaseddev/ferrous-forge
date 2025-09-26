@@ -6,7 +6,7 @@
 #![warn(missing_docs)]
 
 use clap::Parser;
-use ferrous_forge::{cli::Cli, commands, Result};
+use ferrous_forge::{Result, cli::Cli, commands};
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -1,7 +1,7 @@
 //! Edition migrate command
 
-use crate::edition::{migrator::MigrationOptions, Edition, EditionMigrator};
 use crate::Result;
+use crate::edition::{Edition, EditionMigrator, migrator::MigrationOptions};
 use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
 

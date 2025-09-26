@@ -60,9 +60,11 @@ edition = "2018"
 
     // Should have violation for wrong edition
     assert!(!violations.is_empty());
-    assert!(violations
-        .iter()
-        .any(|v| matches!(v.violation_type, ViolationType::WrongEdition)));
+    assert!(
+        violations
+            .iter()
+            .any(|v| matches!(v.violation_type, ViolationType::WrongEdition))
+    );
 }
 
 #[tokio::test]
@@ -89,9 +91,11 @@ version = "0.1.0"
 
     // Should have violation for missing edition
     assert!(!violations.is_empty());
-    assert!(violations
-        .iter()
-        .any(|v| matches!(v.violation_type, ViolationType::WrongEdition)));
+    assert!(
+        violations
+            .iter()
+            .any(|v| matches!(v.violation_type, ViolationType::WrongEdition))
+    );
 }
 
 #[tokio::test]
@@ -117,9 +121,11 @@ async fn test_validate_rust_file_size_limit() {
 
     // Should have violation for file too large
     assert!(!violations.is_empty());
-    assert!(violations
-        .iter()
-        .any(|v| matches!(v.violation_type, ViolationType::FileTooLarge)));
+    assert!(
+        violations
+            .iter()
+            .any(|v| matches!(v.violation_type, ViolationType::FileTooLarge))
+    );
 }
 
 #[tokio::test]
@@ -141,9 +147,11 @@ async fn test_validate_rust_file_line_length() {
 
     // Should have violation for line too long
     assert!(!violations.is_empty());
-    assert!(violations
-        .iter()
-        .any(|v| matches!(v.violation_type, ViolationType::LineTooLong)));
+    assert!(
+        violations
+            .iter()
+            .any(|v| matches!(v.violation_type, ViolationType::LineTooLong))
+    );
 }
 
 #[tokio::test]
@@ -164,9 +172,11 @@ async fn test_validate_rust_file_underscore_bandaid() {
 
     // Should have violations for underscore bandaid
     assert!(!violations.is_empty());
-    assert!(violations
-        .iter()
-        .any(|v| matches!(v.violation_type, ViolationType::UnderscoreBandaid)));
+    assert!(
+        violations
+            .iter()
+            .any(|v| matches!(v.violation_type, ViolationType::UnderscoreBandaid))
+    );
 }
 
 #[tokio::test]

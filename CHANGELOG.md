@@ -5,6 +5,35 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2025-09-25 🔧 CRITICAL BUG FIX & DOGFOODING
+
+### Fixed
+- **CLI Bug**: Fixed duplicate short option '-c' conflict in update command
+  - Removed short option from `channel` argument to avoid conflict with global `--config` option
+  - All CLI commands now work without conflicts
+
+### Improved  
+- **Edition 2024**: Updated from Edition 2021 to Edition 2024
+  - Now using the latest Rust edition as per our own standards
+  - True dogfooding - we practice what we preach
+- **File Size Compliance**: Split safety module tests to maintain <300 line limit
+  - Extracted tests to separate module to fix FILETOOLARGE violation
+  
+### Verified
+- **100% Dogfooding**: Zero violations maintained - perfect self-compliance
+- **Build Stability**: Clean compilation with no errors or warnings  
+- **Test Coverage**: All tests passing successfully
+- **CLI Functionality**: All 12 commands tested and working correctly
+- **Edition Compliance**: Using latest Edition 2024
+- **Rust Version**: Compatible with Rust 1.88+
+
+### Quality Assurance
+- Comprehensive command-line argument testing
+- Full validation suite run
+- Production build verification with Edition 2024
+- Complete feature testing
+- Rust version and edition management commands working
+
 ## [1.4.0] - 2025-09-22 🎉 HISTORIC MILESTONE
 
 ### 🏆 ZERO VIOLATIONS ACHIEVED - MISSION COMPLETE!

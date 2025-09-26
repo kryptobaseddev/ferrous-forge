@@ -1,7 +1,7 @@
 //! Safety pipeline CLI commands
 
-use crate::safety::{PipelineStage, SafetyPipeline};
 use crate::Result;
+use crate::safety::{PipelineStage, SafetyPipeline};
 use console::style;
 use std::fs;
 use std::path::Path;

@@ -1,7 +1,7 @@
 //! File and function size validation
 
-use crate::validation::{Severity, Violation, ViolationType};
 use crate::Result;
+use crate::validation::{Severity, Violation, ViolationType};
 use std::path::Path;
 
 /// Validate file size constraints

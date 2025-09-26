@@ -1,6 +1,6 @@
 //! Config command implementation
 
-use crate::{config::Config, Result};
+use crate::{Result, config::Config};
 use console::style;
 
 /// Execute the config command

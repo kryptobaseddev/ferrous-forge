@@ -6,8 +6,8 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use super::{
-    bypass::BypassManager, config::SafetyConfig, execution::ExecutionManager, report::SafetyReport,
-    PipelineStage, SafetyResult,
+    PipelineStage, SafetyResult, bypass::BypassManager, config::SafetyConfig,
+    execution::ExecutionManager, report::SafetyReport,
 };
 
 /// Main safety pipeline coordinator
@@ -133,8 +133,8 @@ impl SafetyPipeline {
 #[allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod tests {
     use super::*;
-    use crate::safety::execution::get_stage_for_check;
     use crate::safety::CheckType;
+    use crate::safety::execution::get_stage_for_check;
     use tempfile::TempDir;
 
     #[tokio::test]

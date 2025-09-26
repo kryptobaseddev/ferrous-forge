@@ -4,10 +4,9 @@
 //! including progress display and parallel/sequential execution.
 
 use super::{
-    checks,
+    CheckType, PipelineStage, checks,
     config::StageConfig,
     report::{CheckResult, SafetyReport},
-    CheckType, PipelineStage,
 };
 use crate::Result;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};

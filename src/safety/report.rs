@@ -66,11 +66,7 @@ impl CheckResult {
 
     /// Get a status emoji for display
     pub fn status_emoji(&self) -> &'static str {
-        if self.passed {
-            "✅"
-        } else {
-            "❌"
-        }
+        if self.passed { "✅" } else { "❌" }
     }
 
     /// Get a colored status for display

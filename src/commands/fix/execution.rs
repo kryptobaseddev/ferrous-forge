@@ -3,9 +3,9 @@
 use super::file_processing::process_all_files;
 use super::types::{FilterOptions, FixStats};
 use super::utils::{filter_violations, group_violations_by_file};
+use crate::Result;
 use crate::ai_analyzer;
 use crate::validation::{RustValidator, Violation};
-use crate::Result;
 use console::style;
 use std::collections::HashSet;
 use std::path::Path;

@@ -9,8 +9,8 @@ use ai_report::generate_ai_report;
 use checks::{run_additional_checks, run_clippy_validation};
 
 use crate::{
-    validation::{RustValidator, Violation},
     Result,
+    validation::{RustValidator, Violation},
 };
 use console::style;
 use std::path::{Path, PathBuf};

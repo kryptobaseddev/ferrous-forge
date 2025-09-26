@@ -1,7 +1,7 @@
 //! Testing operations for edition migration
 
-use super::types::{MigrationResult, MigrationStep, TestResults};
 use super::EditionMigrator;
+use super::types::{MigrationResult, MigrationStep, TestResults};
 use crate::Result;
 use std::process::Command;
 

@@ -16,7 +16,7 @@ pub enum Commands {
     /// Update Ferrous Forge to the latest version
     Update {
         /// Update channel to use (stable, beta, nightly)
-        #[arg(short, long, default_value = "stable")]
+        #[arg(long, default_value = "stable")]
         channel: String,
         /// Only update rules, not the binary
         #[arg(short, long)]

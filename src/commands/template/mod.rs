@@ -1,7 +1,7 @@
 //! Template management commands
 
-use crate::templates::TemplateRegistry;
 use crate::Result;
+use crate::templates::TemplateRegistry;
 use clap::Subcommand;
 use console::style;
 use std::path::PathBuf;

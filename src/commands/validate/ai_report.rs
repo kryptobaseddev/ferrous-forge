@@ -1,7 +1,7 @@
 //! AI-friendly compliance report generation
 
 use super::{markdown::generate_markdown_report, utils};
-use crate::{validation::Violation, Result};
+use crate::{Result, validation::Violation};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};

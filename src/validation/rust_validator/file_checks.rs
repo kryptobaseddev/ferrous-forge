@@ -12,8 +12,8 @@ use size_validation::validate_file_size;
 use test_utils::{check_allow_attributes, is_test_file};
 
 use super::patterns::ValidationPatterns;
-use crate::validation::Violation;
 use crate::Result;
+use crate::validation::Violation;
 use std::path::Path;
 use tokio::fs;
 

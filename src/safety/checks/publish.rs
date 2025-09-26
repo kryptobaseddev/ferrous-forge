@@ -6,7 +6,7 @@ use std::process::Command;
 use std::time::Instant;
 
 use super::SafetyCheck;
-use crate::safety::{report::CheckResult, CheckType};
+use crate::safety::{CheckType, report::CheckResult};
 
 /// Publish dry run check implementation
 pub struct PublishCheck;

@@ -1,7 +1,7 @@
 //! Utility functions for Rust version commands
 
-use crate::rust_version::VersionManager;
 use crate::Error;
+use crate::rust_version::VersionManager;
 use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
 use semver::Version;

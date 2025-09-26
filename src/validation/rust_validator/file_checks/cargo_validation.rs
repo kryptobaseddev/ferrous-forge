@@ -1,7 +1,7 @@
 //! Cargo.toml validation functions
 
-use crate::validation::{Severity, Violation, ViolationType};
 use crate::Result;
+use crate::validation::{Severity, Violation, ViolationType};
 use std::path::Path;
 use tokio::fs;
 

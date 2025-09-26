@@ -1,7 +1,7 @@
 //! Auto-update functionality
 
 use super::types::{UpdateChannel, UpdateManager};
-use crate::{config::Config, Result};
+use crate::{Result, config::Config};
 
 /// Check for automatic updates based on configuration
 pub async fn check_auto_update() -> Result<()> {

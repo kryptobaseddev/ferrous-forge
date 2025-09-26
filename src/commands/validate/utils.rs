@@ -1,6 +1,6 @@
 //! Utility functions for AI report generation
 
-use crate::{validation::Violation, Result};
+use crate::{Result, validation::Violation};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use tokio::fs;

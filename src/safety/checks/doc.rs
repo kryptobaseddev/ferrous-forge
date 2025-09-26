@@ -5,7 +5,7 @@ use std::path::Path;
 use std::time::Instant;
 
 use super::SafetyCheck;
-use crate::safety::{report::CheckResult, CheckType};
+use crate::safety::{CheckType, report::CheckResult};
 
 /// Doc check implementation
 pub struct DocCheck;

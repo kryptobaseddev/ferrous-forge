@@ -1,6 +1,6 @@
 //! Additional validation checks (documentation, formatting, security)
 
-use crate::{doc_coverage, formatting, security, validation::RustValidator, Result};
+use crate::{Result, doc_coverage, formatting, security, validation::RustValidator};
 use std::path::Path;
 
 /// Run all additional checks (documentation, formatting, security)

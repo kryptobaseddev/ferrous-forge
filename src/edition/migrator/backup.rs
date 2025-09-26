@@ -1,7 +1,7 @@
 //! Backup operations for edition migration
 
-use super::types::{MigrationResult, MigrationStep};
 use super::EditionMigrator;
+use super::types::{MigrationResult, MigrationStep};
 use crate::{Error, Result};
 
 impl EditionMigrator {

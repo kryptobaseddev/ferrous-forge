@@ -1,7 +1,7 @@
 //! Edition check command
 
-use crate::edition::{check_compliance, get_migration_recommendations};
 use crate::Result;
+use crate::edition::{check_compliance, get_migration_recommendations};
 use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::path::Path;

@@ -1,7 +1,7 @@
 //! Edition analyze command
 
-use crate::edition::{Edition, EditionAnalyzer};
 use crate::Result;
+use crate::edition::{Edition, EditionAnalyzer};
 use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::path::Path;

@@ -6,7 +6,7 @@ use std::time::Instant;
 use tokio::fs;
 
 use super::SafetyCheck;
-use crate::safety::{report::CheckResult, CheckType};
+use crate::safety::{CheckType, report::CheckResult};
 
 /// License check implementation
 pub struct LicenseCheck;

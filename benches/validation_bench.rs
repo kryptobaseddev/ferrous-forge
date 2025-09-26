@@ -3,13 +3,13 @@
 #![allow(missing_docs)] // Benchmarks don't need docs
 #![allow(clippy::expect_used, clippy::unwrap_used)] // Benchmarks need unwrap/expect for setup
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use ferrous_forge::validation::{
+    RustValidator,
     rust_validator::{
         file_checks::{validate_cargo_toml, validate_rust_file},
         patterns::ValidationPatterns,
     },
-    RustValidator,
 };
 use tempfile::TempDir;
 use tokio::runtime::Runtime;

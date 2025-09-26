@@ -1,8 +1,8 @@
 //! Code pattern validation
 
-use super::super::patterns::{is_in_string_literal, ValidationPatterns};
-use crate::validation::{Severity, Violation, ViolationType};
+use super::super::patterns::{ValidationPatterns, is_in_string_literal};
 use crate::Result;
+use crate::validation::{Severity, Violation, ViolationType};
 use std::path::Path;
 
 /// Legacy large function that contains the main validation logic

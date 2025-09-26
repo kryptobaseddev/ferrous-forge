@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use tokio::fs;
 
-use super::{config::BypassConfig, PipelineStage};
+use super::{PipelineStage, config::BypassConfig};
 
 /// Bypass manager for emergency situations
 pub struct BypassManager {
