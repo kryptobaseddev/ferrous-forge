@@ -49,6 +49,10 @@ pub async fn execute() -> Result<()> {
     Ok(())
 }
 
+/// Check if cargo wrapper hijacking is installed
+///
+/// Verifies whether the Ferrous Forge cargo wrapper is present in ~/.local/bin/cargo
+/// to intercept cargo commands and enforce standards.
 async fn check_cargo_hijacking() {
     let home_dir = match dirs::home_dir() {
         Some(dir) => dir,
@@ -66,6 +70,10 @@ async fn check_cargo_hijacking() {
     }
 }
 
+/// Check if global clippy configuration is installed
+///
+/// Verifies whether the Ferrous Forge clippy configuration file exists
+/// at ~/.clippy.toml for enforcing strict linting rules.
 async fn check_clippy_config() {
     let home_dir = match dirs::home_dir() {
         Some(dir) => dir,
@@ -83,6 +91,10 @@ async fn check_clippy_config() {
     }
 }
 
+/// Check if shell integration is configured
+///
+/// Scans common shell configuration files (.bashrc, .zshrc, .profile)
+/// to verify if Ferrous Forge PATH modifications are present.
 async fn check_shell_integration() {
     let home_dir = match dirs::home_dir() {
         Some(dir) => dir,

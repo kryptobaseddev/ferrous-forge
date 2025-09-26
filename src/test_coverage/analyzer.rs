@@ -1,9 +1,8 @@
 //! Test coverage analyzer implementation
 
-use super::types::{CoverageConfig, CoverageReport, FileCoverage};
+use super::types::{CoverageConfig, CoverageReport};
+use super::utils::{parse_tarpaulin_json, process_file_coverage, calculate_branch_coverage};
 use crate::{Error, Result};
-use serde::Deserialize;
-use std::collections::HashMap;
 use std::path::Path;
 use std::process::Command;
 
@@ -133,142 +132,73 @@ impl CoverageAnalyzer {
     pub fn config(&self) -> &CoverageConfig {
         &self.config
     }
+
+    /// Run tarpaulin and get coverage report
+    ///
+    /// This is a convenience wrapper around run_coverage that's more explicit
+    /// about running tarpaulin
+    pub async fn run_tarpaulin(&self, project_path: &Path) -> Result<CoverageReport> {
+        self.run_coverage(project_path).await
+    }
+
+    /// Parse a coverage report from tarpaulin output
+    ///
+    /// Parses the JSON output from cargo-tarpaulin and converts it to our 
+    /// CoverageReport format
+    pub fn parse_coverage_report(&self, tarpaulin_output: &str) -> Result<CoverageReport> {
+        self.parse_tarpaulin_output(tarpaulin_output)
+    }
+
+    /// Enforce minimum coverage threshold
+    ///
+    /// Returns an error if the coverage is below the specified threshold
+    pub fn enforce_minimum_coverage(&self, report: &CoverageReport, threshold: f64) -> Result<()> {
+        if report.line_coverage < threshold {
+            return Err(Error::validation(format!(
+                "Test coverage {:.1}% is below minimum threshold of {:.1}%",
+                report.line_coverage, threshold
+            )));
+        }
+        Ok(())
+    }
+
+    /// Generate a coverage badge SVG
+    ///
+    /// Creates an SVG badge showing the current test coverage percentage
+    pub fn generate_coverage_badge(&self, report: &CoverageReport) -> String {
+        let coverage = report.line_coverage;
+        let color = match coverage {
+            c if c >= 80.0 => "#4c1",    // Green
+            c if c >= 60.0 => "#dfb317", // Yellow
+            c if c >= 40.0 => "#fe7d37", // Orange
+            _ => "#e05d44",              // Red
+        };
+
+        format!(
+            r##"<svg xmlns="http://www.w3.org/2000/svg" width="114" height="20">
+                <linearGradient id="a" x2="0" y2="100%">
+                    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+                    <stop offset="1" stop-opacity=".1"/>
+                </linearGradient>
+                <rect rx="3" width="114" height="20" fill="#555"/>
+                <rect rx="3" x="63" width="51" height="20" fill="{}"/>
+                <path fill="{}" d="M63 0h4v20h-4z"/>
+                <rect rx="3" width="114" height="20" fill="url(#a)"/>
+                <g fill="#fff" text-anchor="middle" 
+                   font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+                    <text x="32" y="15" fill="#010101" fill-opacity=".3">coverage</text>
+                    <text x="32" y="14">coverage</text>
+                    <text x="87" y="15" fill="#010101" fill-opacity=".3">{:.1}%</text>
+                    <text x="87" y="14">{:.1}%</text>
+                </g>
+            </svg>"##,
+            color, color, coverage, coverage
+        )
+    }
 }
 
 impl Default for CoverageAnalyzer {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-/// Tarpaulin JSON output structure
-#[derive(Deserialize)]
-struct TarpaulinOutput {
-    #[serde(rename = "coverage")]
-    line_coverage: f64,
-    #[serde(rename = "linesCovered")]
-    lines_covered: u32,
-    #[serde(rename = "linesTotal")]
-    lines_total: u32,
-    #[serde(rename = "branchesCovered")]
-    branches_covered: Option<u32>,
-    #[serde(rename = "branchesTotal")]
-    branches_total: Option<u32>,
-    #[serde(rename = "files")]
-    files: HashMap<String, TarpaulinFile>,
-}
-
-/// Tarpaulin file coverage data
-#[derive(Deserialize)]
-struct TarpaulinFile {
-    #[serde(rename = "coverage")]
-    line_coverage: f64,
-    #[serde(rename = "linesCovered")]
-    lines_covered: u32,
-    #[serde(rename = "linesTotal")]
-    lines_total: u32,
-}
-
-/// Function coverage statistics
-struct FunctionStats {
-    coverage: f64,
-    tested: u32,
-    total: u32,
-}
-
-/// Parse tarpaulin JSON output
-fn parse_tarpaulin_json(output: &str) -> Result<TarpaulinOutput> {
-    serde_json::from_str(output)
-        .map_err(|e| Error::validation(format!("Failed to parse coverage output: {}", e)))
-}
-
-/// Process file coverage data and calculate function statistics
-fn process_file_coverage(
-    files: &HashMap<String, TarpaulinFile>,
-) -> (HashMap<String, FileCoverage>, FunctionStats) {
-    let mut file_coverage = HashMap::new();
-    let mut total_functions_tested = 0;
-    let mut total_functions = 0;
-
-    for (file_path, file_data) in files {
-        let (estimated_functions, estimated_functions_tested) =
-            estimate_function_coverage(file_data);
-
-        total_functions += estimated_functions;
-        total_functions_tested += estimated_functions_tested;
-
-        let coverage = create_file_coverage(
-            file_path,
-            file_data,
-            estimated_functions,
-            estimated_functions_tested,
-        );
-        file_coverage.insert(file_path.clone(), coverage);
-    }
-
-    let function_coverage =
-        calculate_function_coverage_percentage(total_functions_tested, total_functions);
-
-    (
-        file_coverage,
-        FunctionStats {
-            coverage: function_coverage,
-            tested: total_functions_tested,
-            total: total_functions,
-        },
-    )
-}
-
-/// Estimate function coverage from line coverage data
-fn estimate_function_coverage(file_data: &TarpaulinFile) -> (u32, u32) {
-    let estimated_functions = (file_data.lines_total / 10).max(1);
-    let estimated_functions_tested =
-        ((file_data.line_coverage / 100.0) * estimated_functions as f64) as u32;
-    (estimated_functions, estimated_functions_tested)
-}
-
-/// Create file coverage object
-fn create_file_coverage(
-    file_path: &str,
-    file_data: &TarpaulinFile,
-    estimated_functions: u32,
-    estimated_functions_tested: u32,
-) -> FileCoverage {
-    FileCoverage {
-        file_path: file_path.to_string(),
-        line_coverage: file_data.line_coverage,
-        function_coverage: calculate_function_coverage_percentage(
-            estimated_functions_tested,
-            estimated_functions,
-        ),
-        lines_tested: file_data.lines_covered,
-        total_lines: file_data.lines_total,
-        functions_tested: estimated_functions_tested,
-        total_functions: estimated_functions,
-    }
-}
-
-/// Calculate function coverage percentage
-fn calculate_function_coverage_percentage(tested: u32, total: u32) -> f64 {
-    if total > 0 {
-        (tested as f64 / total as f64) * 100.0
-    } else {
-        100.0
-    }
-}
-
-/// Calculate branch coverage from tarpaulin data
-fn calculate_branch_coverage(tarpaulin_data: &TarpaulinOutput) -> f64 {
-    if let (Some(covered), Some(total)) = (
-        tarpaulin_data.branches_covered,
-        tarpaulin_data.branches_total,
-    ) {
-        if total > 0 {
-            (covered as f64 / total as f64) * 100.0
-        } else {
-            100.0
-        }
-    } else {
-        tarpaulin_data.line_coverage // Fallback to line coverage
     }
 }

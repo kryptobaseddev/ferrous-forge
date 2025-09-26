@@ -1,3 +1,8 @@
+//! Code context extraction utilities for AI analysis
+//!
+//! This module provides functions to extract contextual information from code,
+//! including surrounding code, function signatures, imports, and error handling patterns.
+
 use super::types::{CodeContext, ErrorHandlingStyle};
 
 /// Extract code context around a violation line
@@ -38,6 +43,9 @@ pub fn extract_code_context(line_number: usize, content: &str) -> CodeContext {
     }
 }
 
+/// Extract all import statements from the file content
+///
+/// Identifies lines starting with "use " and collects them as import statements.
 fn extract_imports(content: &str) -> Vec<String> {
     content
         .lines()
@@ -46,6 +54,12 @@ fn extract_imports(content: &str) -> Vec<String> {
         .collect()
 }
 
+/// Extract function information for the context of a given line
+///
+/// Searches backwards from the violation line to find the containing function,
+/// extracting its name, signature, and return type.
+///
+/// Returns a tuple of (function_name, function_signature, return_type)
 fn extract_function_info(
     lines: &[&str],
     line_number: usize,
@@ -88,6 +102,10 @@ pub fn detect_error_handling_style(imports: &[String], content: &str) -> ErrorHa
     }
 }
 
+/// Detect if a line is within a trait implementation block
+///
+/// Searches backwards from the given line to find an "impl...for" statement,
+/// which indicates the code is part of a trait implementation.
 fn detect_trait_impl(content: &str, line: usize) -> Option<String> {
     let lines: Vec<&str> = content.lines().collect();
     for i in (0..line.min(lines.len())).rev() {

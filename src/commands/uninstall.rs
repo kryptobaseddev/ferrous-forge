@@ -65,6 +65,9 @@ fn print_uninstall_complete() {
     println!("  cargo uninstall ferrous-forge");
 }
 
+/// Remove the cargo wrapper script from ~/.local/bin
+///
+/// Deletes the cargo hijacking wrapper that intercepts cargo commands.
 async fn remove_cargo_hijacking() -> Result<()> {
     let home_dir =
         dirs::home_dir().ok_or_else(|| Error::config("Could not find home directory"))?;
@@ -78,6 +81,9 @@ async fn remove_cargo_hijacking() -> Result<()> {
     Ok(())
 }
 
+/// Remove the global clippy configuration file
+///
+/// Deletes ~/.clippy.toml that contains Ferrous Forge's clippy rules.
 async fn remove_clippy_config() -> Result<()> {
     let home_dir =
         dirs::home_dir().ok_or_else(|| Error::config("Could not find home directory"))?;
@@ -91,6 +97,10 @@ async fn remove_clippy_config() -> Result<()> {
     Ok(())
 }
 
+/// Remove shell integration from configuration files
+///
+/// Removes PATH modifications and Ferrous Forge sections from
+/// .bashrc, .zshrc, and .profile files.
 async fn remove_shell_integration() -> Result<()> {
     let home_dir =
         dirs::home_dir().ok_or_else(|| Error::config("Could not find home directory"))?;
@@ -112,6 +122,10 @@ async fn remove_shell_integration() -> Result<()> {
     Ok(())
 }
 
+/// Remove Ferrous Forge configuration directory
+///
+/// Deletes the entire configuration directory containing
+/// Ferrous Forge settings and cached data.
 async fn remove_configuration() -> Result<()> {
     let config_dir = crate::config::Config::config_dir_path()?;
     if config_dir.exists() {
@@ -122,6 +136,10 @@ async fn remove_configuration() -> Result<()> {
     Ok(())
 }
 
+/// Remove Ferrous Forge sections from shell configuration content
+///
+/// Identifies and removes lines between "# Ferrous Forge" markers
+/// and any related environment variable exports.
 fn remove_ferrous_forge_section(content: &str) -> String {
     let lines: Vec<&str> = content.lines().collect();
     let mut result = Vec::new();

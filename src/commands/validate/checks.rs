@@ -1,13 +1,17 @@
-//! Additional validation checks (documentation, formatting, security)
+//! Additional validation checks (documentation, formatting, security, test coverage)
 
-use crate::{Result, doc_coverage, formatting, security, validation::RustValidator};
+use crate::{
+    Result, doc_coverage, formatting, security, test_coverage::CoverageAnalyzer,
+    validation::RustValidator,
+};
 use std::path::Path;
 
-/// Run all additional checks (documentation, formatting, security)
+/// Run all additional checks (documentation, formatting, security, test coverage)
 pub async fn run_additional_checks(project_path: &Path) {
     check_documentation_coverage(project_path).await;
     check_code_formatting(project_path).await;
     run_security_audit_check(project_path).await;
+    check_test_coverage(project_path).await;
 }
 
 /// Check documentation coverage
@@ -64,6 +68,53 @@ async fn run_security_audit_check(project_path: &Path) {
             println!("❌ Security audit failed: {}", e);
         }
     }
+}
+
+/// Check test coverage
+async fn check_test_coverage(project_path: &Path) {
+    println!("🧪 Checking test coverage...");
+
+    let analyzer = CoverageAnalyzer::new();
+
+    // First check if tarpaulin is installed
+    match analyzer.check_tarpaulin_installed() {
+        Ok(true) => {
+            // Tarpaulin is installed, run coverage analysis
+            match analyzer.run_coverage(project_path).await {
+                Ok(report) => {
+                    println!("✅ Test coverage: {:.1}%", report.line_coverage);
+                    println!(
+                        "   Lines tested: {}/{}",
+                        report.lines_tested, report.total_lines
+                    );
+                    println!(
+                        "   Functions tested: {}/{}",
+                        report.functions_tested, report.total_functions
+                    );
+
+                    // Check against minimum threshold (configurable, defaulting to 80%)
+                    let threshold = 80.0;
+                    if let Err(e) = analyzer.enforce_minimum_coverage(&report, threshold) {
+                        println!("⚠️  {}", e);
+                    }
+                }
+                Err(e) => {
+                    println!("⚠️  Test coverage check failed: {}", e);
+                    println!("   This may be due to test failures or configuration issues");
+                }
+            }
+        }
+        Ok(false) => {
+            println!("⚠️  cargo-tarpaulin not installed");
+            println!("   Install with: cargo install cargo-tarpaulin");
+            println!("   Skipping test coverage check");
+        }
+        Err(e) => {
+            println!("⚠️  Failed to check for cargo-tarpaulin: {}", e);
+        }
+    }
+
+    println!();
 }
 
 /// Run clippy validation

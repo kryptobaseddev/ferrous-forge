@@ -70,6 +70,10 @@ fn print_completion_message() {
     println!("• All new projects will automatically use Edition 2024 + strict standards!");
 }
 
+/// Install cargo command wrapper for automatic standards enforcement
+///
+/// Creates a wrapper script in ~/.local/bin/cargo that intercepts cargo commands,
+/// applies Ferrous Forge standards, and then delegates to the real cargo binary.
 async fn install_cargo_hijacking() -> Result<()> {
     // This will create wrapper scripts that intercept cargo commands
     // and apply our standards before delegating to the real cargo
@@ -97,6 +101,10 @@ async fn install_cargo_hijacking() -> Result<()> {
     Ok(())
 }
 
+/// Install global clippy configuration with strict linting rules
+///
+/// Creates ~/.clippy.toml with Ferrous Forge's recommended clippy configuration
+/// for enforcing code quality standards across all projects.
 async fn install_clippy_config() -> Result<()> {
     // Copy our strict clippy.toml to the home directory
     let home_dir =
@@ -109,6 +117,10 @@ async fn install_clippy_config() -> Result<()> {
     Ok(())
 }
 
+/// Install shell integration for PATH modifications
+///
+/// Adds ~/.local/bin to PATH in shell configuration files (.bashrc, .zshrc, .profile)
+/// so that the cargo wrapper takes precedence over the system cargo.
 async fn install_shell_integration() -> Result<()> {
     // Add Ferrous Forge to PATH and setup completion
     let home_dir =
