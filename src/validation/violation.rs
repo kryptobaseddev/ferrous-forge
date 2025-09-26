@@ -36,7 +36,7 @@ pub enum Severity {
 }
 
 /// A single standards violation
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Violation {
     /// Type of violation
     pub violation_type: ViolationType,

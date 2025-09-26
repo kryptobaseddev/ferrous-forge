@@ -1,3 +1,8 @@
+//! Type definitions for AI-powered analysis system
+//!
+//! This module contains all the data structures and types used throughout the AI analyzer
+//! system, including analysis reports, violation analyses, fix strategies, and code patterns.
+
 use serde::{Deserialize, Serialize};
 
 use crate::validation::ViolationType;

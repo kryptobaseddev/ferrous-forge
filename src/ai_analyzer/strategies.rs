@@ -1,3 +1,9 @@
+//! AI strategy generation for violation fix recommendations
+//!
+//! This module contains functions for generating intelligent fix strategies based on
+//! violation analysis patterns, code pattern identification, and AI instruction generation
+//! to help developers resolve Ferrous Forge violations effectively.
+
 use super::types::{
     AIInstructions, ArchitecturalStyle, CodePatterns, ErrorPattern, FixStrategy, Pattern,
     ViolationAnalysis,

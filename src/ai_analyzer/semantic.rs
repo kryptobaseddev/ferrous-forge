@@ -1,3 +1,9 @@
+//! Semantic analysis functionality for AI-powered violation analysis
+//!
+//! This module provides functions for analyzing the semantic context of code violations,
+//! assessing fix complexity, and performing deep code analysis to support AI-powered
+//! recommendations for resolving Ferrous Forge violations.
+
 use std::collections::HashMap;
 
 use super::types::{CodeContext, FixComplexity, SemanticAnalysis};
