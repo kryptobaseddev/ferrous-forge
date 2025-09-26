@@ -14,17 +14,29 @@ impl Config {
         }
     }
 
-    /// Load configuration from file
+    /// Load configuration using hierarchical system
     pub async fn load() -> Result<Self> {
-        let config_path = Self::config_file_path()?;
-        let contents = fs::read_to_string(&config_path)
-            .await
-            .map_err(|e| Error::config(format!("Failed to read config file: {}", e)))?;
+        // Try hierarchical config first
+        match super::HierarchicalConfig::load().await {
+            Ok(hier) => Ok(hier.merged()),
+            Err(_) => {
+                // Fallback to old single-file config for backward compatibility
+                let config_path = Self::config_file_path()?;
+                if config_path.exists() {
+                    let contents = fs::read_to_string(&config_path)
+                        .await
+                        .map_err(|e| Error::config(format!("Failed to read config file: {}", e)))?;
 
-        let config: Config = toml::from_str(&contents)
-            .map_err(|e| Error::config(format!("Failed to parse config file: {}", e)))?;
+                    let config: Config = toml::from_str(&contents).map_err(|e| {
+                        Error::config(format!("Failed to parse config file: {}", e))
+                    })?;
 
-        Ok(config)
+                    Ok(config)
+                } else {
+                    Err(Error::config("No configuration found"))
+                }
+            }
+        }
     }
 
     /// Save configuration to file

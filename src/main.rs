@@ -35,7 +35,18 @@ async fn execute_command(command: commands::Commands) -> Result<()> {
             get,
             list,
             reset,
-        } => commands::config::execute(set, get, list, reset).await,
+            sources,
+            migrate,
+            level: _,
+        } => {
+            if sources {
+                commands::config::show_sources().await
+            } else if migrate {
+                commands::config::migrate_config().await
+            } else {
+                commands::config::execute(set, get, list, reset).await
+            }
+        }
         commands::Commands::Validate {
             path,
             ai_report,

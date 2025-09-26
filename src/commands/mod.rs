@@ -39,6 +39,15 @@ pub enum Commands {
         /// Reset configuration to defaults
         #[arg(short, long)]
         reset: bool,
+        /// Show configuration sources from hierarchy
+        #[arg(long)]
+        sources: bool,
+        /// Migrate old configuration to hierarchical system
+        #[arg(long)]
+        migrate: bool,
+        /// Configuration level to use (system, user, project)
+        #[arg(long)]
+        level: Option<String>,
     },
     /// Validate a Rust project against standards
     Validate {
