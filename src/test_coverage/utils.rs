@@ -54,9 +54,8 @@ pub struct FunctionStats {
 
 /// Parse tarpaulin JSON output
 pub fn parse_tarpaulin_json(output: &str) -> Result<TarpaulinOutput> {
-    serde_json::from_str(output).map_err(|e| {
-        Error::process(format!("Failed to parse tarpaulin output: {}", e))
-    })
+    serde_json::from_str(output)
+        .map_err(|e| Error::process(format!("Failed to parse tarpaulin output: {}", e)))
 }
 
 /// Process file coverage data

@@ -28,7 +28,8 @@ fn html_header() -> String {
         #output { margin: 10px 0; padding: 10px; background: #f0f8ff; }
         #output { border-radius: 3px; }
     </style>
-</head>"#.to_string()
+</head>"#
+        .to_string()
 }
 
 /// HTML body content

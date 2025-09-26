@@ -1,7 +1,7 @@
 //! Test coverage analyzer implementation
 
 use super::types::{CoverageConfig, CoverageReport};
-use super::utils::{parse_tarpaulin_json, process_file_coverage, calculate_branch_coverage};
+use super::utils::{calculate_branch_coverage, parse_tarpaulin_json, process_file_coverage};
 use crate::{Error, Result};
 use std::path::Path;
 use std::process::Command;
@@ -143,7 +143,7 @@ impl CoverageAnalyzer {
 
     /// Parse a coverage report from tarpaulin output
     ///
-    /// Parses the JSON output from cargo-tarpaulin and converts it to our 
+    /// Parses the JSON output from cargo-tarpaulin and converts it to our
     /// CoverageReport format
     pub fn parse_coverage_report(&self, tarpaulin_output: &str) -> Result<CoverageReport> {
         self.parse_tarpaulin_output(tarpaulin_output)
