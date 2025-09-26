@@ -89,8 +89,8 @@ async fn execute_edition_command(command: commands::EditionCommand) -> Result<()
 async fn execute_safety_command(command: commands::SafetyCommand) -> Result<()> {
     match command {
         commands::SafetyCommand::Status => commands::safety::handle_status().await,
-        commands::SafetyCommand::Install { force, path } => {
-            commands::safety::handle_install(force, &path).await
+        commands::SafetyCommand::Install { force, path, cargo } => {
+            commands::safety::handle_install(force, &path, cargo).await
         }
         commands::SafetyCommand::Check {
             stage,

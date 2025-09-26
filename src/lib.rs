@@ -38,6 +38,8 @@
 
 /// AI-powered violation analysis module
 pub mod ai_analyzer;
+/// Cargo command interception for publish validation
+pub mod cargo_intercept;
 pub mod cli;
 pub mod commands;
 pub mod config;

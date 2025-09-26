@@ -179,6 +179,9 @@ pub enum SafetyCommand {
         /// Project path
         #[arg(default_value = ".")]
         path: std::path::PathBuf,
+        /// Install cargo publish interception
+        #[arg(long)]
+        cargo: bool,
     },
     /// Run safety checks manually
     Check {

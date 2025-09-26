@@ -1,0 +1,546 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://project-tracking-template/schemas/user-stories-schema.json",
+  "title": "User Stories Schema",
+  "description": "Schema for user story tracking and management",
+  "type": "object",
+  "required": ["version", "lastUpdated", "projectName", "stories", "epics", "metrics"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Schema version following semantic versioning"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when user stories file was last modified"
+    },
+    "projectName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the project these stories belong to"
+    },
+    "projectVersion": {
+      "type": "string",
+      "description": "Current version of the project being developed"
+    },
+    "stories": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/userStory"
+      }
+    },
+    "epics": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Za-z][A-Za-z0-9\\s]*$": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^US-\\d+$"
+          }
+        }
+      },
+      "description": "Grouping of related user stories by epic name"
+    },
+    "personas": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/persona"
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["totalStories"],
+      "properties": {
+        "totalStories": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notStarted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inProgress": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inReview": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "criticalPriority": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "highPriority": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mediumPriority": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lowPriority": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalEffortPoints": {
+          "type": "number",
+          "minimum": 0
+        },
+        "averageEffortPerStory": {
+          "type": "number",
+          "minimum": 0
+        },
+        "storiesPerEpic": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "completionRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "velocityTrend": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sprint": {
+                "type": "integer"
+              },
+              "pointsCompleted": {
+                "type": "number"
+              },
+              "storiesCompleted": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "effortDistribution": {
+          "type": "object",
+          "properties": {
+            "1-3": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "4-6": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "7-10": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "10+": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "sprintPlanning": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/sprint"
+      }
+    },
+    "riskAssessment": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "risks"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "qualityGates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "criteria"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "effortScale": {
+          "type": "object",
+          "patternProperties": {
+            "^\\d+$": {
+              "type": "string"
+            }
+          }
+        },
+        "priorityDefinitions": {
+          "type": "object",
+          "properties": {
+            "CRITICAL": {
+              "type": "string"
+            },
+            "HIGH": {
+              "type": "string"
+            },
+            "MEDIUM": {
+              "type": "string"
+            },
+            "LOW": {
+              "type": "string"
+            }
+          }
+        },
+        "statusDefinitions": {
+          "type": "object",
+          "properties": {
+            "NOT_STARTED": {
+              "type": "string"
+            },
+            "IN_PROGRESS": {
+              "type": "string"
+            },
+            "IN_REVIEW": {
+              "type": "string"
+            },
+            "COMPLETED": {
+              "type": "string"
+            },
+            "BLOCKED": {
+              "type": "string"
+            }
+          }
+        },
+        "reviewCycle": {
+          "type": "object",
+          "properties": {
+            "frequency": {
+              "type": "string"
+            },
+            "participants": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "activities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "userStory": {
+      "type": "object",
+      "required": ["id", "title", "persona", "epic", "priority", "status", "story", "effort"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^US-\\d+$",
+          "description": "Unique identifier in format US-{number}"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Brief descriptive title of the user story"
+        },
+        "persona": {
+          "type": "string",
+          "minLength": 1,
+          "description": "User type or persona this story serves"
+        },
+        "epic": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Epic or feature area this story belongs to"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+          "description": "Priority level for story implementation"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["NOT_STARTED", "IN_PROGRESS", "IN_REVIEW", "COMPLETED", "BLOCKED"],
+          "description": "Current implementation status"
+        },
+        "implementedIn": {
+          "type": ["string", "null"],
+          "description": "Version or release where story was implemented"
+        },
+        "relatedTodos": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^P\\d+-\\d+$"
+          },
+          "description": "Associated TODO tasks that implement this story"
+        },
+        "story": {
+          "type": "string",
+          "minLength": 1,
+          "description": "User story in 'As a... I want... so that...' format"
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Testable conditions that must be met for story completion"
+        },
+        "businessValue": {
+          "type": "string",
+          "description": "Description of business value and impact"
+        },
+        "technicalNotes": {
+          "type": "string",
+          "description": "Technical implementation considerations"
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Identified risks that could impact story implementation"
+        },
+        "effort": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Story points or effort estimate"
+        },
+        "actualEffort": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Actual effort spent implementing the story"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "External dependencies or prerequisite stories"
+        },
+        "mockups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths to design mockups or wireframes"
+        },
+        "testCases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific test cases that validate the story"
+        },
+        "createdDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when story was created"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Person who created the story"
+        },
+        "lastModified": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when story was last updated"
+        },
+        "modifiedBy": {
+          "type": "string",
+          "description": "Person who last modified the story"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags for categorization and filtering"
+        },
+        "userFeedback": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "source": {
+                "type": "string"
+              },
+              "feedback": {
+                "type": "string"
+              },
+              "actionTaken": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "persona": {
+      "type": "object",
+      "required": ["name", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the persona"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Description of the persona and their role"
+        },
+        "characteristics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Key characteristics and attributes"
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Primary goals and objectives"
+        },
+        "frustrations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Common pain points and frustrations"
+        },
+        "technicalProficiency": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced", "expert"],
+          "description": "Level of technical expertise"
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tools and technologies they commonly use"
+        }
+      }
+    },
+    "sprint": {
+      "type": "object",
+      "required": ["sprintNumber", "startDate", "endDate", "status"],
+      "properties": {
+        "sprintNumber": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Sequential sprint number"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Sprint start date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Sprint end date"
+        },
+        "plannedStories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^US-\\d+$"
+          },
+          "description": "Stories planned for this sprint"
+        },
+        "plannedEffort": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total effort points planned"
+        },
+        "actualEffort": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Actual effort points completed"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PLANNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
+          "description": "Current sprint status"
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Sprint goals and objectives"
+        },
+        "retrospectiveNotes": {
+          "type": ["string", "null"],
+          "description": "Notes from sprint retrospective"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Blockers encountered during sprint"
+        },
+        "achievements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Key achievements and successes"
+        }
+      }
+    }
+  }
+}
