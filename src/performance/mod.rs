@@ -177,13 +177,19 @@ mod tests {
 
     #[test]
     fn test_performance_metrics() {
-        let mut metrics = PerformanceMetrics::default();
-        metrics.validation_time_ms = 1500;
-        metrics.memory_usage_bytes = 50 * 1024 * 1024;
+        let metrics = PerformanceMetrics {
+            validation_time_ms: 1500,
+            memory_usage_bytes: 50 * 1024 * 1024,
+            ..Default::default()
+        };
 
         assert!(metrics.meets_targets());
 
-        metrics.validation_time_ms = 3000;
+        let metrics = PerformanceMetrics {
+            validation_time_ms: 3000,
+            memory_usage_bytes: 50 * 1024 * 1024,
+            ..Default::default()
+        };
         assert!(!metrics.meets_targets());
     }
 

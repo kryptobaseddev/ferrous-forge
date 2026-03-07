@@ -170,6 +170,8 @@ impl BatchProcessor {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
@@ -199,7 +201,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_parallel_safety_runner() {
-        let runner = ParallelSafetyRunner::new(2).unwrap();
+        let runner = ParallelSafetyRunner::new(2).expect("Failed to create runner");
 
         let checks = vec![
             || Ok::<i32, crate::Error>(1),
