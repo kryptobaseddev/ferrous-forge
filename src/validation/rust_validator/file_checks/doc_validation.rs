@@ -17,10 +17,7 @@ pub fn validate_doc_presence(
     lines: &[&str],
     violations: &mut Vec<Violation>,
 ) -> Result<()> {
-    let filename = rust_file
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("");
+    let filename = rust_file.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
     // Only check module root files
     if filename != "lib.rs" && filename != "mod.rs" {

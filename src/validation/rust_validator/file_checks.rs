@@ -57,7 +57,13 @@ pub async fn validate_cargo_toml_full(
     let lines: Vec<&str> = content.lines().collect();
 
     // Validate edition/version (locked settings)
-    validate_cargo_toml_content(cargo_file, &lines, violations, required_edition, required_rust_version);
+    validate_cargo_toml_content(
+        cargo_file,
+        &lines,
+        violations,
+        required_edition,
+        required_rust_version,
+    );
 
     // Validate rustdoc lint config presence
     validate_cargo_doc_config(cargo_file, &content, violations)?;

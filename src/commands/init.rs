@@ -29,7 +29,9 @@ pub async fn execute(force: bool) -> Result<()> {
 pub async fn execute_project() -> Result<()> {
     println!(
         "{}",
-        style("🔨 Setting up Ferrous Forge project tooling...").bold().cyan()
+        style("🔨 Setting up Ferrous Forge project tooling...")
+            .bold()
+            .cyan()
     );
 
     let project_path = std::env::current_dir()
@@ -56,10 +58,7 @@ pub async fn execute_project() -> Result<()> {
     install_project_git_hooks(&project_path).await?;
 
     println!();
-    println!(
-        "{}",
-        style("🎉 Project tooling installed!").bold().green()
-    );
+    println!("{}", style("🎉 Project tooling installed!").bold().green());
     println!();
     println!("Next steps:");
     println!("  cargo fmt          — format code");

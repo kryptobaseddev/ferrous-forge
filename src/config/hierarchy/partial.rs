@@ -128,9 +128,7 @@ impl PartialConfig {
             max_function_lines: self
                 .max_function_lines
                 .unwrap_or(default.max_function_lines),
-            required_edition: self
-                .required_edition
-                .unwrap_or(default.required_edition),
+            required_edition: self.required_edition.unwrap_or(default.required_edition),
             required_rust_version: self
                 .required_rust_version
                 .unwrap_or(default.required_rust_version),

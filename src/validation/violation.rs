@@ -78,7 +78,9 @@ impl Violation {
     pub fn is_locked_setting(&self) -> bool {
         matches!(
             self.violation_type,
-            ViolationType::WrongEdition | ViolationType::OldRustVersion | ViolationType::LockedSetting
+            ViolationType::WrongEdition
+                | ViolationType::OldRustVersion
+                | ViolationType::LockedSetting
         )
     }
 }

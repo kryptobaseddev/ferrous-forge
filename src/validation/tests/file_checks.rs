@@ -157,8 +157,16 @@ async fn test_validate_rust_file_respects_config_limit() {
         .await
         .expect("Validation should succeed");
 
-    assert!(violations_strict.iter().any(|v| matches!(v.violation_type, ViolationType::FileTooLarge)));
-    assert!(!violations_lenient.iter().any(|v| matches!(v.violation_type, ViolationType::FileTooLarge)));
+    assert!(
+        violations_strict
+            .iter()
+            .any(|v| matches!(v.violation_type, ViolationType::FileTooLarge))
+    );
+    assert!(
+        !violations_lenient
+            .iter()
+            .any(|v| matches!(v.violation_type, ViolationType::FileTooLarge))
+    );
 }
 
 #[tokio::test]

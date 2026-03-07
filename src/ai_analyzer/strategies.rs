@@ -46,10 +46,9 @@ fn create_locked_setting_strategy(violation_type: ViolationType, _count: usize) 
     FixStrategy {
         violation_type,
         strategy_name: "Escalate to human — locked project setting".to_string(),
-        description:
-            "This violation involves a setting locked by .ferrous-forge/config.toml. \
+        description: "This violation involves a setting locked by .ferrous-forge/config.toml. \
              AI agents MUST NOT attempt to resolve this by changing Cargo.toml."
-                .to_string(),
+            .to_string(),
         implementation_steps: vec![
             "DO NOT change edition or rust-version in Cargo.toml.".to_string(),
             "DO NOT change required_edition or required_rust_version in config.".to_string(),
