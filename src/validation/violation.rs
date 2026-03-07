@@ -8,7 +8,7 @@ use std::path::PathBuf;
 pub enum ViolationType {
     /// Underscore parameter or let assignment bandaid
     UnderscoreBandaid,
-    /// Wrong Rust edition (not 2024)
+    /// Wrong Rust edition (locked by project config)
     WrongEdition,
     /// File exceeds size limit
     FileTooLarge,
@@ -22,8 +22,14 @@ pub enum ViolationType {
     MissingDocs,
     /// Missing required dependencies
     MissingDependencies,
-    /// Rust version too old
+    /// Rust version too old (locked by project config)
     OldRustVersion,
+    /// A project configuration value is locked and was violated
+    LockedSetting,
+    /// Module-level //! documentation is missing
+    MissingModuleDoc,
+    /// Cargo.toml is missing [lints.rustdoc] configuration
+    MissingDocConfig,
 }
 
 /// Severity level of a violation
@@ -66,5 +72,13 @@ impl Violation {
             message,
             severity,
         }
+    }
+
+    /// Returns true if this violation represents a locked setting (edition/version/config lock)
+    pub fn is_locked_setting(&self) -> bool {
+        matches!(
+            self.violation_type,
+            ViolationType::WrongEdition | ViolationType::OldRustVersion | ViolationType::LockedSetting
+        )
     }
 }

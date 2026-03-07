@@ -34,7 +34,30 @@ fn create_strategy(violation_type: ViolationType, count: usize) -> FixStrategy {
         ViolationType::UnderscoreBandaid => create_underscore_strategy(violation_type, count),
         ViolationType::FunctionTooLarge => create_function_refactor_strategy(violation_type, count),
         ViolationType::FileTooLarge => create_file_refactor_strategy(violation_type, count),
+        ViolationType::WrongEdition
+        | ViolationType::OldRustVersion
+        | ViolationType::LockedSetting => create_locked_setting_strategy(violation_type, count),
         _ => create_generic_strategy(violation_type, count),
+    }
+}
+
+/// Create strategy for locked setting violations — humans only, never AI-fixable
+fn create_locked_setting_strategy(violation_type: ViolationType, _count: usize) -> FixStrategy {
+    FixStrategy {
+        violation_type,
+        strategy_name: "Escalate to human — locked project setting".to_string(),
+        description:
+            "This violation involves a setting locked by .ferrous-forge/config.toml. \
+             AI agents MUST NOT attempt to resolve this by changing Cargo.toml."
+                .to_string(),
+        implementation_steps: vec![
+            "DO NOT change edition or rust-version in Cargo.toml.".to_string(),
+            "DO NOT change required_edition or required_rust_version in config.".to_string(),
+            "Escalate to a human project owner for guidance.".to_string(),
+            "Ensure Cargo.toml values match the locked config values.".to_string(),
+        ],
+        estimated_effort: "Human intervention required".to_string(),
+        risk_level: "High — changing locked settings can break CI and team standards".to_string(),
     }
 }
 

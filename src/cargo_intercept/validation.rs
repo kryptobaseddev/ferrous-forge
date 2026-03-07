@@ -1,11 +1,13 @@
 //! Validation functions for cargo publish interception
 
+use crate::config::Config;
 use crate::safety::SafetyPipeline;
+use crate::validation::{RustValidator, Violation, ViolationType};
 use crate::{Error, Result};
 use std::path::Path;
 use toml::Value;
 
-/// Run comprehensive pre-publish validation
+/// Run comprehensive pre-publish validation (all violations block)
 pub async fn pre_publish_validation(project_path: &Path) -> Result<()> {
     tracing::info!("Running pre-publish validation");
 
@@ -14,7 +16,6 @@ pub async fn pre_publish_validation(project_path: &Path) -> Result<()> {
         .run_checks(crate::safety::PipelineStage::Publish)
         .await?;
 
-    // Check if any critical checks failed
     if !results.passed {
         tracing::error!("Pre-publish validation failed");
         return Err(Error::validation(
@@ -25,11 +26,55 @@ pub async fn pre_publish_validation(project_path: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Check only locked settings (edition, rust-version) — used for dev command blocking
+pub async fn check_locked_settings(project_path: &Path) -> Result<Vec<Violation>> {
+    let config = Config::load_or_default().await?;
+    let validator = RustValidator::with_config(project_path.to_path_buf(), config)?;
+    let all_violations = validator.validate_project().await?;
+
+    let locked: Vec<Violation> = all_violations
+        .into_iter()
+        .filter(|v| {
+            matches!(
+                v.violation_type,
+                ViolationType::WrongEdition
+                    | ViolationType::OldRustVersion
+                    | ViolationType::LockedSetting
+            )
+        })
+        .collect();
+
+    Ok(locked)
+}
+
+/// Check only style violations (file size, function size, underscore bandaid)
+/// Used for dev command warnings (non-blocking)
+pub async fn check_style_violations(project_path: &Path) -> Result<Vec<Violation>> {
+    let config = Config::load_or_default().await?;
+    let validator = RustValidator::with_config(project_path.to_path_buf(), config)?;
+    let all_violations = validator.validate_project().await?;
+
+    let style: Vec<Violation> = all_violations
+        .into_iter()
+        .filter(|v| {
+            matches!(
+                v.violation_type,
+                ViolationType::FileTooLarge
+                    | ViolationType::FunctionTooLarge
+                    | ViolationType::UnderscoreBandaid
+                    | ViolationType::MissingModuleDoc
+                    | ViolationType::MissingDocConfig
+            )
+        })
+        .collect();
+
+    Ok(style)
+}
+
 /// Enforce dogfooding by checking Ferrous Forge usage
 pub async fn enforce_dogfooding(project_path: &Path) -> Result<()> {
     tracing::info!("Checking dogfooding compliance");
 
-    // Check if project has .ferrous-forge directory
     let ff_dir = project_path.join(".ferrous-forge");
     if !ff_dir.exists() {
         return Err(Error::validation(
@@ -37,7 +82,6 @@ pub async fn enforce_dogfooding(project_path: &Path) -> Result<()> {
         ));
     }
 
-    // Check if validation has been run recently
     let config_file = ff_dir.join("config.toml");
     if !config_file.exists() {
         return Err(Error::validation(
@@ -65,7 +109,6 @@ pub fn version_consistency_check(project_path: &Path) -> Result<()> {
         .parse()
         .map_err(|e| Error::config(format!("Failed to parse Cargo.toml: {}", e)))?;
 
-    // Extract version from Cargo.toml
     let version = cargo_toml
         .get("package")
         .and_then(|p| p.get("version"))
@@ -73,8 +116,6 @@ pub fn version_consistency_check(project_path: &Path) -> Result<()> {
         .ok_or_else(|| Error::config("No version found in Cargo.toml"))?;
 
     tracing::info!("Version {} found in Cargo.toml", version);
-
-    // Check if version follows semantic versioning
     check_semver_format(version)?;
 
     Ok(())
@@ -90,7 +131,6 @@ fn check_semver_format(version: &str) -> Result<()> {
         )));
     }
 
-    // Check each part is numeric
     for (i, part) in parts.iter().enumerate() {
         if part.parse::<u32>().is_err() {
             let part_name = match i {
@@ -109,6 +149,8 @@ fn check_semver_format(version: &str) -> Result<()> {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use std::fs;

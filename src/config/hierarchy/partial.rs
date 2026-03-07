@@ -24,8 +24,10 @@ pub struct PartialConfig {
     pub max_file_lines: Option<usize>,
     /// Function size limit in lines
     pub max_function_lines: Option<usize>,
-    /// Whether to enforce Edition 2024
-    pub enforce_edition_2024: Option<bool>,
+    /// Required Rust edition (locked)
+    pub required_edition: Option<String>,
+    /// Required minimum rust-version (locked)
+    pub required_rust_version: Option<String>,
     /// Whether to ban underscore bandaid patterns
     pub ban_underscore_bandaid: Option<bool>,
     /// Whether to require documentation
@@ -95,8 +97,11 @@ impl PartialConfig {
         if other.max_function_lines.is_some() {
             self.max_function_lines = other.max_function_lines;
         }
-        if other.enforce_edition_2024.is_some() {
-            self.enforce_edition_2024 = other.enforce_edition_2024;
+        if other.required_edition.is_some() {
+            self.required_edition = other.required_edition;
+        }
+        if other.required_rust_version.is_some() {
+            self.required_rust_version = other.required_rust_version;
         }
         if other.ban_underscore_bandaid.is_some() {
             self.ban_underscore_bandaid = other.ban_underscore_bandaid;
@@ -123,9 +128,12 @@ impl PartialConfig {
             max_function_lines: self
                 .max_function_lines
                 .unwrap_or(default.max_function_lines),
-            enforce_edition_2024: self
-                .enforce_edition_2024
-                .unwrap_or(default.enforce_edition_2024),
+            required_edition: self
+                .required_edition
+                .unwrap_or(default.required_edition),
+            required_rust_version: self
+                .required_rust_version
+                .unwrap_or(default.required_rust_version),
             ban_underscore_bandaid: self
                 .ban_underscore_bandaid
                 .unwrap_or(default.ban_underscore_bandaid),
@@ -151,14 +159,14 @@ mod tests {
 
         let override_config = PartialConfig {
             max_file_lines: Some(400),
-            enforce_edition_2024: Some(false),
+            required_edition: Some("2021".to_string()),
             ..Default::default()
         };
 
         let merged = base.merge(override_config);
         assert_eq!(merged.max_file_lines, Some(400));
         assert_eq!(merged.max_function_lines, Some(50));
-        assert_eq!(merged.enforce_edition_2024, Some(false));
+        assert_eq!(merged.required_edition, Some("2021".to_string()));
     }
 
     #[test]

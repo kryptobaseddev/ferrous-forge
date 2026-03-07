@@ -23,7 +23,13 @@ async fn main() -> Result<()> {
 /// Execute the CLI command
 async fn execute_command(command: commands::Commands) -> Result<()> {
     match command {
-        commands::Commands::Init { force } => commands::init::execute(force).await,
+        commands::Commands::Init { force, project } => {
+            if project {
+                commands::init::execute_project().await
+            } else {
+                commands::init::execute(force).await
+            }
+        }
         commands::Commands::Status => commands::status::execute().await,
         commands::Commands::Update {
             channel,
@@ -51,7 +57,8 @@ async fn execute_command(command: commands::Commands) -> Result<()> {
             path,
             ai_report,
             compare_previous: _,
-        } => commands::validate::execute(path, ai_report).await,
+            locked_only,
+        } => commands::validate::execute(path, ai_report, locked_only).await,
         commands::Commands::Rollback { version } => commands::rollback::execute(version).await,
         commands::Commands::Uninstall { confirm } => commands::uninstall::execute(confirm).await,
         commands::Commands::Rust { command } => execute_rust_command(command).await,

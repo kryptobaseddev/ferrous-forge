@@ -3,9 +3,10 @@
 pub mod file_checks;
 pub mod patterns;
 
+use crate::config::Config;
 use crate::validation::{Severity, Violation, ViolationType};
 use crate::{Error, Result};
-use file_checks::{validate_cargo_toml, validate_rust_file};
+use file_checks::{validate_cargo_toml_full, validate_rust_file};
 use patterns::ValidationPatterns;
 use regex::Regex;
 use std::path::{Path, PathBuf};
@@ -26,15 +27,23 @@ pub struct RustValidator {
     project_root: PathBuf,
     /// Compiled regex patterns for validation
     patterns: ValidationPatterns,
+    /// Active configuration (drives limits and locked settings)
+    config: Config,
 }
 
 impl RustValidator {
-    /// Create a new validator for the given project
+    /// Create a new validator with default configuration
     pub fn new(project_root: PathBuf) -> Result<Self> {
+        Self::with_config(project_root, Config::default())
+    }
+
+    /// Create a new validator with explicit configuration
+    pub fn with_config(project_root: PathBuf, config: Config) -> Result<Self> {
         let patterns = ValidationPatterns::new()?;
         Ok(Self {
             project_root,
             patterns,
+            config,
         })
     }
 
@@ -47,19 +56,32 @@ impl RustValidator {
     pub async fn validate_project(&self) -> Result<Vec<Violation>> {
         let mut violations = Vec::new();
 
-        // Check Rust version
+        // Check installed Rust version against config minimum
         self.check_rust_version(&mut violations).await?;
 
         // Find and validate all Cargo.toml files
         let cargo_files = self.find_cargo_files().await?;
         for cargo_file in cargo_files {
-            validate_cargo_toml(&cargo_file, &mut violations).await?;
+            validate_cargo_toml_full(
+                &cargo_file,
+                &mut violations,
+                &self.config.required_edition,
+                &self.config.required_rust_version,
+            )
+            .await?;
         }
 
         // Find and validate all Rust source files
         let rust_files = self.find_rust_files().await?;
         for rust_file in rust_files {
-            validate_rust_file(&rust_file, &mut violations, &self.patterns).await?;
+            validate_rust_file(
+                &rust_file,
+                &mut violations,
+                &self.patterns,
+                self.config.max_file_lines,
+                self.config.max_function_lines,
+            )
+            .await?;
         }
 
         Ok(violations)
@@ -175,7 +197,6 @@ impl RustValidator {
 
         let version_line = String::from_utf8_lossy(&output.stdout);
 
-        // Extract version (e.g., "rustc 1.85.0" -> "1.85.0")
         let version_regex = Regex::new(r"rustc (\d+)\.(\d+)\.(\d+)")
             .map_err(|e| Error::validation(format!("Invalid regex: {}", e)))?;
 
@@ -183,14 +204,17 @@ impl RustValidator {
             let major: u32 = captures[1].parse().unwrap_or(0);
             let minor: u32 = captures[2].parse().unwrap_or(0);
 
-            if major < 1 || (major == 1 && minor < 82) {
+            // Check against the configured minimum (parse required_rust_version)
+            let min_minor = self.parse_required_minor();
+
+            if major < 1 || (major == 1 && minor < min_minor) {
                 violations.push(Violation {
                     violation_type: ViolationType::OldRustVersion,
                     file: PathBuf::from("<system>"),
                     line: 0,
                     message: format!(
-                        "Rust version {}.{} is too old. Minimum required: 1.82.0",
-                        major, minor
+                        "Rust version {}.{} is too old. Minimum required: {}",
+                        major, minor, self.config.required_rust_version
                     ),
                     severity: Severity::Error,
                 });
@@ -208,6 +232,16 @@ impl RustValidator {
         Ok(())
     }
 
+    /// Parse the minor version number from the required_rust_version string
+    fn parse_required_minor(&self) -> u32 {
+        let parts: Vec<&str> = self.config.required_rust_version.split('.').collect();
+        if parts.len() >= 2 {
+            parts[1].parse().unwrap_or(82)
+        } else {
+            82 // fallback to 1.82
+        }
+    }
+
     async fn find_rust_files(&self) -> Result<Vec<PathBuf>> {
         let mut rust_files = Vec::new();
         self.collect_rust_files_recursive(&self.project_root, &mut rust_files)?;
@@ -219,7 +253,6 @@ impl RustValidator {
         path: &Path,
         rust_files: &mut Vec<PathBuf>,
     ) -> Result<()> {
-        // Skip any path containing target directory
         if path.to_string_lossy().contains("target/") {
             return Ok(());
         }
@@ -235,7 +268,6 @@ impl RustValidator {
             for entry in entries {
                 let entry = entry?;
                 let entry_path = entry.path();
-                // Skip target directory entries
                 if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
                     continue;
                 }
@@ -257,7 +289,6 @@ impl RustValidator {
         path: &Path,
         cargo_files: &mut Vec<PathBuf>,
     ) -> Result<()> {
-        // Skip any path containing target directory
         if path.to_string_lossy().contains("target/") {
             return Ok(());
         }
@@ -271,7 +302,6 @@ impl RustValidator {
             for entry in entries {
                 let entry = entry?;
                 let entry_path = entry.path();
-                // Skip target directory entries
                 if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
                     continue;
                 }

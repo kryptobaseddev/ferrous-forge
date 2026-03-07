@@ -32,7 +32,8 @@ pub async fn execute() -> Result<()> {
     println!("  Auto Update: {}", config.auto_update);
     println!("  Max File Lines: {}", config.max_file_lines);
     println!("  Max Function Lines: {}", config.max_function_lines);
-    println!("  Enforce Edition 2024: {}", config.enforce_edition_2024);
+    println!("  Required Edition: {}", config.required_edition);
+    println!("  Required Rust Version: {}", config.required_rust_version);
     println!(
         "  Ban Underscore Bandaid: {}",
         config.ban_underscore_bandaid

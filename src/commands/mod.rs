@@ -5,11 +5,16 @@ use clap::Subcommand;
 /// Available commands for Ferrous Forge
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Initialize Ferrous Forge system-wide
+    /// Initialize Ferrous Forge system-wide, or set up a project with --project
     Init {
         /// Force initialization even if already configured
         #[arg(short, long)]
         force: bool,
+        /// Set up project-level tooling (rustfmt.toml, clippy.toml, Cargo.toml lints,
+        /// .vscode/settings.json, CI workflow, and git hooks) in the current directory.
+        /// Requires an existing Rust project with Cargo.toml.
+        #[arg(short, long)]
+        project: bool,
     },
     /// Show status of Ferrous Forge installation and configuration
     Status,
@@ -59,6 +64,9 @@ pub enum Commands {
         /// Compare with previous report
         #[arg(long)]
         compare_previous: bool,
+        /// Only check locked settings (edition, rust-version) — exits 1 if any locked violation
+        #[arg(long)]
+        locked_only: bool,
     },
     /// Rollback to a previous version
     Rollback {

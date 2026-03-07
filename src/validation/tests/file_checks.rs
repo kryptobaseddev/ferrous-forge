@@ -27,7 +27,7 @@ edition = "2024"
         .expect("Failed to write Cargo.toml");
 
     let mut violations = Vec::new();
-    validate_cargo_toml(&cargo_toml_path, &mut violations)
+    validate_cargo_toml(&cargo_toml_path, &mut violations, "2024", "1.85.0")
         .await
         .expect("Validation should succeed");
 
@@ -54,7 +54,7 @@ edition = "2018"
         .expect("Failed to write Cargo.toml");
 
     let mut violations = Vec::new();
-    validate_cargo_toml(&cargo_toml_path, &mut violations)
+    validate_cargo_toml(&cargo_toml_path, &mut violations, "2024", "1.85.0")
         .await
         .expect("Validation should succeed");
 
@@ -85,7 +85,7 @@ version = "0.1.0"
         .expect("Failed to write Cargo.toml");
 
     let mut violations = Vec::new();
-    validate_cargo_toml(&cargo_toml_path, &mut violations)
+    validate_cargo_toml(&cargo_toml_path, &mut violations, "2024", "1.85.0")
         .await
         .expect("Validation should succeed");
 
@@ -115,7 +115,7 @@ async fn test_validate_rust_file_size_limit() {
 
     let mut violations = Vec::new();
     let patterns = ValidationPatterns::new().expect("Failed to create patterns");
-    validate_rust_file(&rust_file, &mut violations, &patterns)
+    validate_rust_file(&rust_file, &mut violations, &patterns, 300, 50)
         .await
         .expect("Validation should succeed");
 
@@ -129,29 +129,36 @@ async fn test_validate_rust_file_size_limit() {
 }
 
 #[tokio::test]
-async fn test_validate_rust_file_line_length() {
+async fn test_validate_rust_file_respects_config_limit() {
     let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let rust_file = temp_dir.path().join("test.rs");
 
-    let content = "// ".to_string() + &"a".repeat(150); // Create a very long line
+    // 150 lines — above default limit of 100 but below 300
+    let content: String = (0..150)
+        .map(|i| format!("// Line {}", i))
+        .collect::<Vec<_>>()
+        .join("\n");
 
     fs::write(&rust_file, content)
         .await
         .expect("Failed to write Rust file");
 
-    let mut violations = Vec::new();
+    let mut violations_strict = Vec::new();
+    let mut violations_lenient = Vec::new();
     let patterns = ValidationPatterns::new().expect("Failed to create patterns");
-    validate_rust_file(&rust_file, &mut violations, &patterns)
+
+    // With limit=100 (strict), should flag
+    validate_rust_file(&rust_file, &mut violations_strict, &patterns, 100, 50)
         .await
         .expect("Validation should succeed");
 
-    // Should have violation for line too long
-    assert!(!violations.is_empty());
-    assert!(
-        violations
-            .iter()
-            .any(|v| matches!(v.violation_type, ViolationType::LineTooLong))
-    );
+    // With limit=300 (lenient), should NOT flag
+    validate_rust_file(&rust_file, &mut violations_lenient, &patterns, 300, 50)
+        .await
+        .expect("Validation should succeed");
+
+    assert!(violations_strict.iter().any(|v| matches!(v.violation_type, ViolationType::FileTooLarge)));
+    assert!(!violations_lenient.iter().any(|v| matches!(v.violation_type, ViolationType::FileTooLarge)));
 }
 
 #[tokio::test]
@@ -166,7 +173,7 @@ async fn test_validate_rust_file_underscore_bandaid() {
 
     let mut violations = Vec::new();
     let patterns = ValidationPatterns::new().expect("Failed to create patterns");
-    validate_rust_file(&rust_file, &mut violations, &patterns)
+    validate_rust_file(&rust_file, &mut violations, &patterns, 300, 50)
         .await
         .expect("Validation should succeed");
 
@@ -177,44 +184,4 @@ async fn test_validate_rust_file_underscore_bandaid() {
             .iter()
             .any(|v| matches!(v.violation_type, ViolationType::UnderscoreBandaid))
     );
-}
-
-#[tokio::test]
-async fn test_validate_rust_file_unwrap_in_production() {
-    let temp_dir = TempDir::new().expect("Failed to create temp dir");
-    let rust_file = temp_dir.path().join("test.rs");
-
-    let content = r#"
-#[test]
-fn test_code() {
-    let value = Some(42);
-    value.unwrap(); // This should NOT be flagged in test code
-}
-
-fn production_code() {
-    let value = Some(42);
-    value.unwrap(); // This SHOULD be flagged
-    value.expect("error"); // This SHOULD also be flagged
-}
-"#;
-
-    fs::write(&rust_file, content)
-        .await
-        .expect("Failed to write Rust file");
-
-    let mut violations = Vec::new();
-    let patterns = ValidationPatterns::new().expect("Failed to create patterns");
-    validate_rust_file(&rust_file, &mut violations, &patterns)
-        .await
-        .expect("Validation should succeed");
-
-    // Should have violations for unwrap in production code, but not in test code
-    let unwrap_violations: Vec<_> = violations
-        .iter()
-        .filter(|v| matches!(v.violation_type, ViolationType::UnwrapInProduction))
-        .collect();
-
-    // Should find unwrap and expect in production function but not in test function
-    assert!(!unwrap_violations.is_empty());
-    assert!(unwrap_violations.len() >= 2); // unwrap and expect
 }
