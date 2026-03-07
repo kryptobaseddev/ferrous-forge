@@ -146,6 +146,15 @@ useless_format = "allow"  # Sometimes clearer
 manual_map = "allow"  # Sometimes clearer
 only_used_in_recursion = "allow"  # False positives
 
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "warn"
+missing_crate_level_docs = "warn"
+private_doc_tests = "allow"
+invalid_codeblock_attributes = "deny"
+invalid_rust_codeblocks = "deny"
+bare_urls = "warn"
+
 [[bin]]
 name = "ferrous-forge"
 path = "src/main.rs"

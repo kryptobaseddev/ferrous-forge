@@ -325,7 +325,8 @@ impl AIAnalyzer {
                 ));
             }
             instructions.push_str(
-                "\n**AI Agent Rule**: `ai_fixable = false`, `confidence = 0%` for all locked violations above.\n\n",
+                "\n**AI Agent Rule**: `ai_fixable = false`, \
+                 `confidence = 0%` for all locked violations above.\n\n",
             );
         }
 

@@ -7,7 +7,8 @@
 //!
 //! - **Edition/version violations** → block ALL cargo commands (build, test, run, check, publish)
 //! - **Code style violations** (file size, function size) → WARN during dev commands, block at publish
-//! - `FERROUS_FORGE_BYPASS=true` → skips style checks; edition/version still enforced
+//! - `FERROUS_FORGE_BYPASS=true` → skips style checks; edition/version still
+//!   enforced
 //! - `FERROUS_FORGE_FORCE_BYPASS=true` → absolute override with visible "BYPASSED" warning
 
 pub mod validation;
@@ -137,13 +138,21 @@ pub async fn intercept_dev_command(project_path: &Path) -> Result<()> {
                 );
             }
             if style_violations.len() > 5 {
-                eprintln!("   ... and {} more (run 'ferrous-forge validate' for full list)", style_violations.len() - 5);
+                eprintln!(
+                    "   ... and {} more (run 'ferrous-forge validate' \
+                 for full list)",
+                    style_violations.len() - 5
+                );
             }
             eprintln!("   (These will block 'cargo publish'. Fix before publishing.)");
-            eprintln!("   (Set FERROUS_FORGE_BYPASS=true to suppress these warnings.)\n");
+            eprintln!(
+            "   (Set FERROUS_FORGE_BYPASS=true to suppress these warnings.)\n"
+        );
         }
     } else {
-        tracing::info!("FERROUS_FORGE_BYPASS — style warnings suppressed (locked settings still checked)");
+        tracing::info!(
+            "FERROUS_FORGE_BYPASS — style warnings suppressed (locked settings still checked)"
+        );
     }
 
     Ok(())
@@ -154,7 +163,9 @@ pub fn has_locked_violations(violations: &[crate::validation::Violation]) -> boo
     violations.iter().any(|v| {
         matches!(
             v.violation_type,
-            ViolationType::WrongEdition | ViolationType::OldRustVersion | ViolationType::LockedSetting
+            ViolationType::WrongEdition
+                | ViolationType::OldRustVersion
+                | ViolationType::LockedSetting
         )
     })
 }
