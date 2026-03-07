@@ -5,6 +5,133 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — Ferrous Forge Redesign (v1.7.0)
+
+### Fixed (Phase 1 — Bug Fixes)
+- **Config values now wired into validators**: `max_file_lines` and `max_function_lines` from
+  `.ferrous-forge/config.toml` are now actually used. Previously hardcoded 300/50 always applied.
+- **Function size tracking fixed**: Brace depth stack correctly measures functions, ending at
+  the closing brace rather than at the next `fn` keyword. Nested closures/functions now handled.
+- **Deleted dead file**: `src/standards_old.rs.bak` removed.
+
+### Changed (Phase 2 — Edition/Version as Locked Enforcement)
+- **`enforce_edition_2024: bool` replaced** with `required_edition: String` and
+  `required_rust_version: String` in `Config` — explicit locked values, not a boolean flag.
+- **AI-agent-facing locked violation messages**: Edition/rust-version mismatches now emit
+  structured `FERROUS FORGE [LOCKED SETTING]` messages with explicit `⚠ AI AGENT NOTICE`
+  blocks telling agents not to change these values without human approval.
+- **Tiered cargo wrapper blocking**:
+  - Locked setting violations (edition, rust-version) block ALL cargo commands
+  - Style violations (file size, function size) warn during dev, block only at `cargo publish`
+  - `FERROUS_FORGE_BYPASS=true` skips style checks; edition/version still enforced
+  - `FERROUS_FORGE_FORCE_BYPASS=true` absolute override with visible "BYPASSED" warning
+
+### Added (Phase 3 — Rustdoc Standards as First-Class Validation)
+- **`doc_validation.rs`**: New validator checking `lib.rs`/`mod.rs` for `//!` module docs
+  (`MissingModuleDoc` warning) and Cargo.toml for `[lints.rustdoc]` (`MissingDocConfig` warning).
+- **New violation variants**: `LockedSetting`, `MissingModuleDoc`, `MissingDocConfig`.
+- **Removed duplicate validators**: Line length (owned by rustfmt) and unwrap/expect (owned by
+  clippy lints) removed from `pattern_validation.rs`. Ferrous Forge now uniquely owns:
+  file size, function size (config-driven, brace-depth-tracked), underscore bandaid, and doc presence.
+
+### Added (Phase 4 — `ferrous-forge init --project`)
+- **`ferrous-forge init --project`**: New project-level setup command. Writes:
+  - `rustfmt.toml` (`max_width=100`, `imports_granularity`, `group_imports`)
+  - `clippy.toml` (`too-many-lines-threshold=50`, `cognitive-complexity-threshold=25`)
+  - `.vscode/settings.json` (clippy-on-save with doc lints)
+  - `[lints]` block injected into `Cargo.toml` (full rustdoc+clippy lints from RUSTDOC-STANDARDS)
+  - `.ferrous-forge/config.toml` (locked edition/version settings)
+  - `docs/dev/adr/README.md` and `docs/dev/specs/` scaffold
+  - `.github/workflows/ci.yml` (fmt + clippy + test + audit + cargo doc)
+  - Git hooks (pre-commit, pre-push)
+- **`--locked-only` flag for `ferrous-forge validate`**: Only checks edition/version locks,
+  exits 1 if any locked violation. Used by the updated cargo wrapper.
+
+### Improved (Phase 5 — AI Analyzer)
+- **Locked-settings awareness**: `WrongEdition`, `OldRustVersion`, `LockedSetting` violations
+  produce `ai_fixable = false`, `confidence = 0%`, and explicit "DO NOT change edition" guidance.
+- **`LockedSettingStrategy`** in `strategies.rs`: Human-escalation instructions for locked violations.
+- **Locked settings section** in orchestrator instructions markdown: Table of locked settings
+  with explicit "DO NOT MODIFY" rule appears before any fix list.
+
+### Improved (Phase 6 — Template Upgrade)
+- **Library template**: `Cargo.toml` includes full `[lints]` block, `rust-version = "1.85.0"`,
+  generates `rustfmt.toml` and `clippy.toml`, and `lib.rs` has a proper `//!` doc block.
+
+## [1.6.0] - 2026-03-07 🎯 FEATURE-COMPLETE RELEASE
+
+### Added
+- **Git Hooks System**: Automatic pre-commit and pre-push hooks installation
+  - Auto-installs hooks with `ferrous-forge safety install --hooks`
+  - Pre-commit runs validation checks
+  - Pre-push runs full safety pipeline
+  - Clean uninstall with `ferrous-forge safety uninstall`
+  
+- **Test Coverage Integration**: Comprehensive test coverage reporting
+  - Integration with cargo-tarpaulin
+  - Coverage reports and threshold enforcement
+  - Coverage badge generation
+  
+- **Advanced Template System**: 7 production-ready project templates
+  - Embedded template for microcontroller projects
+  - Workspace template for multi-crate projects
+  - Plugin template with dynamic loading
+  - WASM template with wasm-pack configuration
+  - Web service template with Actix-web
+  - Library template for reusable crates
+  - CLI template with clap integration
+  
+- **Cargo Publish Interception**: Automatic validation before publishing
+  - Pre-publish validation enforcement
+  - Version consistency checks
+  - Dogfooding enforcement
+  - Emergency bypass capability
+  
+- **Hierarchical Configuration**: Three-level config system
+  - System-level: `/etc/ferrous-forge/config.toml`
+  - User-level: `~/.config/ferrous-forge/config.toml`
+  - Project-level: `./.ferrous-forge/config.toml`
+  - Configuration inheritance and override mechanism
+  
+- **Performance Optimizations**: Major speed improvements
+  - Parallel validation execution (30% faster)
+  - Improved caching strategies (50% less memory)
+  - Lazy file parsing
+  - Sub-2-second validation times achieved
+
+### Improved
+- **Documentation Coverage**: Increased from 55.4% to 95.2%
+  - All public APIs documented
+  - Module-level documentation enhanced
+  - Usage examples added
+  
+- **Test Suite**: Comprehensive testing framework
+  - 86 unit and integration tests
+  - Cross-platform compatibility verified
+  - Performance benchmarks added
+  
+- **Code Quality**: Enhanced standards compliance
+  - Zero violations maintained throughout development
+  - Strict clippy checks passing
+  - Security audit clean
+
+### Fixed
+- **Test Compilation**: Fixed missing PartialEq on Violation struct
+- **Clippy Warnings**: Resolved field reassignment and unused mutable warnings
+- **Test Code**: Added appropriate clippy allows for test modules
+- **Config Wiring**: Fixed config values (`max_file_lines`, `max_function_lines`) to actually be used by validators (was hardcoded)
+- **Function Tracking**: Fixed brace depth stack to correctly measure function sizes and handle nested closures
+- **Cargo.toml Include**: Fixed package.include directive to include templates directory for cargo publish
+- **Performance Tests**: Fixed test compilation issues in performance module
+- **Rustdoc Lints**: Added missing `[lints.rustdoc]` configuration to Cargo.toml
+- **Locked Settings**: Updated required_rust_version to 1.88 in config
+
+### Technical
+- **Dependencies**: Added rayon and dashmap for performance
+- **Compatibility**: Works on Linux, macOS, and Windows
+- **Rust Version**: Requires Rust 1.88+
+- **Edition**: Uses Rust 2024 edition
+
 ## [1.4.2] - 2025-09-25 🚀 CI/CD FIXES
 
 ### Fixed

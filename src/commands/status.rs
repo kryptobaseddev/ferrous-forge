@@ -32,7 +32,8 @@ pub async fn execute() -> Result<()> {
     println!("  Auto Update: {}", config.auto_update);
     println!("  Max File Lines: {}", config.max_file_lines);
     println!("  Max Function Lines: {}", config.max_function_lines);
-    println!("  Enforce Edition 2024: {}", config.enforce_edition_2024);
+    println!("  Required Edition: {}", config.required_edition);
+    println!("  Required Rust Version: {}", config.required_rust_version);
     println!(
         "  Ban Underscore Bandaid: {}",
         config.ban_underscore_bandaid
@@ -49,6 +50,10 @@ pub async fn execute() -> Result<()> {
     Ok(())
 }
 
+/// Check if cargo wrapper hijacking is installed
+///
+/// Verifies whether the Ferrous Forge cargo wrapper is present in ~/.local/bin/cargo
+/// to intercept cargo commands and enforce standards.
 async fn check_cargo_hijacking() {
     let home_dir = match dirs::home_dir() {
         Some(dir) => dir,
@@ -66,6 +71,10 @@ async fn check_cargo_hijacking() {
     }
 }
 
+/// Check if global clippy configuration is installed
+///
+/// Verifies whether the Ferrous Forge clippy configuration file exists
+/// at ~/.clippy.toml for enforcing strict linting rules.
 async fn check_clippy_config() {
     let home_dir = match dirs::home_dir() {
         Some(dir) => dir,
@@ -83,6 +92,10 @@ async fn check_clippy_config() {
     }
 }
 
+/// Check if shell integration is configured
+///
+/// Scans common shell configuration files (.bashrc, .zshrc, .profile)
+/// to verify if Ferrous Forge PATH modifications are present.
 async fn check_shell_integration() {
     let home_dir = match dirs::home_dir() {
         Some(dir) => dir,

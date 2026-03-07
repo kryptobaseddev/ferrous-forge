@@ -3,7 +3,7 @@
 use crate::{Result, config::Config};
 use console::style;
 
-/// Execute the init command
+/// Execute the system-wide init command
 pub async fn execute(force: bool) -> Result<()> {
     println!(
         "{}",
@@ -21,7 +21,56 @@ pub async fn execute(force: bool) -> Result<()> {
     Ok(())
 }
 
-/// Check if already initialized and handle accordingly
+/// Execute the project-level init command (`ferrous-forge init --project`)
+///
+/// Writes project-level tooling files into the current directory:
+/// rustfmt.toml, clippy.toml, .vscode/settings.json, Cargo.toml [lints],
+/// docs scaffold, .github/workflows/ci.yml, and git hooks.
+pub async fn execute_project() -> Result<()> {
+    println!(
+        "{}",
+        style("🔨 Setting up Ferrous Forge project tooling...")
+            .bold()
+            .cyan()
+    );
+
+    let project_path = std::env::current_dir()
+        .map_err(|e| crate::Error::config(format!("Failed to get current directory: {}", e)))?;
+
+    // Verify this is a Rust project
+    let cargo_toml = project_path.join("Cargo.toml");
+    if !cargo_toml.exists() {
+        return Err(crate::Error::config(
+            "No Cargo.toml found. Run 'ferrous-forge init --project' inside a Rust project.",
+        ));
+    }
+
+    println!("📁 Project: {}", project_path.display());
+    println!();
+
+    write_rustfmt_toml(&project_path).await?;
+    write_clippy_toml(&project_path).await?;
+    write_vscode_settings(&project_path).await?;
+    inject_cargo_toml_lints(&cargo_toml).await?;
+    write_ferrous_config(&project_path).await?;
+    create_docs_scaffold(&project_path).await?;
+    write_ci_workflow(&project_path).await?;
+    install_project_git_hooks(&project_path).await?;
+
+    println!();
+    println!("{}", style("🎉 Project tooling installed!").bold().green());
+    println!();
+    println!("Next steps:");
+    println!("  cargo fmt          — format code");
+    println!("  cargo clippy       — enforce doc + quality lints (now configured)");
+    println!("  cargo doc --no-deps — verify documentation builds");
+    println!("  ferrous-forge validate — validate against Ferrous Forge standards");
+
+    Ok(())
+}
+
+// ── System init helpers ──────────────────────────────────────────────────────
+
 fn check_already_initialized(config: &Config, force: bool) -> Result<bool> {
     if config.is_initialized() && !force {
         println!(
@@ -34,7 +83,6 @@ fn check_already_initialized(config: &Config, force: bool) -> Result<bool> {
     Ok(false)
 }
 
-/// Perform the actual initialization steps
 async fn perform_initialization(config: Config) -> Result<()> {
     println!("📁 Creating configuration directories...");
     config.ensure_directories().await?;
@@ -55,7 +103,6 @@ async fn perform_initialization(config: Config) -> Result<()> {
     Ok(())
 }
 
-/// Print completion message and next steps
 fn print_completion_message() {
     println!(
         "{}",
@@ -71,21 +118,16 @@ fn print_completion_message() {
 }
 
 async fn install_cargo_hijacking() -> Result<()> {
-    // This will create wrapper scripts that intercept cargo commands
-    // and apply our standards before delegating to the real cargo
-
     let home_dir =
         dirs::home_dir().ok_or_else(|| crate::Error::config("Could not find home directory"))?;
 
     let bin_dir = home_dir.join(".local").join("bin");
     tokio::fs::create_dir_all(&bin_dir).await?;
 
-    // Create cargo wrapper script
     let cargo_wrapper = include_str!("../../templates/cargo-wrapper.sh");
     let cargo_path = bin_dir.join("cargo");
     tokio::fs::write(&cargo_path, cargo_wrapper).await?;
 
-    // Make executable
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -98,7 +140,6 @@ async fn install_cargo_hijacking() -> Result<()> {
 }
 
 async fn install_clippy_config() -> Result<()> {
-    // Copy our strict clippy.toml to the home directory
     let home_dir =
         dirs::home_dir().ok_or_else(|| crate::Error::config("Could not find home directory"))?;
 
@@ -110,7 +151,6 @@ async fn install_clippy_config() -> Result<()> {
 }
 
 async fn install_shell_integration() -> Result<()> {
-    // Add Ferrous Forge to PATH and setup completion
     let home_dir =
         dirs::home_dir().ok_or_else(|| crate::Error::config("Could not find home directory"))?;
 
@@ -124,7 +164,6 @@ export FERROUS_FORGE_ENABLED=1
 "#
     );
 
-    // Add to common shell config files
     for shell_file in &[".bashrc", ".zshrc", ".profile"] {
         let shell_path = home_dir.join(shell_file);
         if shell_path.exists() {
@@ -136,5 +175,238 @@ export FERROUS_FORGE_ENABLED=1
         }
     }
 
+    Ok(())
+}
+
+// ── Project init helpers ─────────────────────────────────────────────────────
+
+async fn write_rustfmt_toml(project_path: &std::path::Path) -> Result<()> {
+    let path = project_path.join("rustfmt.toml");
+    if path.exists() {
+        println!("  ⏭  rustfmt.toml already exists, skipping");
+        return Ok(());
+    }
+    let content = r#"# Ferrous Forge project rustfmt configuration
+max_width = 100
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+edition = "2024"
+"#;
+    tokio::fs::write(&path, content).await?;
+    println!("  ✅ Written: rustfmt.toml");
+    Ok(())
+}
+
+async fn write_clippy_toml(project_path: &std::path::Path) -> Result<()> {
+    let path = project_path.join("clippy.toml");
+    if path.exists() {
+        println!("  ⏭  clippy.toml already exists, skipping");
+        return Ok(());
+    }
+    let content = r#"# Ferrous Forge project clippy configuration
+too-many-lines-threshold = 50
+cognitive-complexity-threshold = 25
+"#;
+    tokio::fs::write(&path, content).await?;
+    println!("  ✅ Written: clippy.toml");
+    Ok(())
+}
+
+async fn write_vscode_settings(project_path: &std::path::Path) -> Result<()> {
+    let vscode_dir = project_path.join(".vscode");
+    let settings_path = vscode_dir.join("settings.json");
+
+    if settings_path.exists() {
+        println!("  ⏭  .vscode/settings.json already exists, skipping");
+        return Ok(());
+    }
+
+    tokio::fs::create_dir_all(&vscode_dir).await?;
+
+    let content = r#"{
+  "rust-analyzer.checkOnSave.command": "clippy",
+  "rust-analyzer.checkOnSave.extraArgs": [
+    "--",
+    "-W", "clippy::missing_docs_in_private_items",
+    "-W", "rustdoc::broken_intra_doc_links",
+    "-W", "rustdoc::missing_crate_level_docs"
+  ],
+  "editor.formatOnSave": true,
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer"
+  }
+}
+"#;
+    tokio::fs::write(&settings_path, content).await?;
+    println!("  ✅ Written: .vscode/settings.json");
+    Ok(())
+}
+
+async fn inject_cargo_toml_lints(cargo_toml: &std::path::Path) -> Result<()> {
+    let content = tokio::fs::read_to_string(cargo_toml).await?;
+
+    if content.contains("[lints]") || content.contains("[lints.rust]") {
+        println!("  ⏭  Cargo.toml already has [lints] section, skipping");
+        return Ok(());
+    }
+
+    let lints_block = r#"
+[lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+invalid_html_tags = "deny"
+missing_crate_level_docs = "warn"
+bare_urls = "warn"
+redundant_explicit_links = "warn"
+unescaped_backticks = "warn"
+
+[lints.clippy]
+missing_safety_doc = "deny"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+empty_docs = "warn"
+doc_markdown = "warn"
+needless_doctest_main = "warn"
+suspicious_doc_comments = "warn"
+too_long_first_doc_paragraph = "warn"
+unwrap_used = "deny"
+expect_used = "deny"
+"#;
+
+    let mut new_content = content;
+    new_content.push_str(lints_block);
+    tokio::fs::write(cargo_toml, new_content).await?;
+    println!("  ✅ Injected [lints] block into Cargo.toml");
+    Ok(())
+}
+
+async fn write_ferrous_config(project_path: &std::path::Path) -> Result<()> {
+    let ff_dir = project_path.join(".ferrous-forge");
+    let config_path = ff_dir.join("config.toml");
+
+    if config_path.exists() {
+        println!("  ⏭  .ferrous-forge/config.toml already exists, skipping");
+        return Ok(());
+    }
+
+    tokio::fs::create_dir_all(&ff_dir).await?;
+
+    let content = r#"# Ferrous Forge project configuration
+# These values are LOCKED — LLM agents must not modify them without human approval.
+
+[validation]
+max_file_lines = 300
+max_function_lines = 50
+required_edition = "2024"
+required_rust_version = "1.85.0"
+ban_underscore_bandaid = true
+require_documentation = true
+"#;
+    tokio::fs::write(&config_path, content).await?;
+    println!("  ✅ Written: .ferrous-forge/config.toml");
+    Ok(())
+}
+
+async fn create_docs_scaffold(project_path: &std::path::Path) -> Result<()> {
+    let adr_dir = project_path.join("docs").join("dev").join("adr");
+    let specs_dir = project_path.join("docs").join("dev").join("specs");
+
+    if !adr_dir.exists() {
+        tokio::fs::create_dir_all(&adr_dir).await?;
+        let readme = adr_dir.join("README.md");
+        tokio::fs::write(
+            &readme,
+            "# Architecture Decision Records\n\n\
+             This directory tracks architectural decisions for this project.\n\n\
+             ## Format\n\n\
+             Each ADR is a markdown file named `NNNN-short-title.md`.\n",
+        )
+        .await?;
+        println!("  ✅ Created: docs/dev/adr/README.md");
+    } else {
+        println!("  ⏭  docs/dev/adr already exists, skipping");
+    }
+
+    if !specs_dir.exists() {
+        tokio::fs::create_dir_all(&specs_dir).await?;
+        println!("  ✅ Created: docs/dev/specs/");
+    }
+
+    Ok(())
+}
+
+async fn write_ci_workflow(project_path: &std::path::Path) -> Result<()> {
+    let workflow_dir = project_path.join(".github").join("workflows");
+    let ci_path = workflow_dir.join("ci.yml");
+
+    if ci_path.exists() {
+        println!("  ⏭  .github/workflows/ci.yml already exists, skipping");
+        return Ok(());
+    }
+
+    tokio::fs::create_dir_all(&workflow_dir).await?;
+
+    let content = r#"name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  ci:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Format check
+        run: cargo fmt --check
+
+      - name: Clippy (with doc lints)
+        run: cargo clippy --all-features -- -D warnings
+
+      - name: Tests
+        run: cargo test --all-features
+
+      - name: Doc build
+        run: cargo doc --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+
+      - name: Security audit
+        run: |
+          cargo install cargo-audit --quiet
+          cargo audit
+"#;
+    tokio::fs::write(&ci_path, content).await?;
+    println!("  ✅ Written: .github/workflows/ci.yml");
+    Ok(())
+}
+
+async fn install_project_git_hooks(project_path: &std::path::Path) -> Result<()> {
+    // Use the existing git_hooks installer
+    match crate::git_hooks::install_git_hooks(project_path).await {
+        Ok(()) => {}
+        Err(e) => {
+            // Not fatal — project might not have a git repo yet
+            println!("  ⚠️  Git hooks skipped: {}", e);
+        }
+    }
     Ok(())
 }

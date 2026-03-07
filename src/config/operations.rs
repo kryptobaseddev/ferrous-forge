@@ -21,7 +21,8 @@ impl Config {
             "auto_update" => Some(self.auto_update.to_string()),
             "max_file_lines" => Some(self.max_file_lines.to_string()),
             "max_function_lines" => Some(self.max_function_lines.to_string()),
-            "enforce_edition_2024" => Some(self.enforce_edition_2024.to_string()),
+            "required_edition" => Some(self.required_edition.clone()),
+            "required_rust_version" => Some(self.required_rust_version.clone()),
             "ban_underscore_bandaid" => Some(self.ban_underscore_bandaid.to_string()),
             "require_documentation" => Some(self.require_documentation.to_string()),
             _ => None,
@@ -35,7 +36,8 @@ impl Config {
             "auto_update" => self.set_auto_update(value)?,
             "max_file_lines" => self.set_max_file_lines(value)?,
             "max_function_lines" => self.set_max_function_lines(value)?,
-            "enforce_edition_2024" => self.set_enforce_edition_2024(value)?,
+            "required_edition" => self.required_edition = value.to_string(),
+            "required_rust_version" => self.required_rust_version = value.to_string(),
             "ban_underscore_bandaid" => self.set_ban_underscore_bandaid(value)?,
             "require_documentation" => self.set_require_documentation(value)?,
             _ => return Err(Error::config(format!("Unknown configuration key: {}", key))),
@@ -57,8 +59,12 @@ impl Config {
                 self.max_function_lines.to_string(),
             ),
             (
-                "enforce_edition_2024".to_string(),
-                self.enforce_edition_2024.to_string(),
+                "required_edition".to_string(),
+                self.required_edition.clone(),
+            ),
+            (
+                "required_rust_version".to_string(),
+                self.required_rust_version.clone(),
             ),
             (
                 "ban_underscore_bandaid".to_string(),
@@ -113,13 +119,6 @@ impl Config {
         self.max_function_lines = value
             .parse()
             .map_err(|_| Error::config("Invalid number for max_function_lines"))?;
-        Ok(())
-    }
-
-    fn set_enforce_edition_2024(&mut self, value: &str) -> Result<()> {
-        self.enforce_edition_2024 = value
-            .parse()
-            .map_err(|_| Error::config("Invalid boolean value for enforce_edition_2024"))?;
         Ok(())
     }
 

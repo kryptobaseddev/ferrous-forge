@@ -36,23 +36,43 @@
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-/// AI-powered violation analysis module
+/// AI-powered violation analysis and fix suggestions
 pub mod ai_analyzer;
+/// Cargo command interception for publish validation
+pub mod cargo_intercept;
+/// Command line interface definitions and argument parsing
 pub mod cli;
+/// Implementation of all Ferrous Forge commands
 pub mod commands;
+/// Configuration management and hierarchical config system
 pub mod config;
+/// Documentation coverage checking and reporting
 pub mod doc_coverage;
+/// Rust edition management and upgrade assistance
 pub mod edition;
+/// Error types and result handling
 pub mod error;
+/// Code formatting enforcement and validation
 pub mod formatting;
+/// Git hooks installation and management
 pub mod git_hooks;
+/// Performance optimizations for validation
+pub mod performance;
+/// Rust version checking and compatibility validation
 pub mod rust_version;
+/// Safety pipeline and enforcement mechanisms
 pub mod safety;
+/// Security auditing and vulnerability scanning
 pub mod security;
+/// Development standards definitions and enforcement
 pub mod standards;
+/// Project template system and built-in templates
 pub mod templates;
+/// Test coverage integration and reporting
 pub mod test_coverage;
+/// Self-update functionality and version management
 pub mod updater;
+/// Core validation logic and rule enforcement
 pub mod validation;
 
 // Re-export commonly used types

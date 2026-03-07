@@ -23,7 +23,13 @@ async fn main() -> Result<()> {
 /// Execute the CLI command
 async fn execute_command(command: commands::Commands) -> Result<()> {
     match command {
-        commands::Commands::Init { force } => commands::init::execute(force).await,
+        commands::Commands::Init { force, project } => {
+            if project {
+                commands::init::execute_project().await
+            } else {
+                commands::init::execute(force).await
+            }
+        }
         commands::Commands::Status => commands::status::execute().await,
         commands::Commands::Update {
             channel,
@@ -35,12 +41,24 @@ async fn execute_command(command: commands::Commands) -> Result<()> {
             get,
             list,
             reset,
-        } => commands::config::execute(set, get, list, reset).await,
+            sources,
+            migrate,
+            level: _,
+        } => {
+            if sources {
+                commands::config::show_sources().await
+            } else if migrate {
+                commands::config::migrate_config().await
+            } else {
+                commands::config::execute(set, get, list, reset).await
+            }
+        }
         commands::Commands::Validate {
             path,
             ai_report,
             compare_previous: _,
-        } => commands::validate::execute(path, ai_report).await,
+            locked_only,
+        } => commands::validate::execute(path, ai_report, locked_only).await,
         commands::Commands::Rollback { version } => commands::rollback::execute(version).await,
         commands::Commands::Uninstall { confirm } => commands::uninstall::execute(confirm).await,
         commands::Commands::Rust { command } => execute_rust_command(command).await,
@@ -89,8 +107,8 @@ async fn execute_edition_command(command: commands::EditionCommand) -> Result<()
 async fn execute_safety_command(command: commands::SafetyCommand) -> Result<()> {
     match command {
         commands::SafetyCommand::Status => commands::safety::handle_status().await,
-        commands::SafetyCommand::Install { force, path } => {
-            commands::safety::handle_install(force, &path).await
+        commands::SafetyCommand::Install { force, path, cargo } => {
+            commands::safety::handle_install(force, &path, cargo).await
         }
         commands::SafetyCommand::Check {
             stage,

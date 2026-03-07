@@ -49,6 +49,16 @@ fn create_library_manifest() -> TemplateManifest {
         PathBuf::from(".ferrous-forge/config.toml"),
     ));
 
+    manifest.add_file(TemplateFile::new(
+        PathBuf::from("rustfmt.toml"),
+        PathBuf::from("rustfmt.toml"),
+    ));
+
+    manifest.add_file(TemplateFile::new(
+        PathBuf::from("clippy.toml"),
+        PathBuf::from("clippy.toml"),
+    ));
+
     // Add post-generate commands
     manifest.add_post_generate("cargo fmt".to_string());
     manifest.add_post_generate("cargo test".to_string());
@@ -66,6 +76,8 @@ fn create_library_files() -> HashMap<String, String> {
         ".ferrous-forge/config.toml".to_string(),
         config_toml_content(),
     );
+    files.insert("rustfmt.toml".to_string(), rustfmt_toml_content());
+    files.insert("clippy.toml".to_string(), clippy_toml_content());
 
     files
 }
@@ -76,6 +88,7 @@ fn cargo_toml_content() -> String {
 name = "{{project_name}}"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85.0"
 authors = ["{{author}}"]
 description = "A Ferrous Forge compliant Rust library"
 license = "MIT OR Apache-2.0"
@@ -91,13 +104,47 @@ serde = { version = "1.0", features = ["derive"] }
 [dev-dependencies]
 tempfile = "3.10"
 tokio = { version = "1.40", features = ["test-util"] }
+
+[lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+invalid_html_tags = "deny"
+missing_crate_level_docs = "warn"
+bare_urls = "warn"
+redundant_explicit_links = "warn"
+unescaped_backticks = "warn"
+
+[lints.clippy]
+missing_safety_doc = "deny"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+empty_docs = "warn"
+doc_markdown = "warn"
+needless_doctest_main = "warn"
+suspicious_doc_comments = "warn"
+too_long_first_doc_paragraph = "warn"
+unwrap_used = "deny"
+expect_used = "deny"
 "#
     .to_string()
 }
 
 /// src/lib.rs content
 fn lib_rs_content() -> String {
-    r#"//! {{project_name}} - A Ferrous Forge compliant library
+    r#"//! `{{project_name}}` — A Ferrous Forge compliant library.
+//!
+//! ## Overview
+//!
+//! Describe what this library does and its primary use cases.
+//!
+//! ## Quick Start
+//!
+//! ```rust
+//! // Example usage here
+//! ```
 #![forbid(unsafe_code)]
 #![warn(
     missing_docs,
@@ -155,14 +202,36 @@ mod tests {
 
 /// .ferrous-forge/config.toml content
 fn config_toml_content() -> String {
-    r#"# Ferrous Forge configuration
+    r#"# Ferrous Forge project configuration
+# These values are LOCKED — LLM agents must not modify them without human approval.
 
 [validation]
-max_line_length = 100
-max_file_length = 300
-max_function_length = 50
-allow_unwrap = false
-allow_expect = false
+max_file_lines = 300
+max_function_lines = 50
+required_edition = "2024"
+required_rust_version = "1.85.0"
+ban_underscore_bandaid = true
+require_documentation = true
+"#
+    .to_string()
+}
+
+/// rustfmt.toml content
+fn rustfmt_toml_content() -> String {
+    r#"# Ferrous Forge project rustfmt configuration
+max_width = 100
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+edition = "2024"
+"#
+    .to_string()
+}
+
+/// clippy.toml content
+fn clippy_toml_content() -> String {
+    r#"# Ferrous Forge project clippy configuration
+too-many-lines-threshold = 50
+cognitive-complexity-threshold = 25
 "#
     .to_string()
 }

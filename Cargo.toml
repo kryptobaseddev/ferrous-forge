@@ -1,6 +1,6 @@
 [package]
 name = "ferrous-forge"
-version = "1.4.2"
+version = "1.6.0"
 edition = "2024"
 rust-version = "1.88"
 authors = ["Ferrous Forge Contributors"]
@@ -48,6 +48,10 @@ toml = "0.8"
 # Async runtime and networking
 tokio = { version = "1.40", features = ["full"] }
 reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+# Performance optimizations
+rayon = "1.10"
+dashmap = "6.1"
 
 # Error handling
 anyhow = "1.0"
@@ -141,6 +145,15 @@ needless_borrow = "allow"  # Style preference
 useless_format = "allow"  # Sometimes clearer
 manual_map = "allow"  # Sometimes clearer
 only_used_in_recursion = "allow"  # False positives
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "warn"
+missing_crate_level_docs = "warn"
+private_doc_tests = "allow"
+invalid_codeblock_attributes = "deny"
+invalid_rust_codeblocks = "deny"
+bare_urls = "warn"
 
 [[bin]]
 name = "ferrous-forge"

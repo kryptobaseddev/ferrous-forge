@@ -20,8 +20,8 @@ pub struct AIReport {
     pub fix_instructions: Vec<FixInstruction>,
 }
 
-#[derive(Serialize, Deserialize)]
 /// Metadata for AI compliance reports
+#[derive(Serialize, Deserialize)]
 pub struct AIMetadata {
     /// ISO timestamp when report was generated
     pub timestamp: String,
@@ -35,8 +35,8 @@ pub struct AIMetadata {
     pub report_version: String,
 }
 
-#[derive(Serialize, Deserialize)]
 /// Summary statistics for the AI compliance report
+#[derive(Serialize, Deserialize)]
 pub struct AISummary {
     /// Percentage of code that meets Ferrous Forge standards (0-100)
     pub compliance_percentage: f64,
@@ -48,8 +48,8 @@ pub struct AISummary {
     pub estimated_fix_time_hours: f64,
 }
 
-#[derive(Serialize, Deserialize)]
 /// Individual violation details for AI analysis
+#[derive(Serialize, Deserialize)]
 pub struct AIViolation {
     /// Type of violation (e.g., "UNWRAPINPRODUCTION", "FUNCTIONTOOLARGE")
     pub violation_type: String,
@@ -69,8 +69,8 @@ pub struct AIViolation {
     pub priority: u8,
 }
 
-#[derive(Serialize, Deserialize)]
 /// Instructions for fixing a specific type of violation
+#[derive(Serialize, Deserialize)]
 pub struct FixInstruction {
     /// Type of violation this instruction applies to
     pub violation_type: String,

@@ -1,0 +1,52 @@
+# Project Tracking Template - Git Ignore Rules
+
+# Optional: Add this entire directory to your project's .gitignore if you want
+# to keep project tracking private or local to development team
+
+# Remove any of these rules as needed for your project
+
+# Session artifacts that might contain sensitive information
+sessions/SESSION_*_DRAFT.md
+sessions/SESSION_*_PRIVATE.md
+
+# Temporary files created during planning
+*.tmp
+*.draft
+*_backup.json
+
+# Personal notes (team members might create these)
+PERSONAL_NOTES.md
+TODO_PERSONAL.md
+
+# Tool-generated files (if using automated tools)
+reports/
+dashboards/
+exports/
+
+# IDE or editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node modules if using JS-based validation tools
+node_modules/
+
+# Python cache if using Python-based tools
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs from automated tools
+*.log
+logs/

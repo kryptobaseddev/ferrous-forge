@@ -1,3 +1,9 @@
+//! Semantic analysis functionality for AI-powered violation analysis
+//!
+//! This module provides functions for analyzing the semantic context of code violations,
+//! assessing fix complexity, and performing deep code analysis to support AI-powered
+//! recommendations for resolving Ferrous Forge violations.
+
 use std::collections::HashMap;
 
 use super::types::{CodeContext, FixComplexity, SemanticAnalysis};
@@ -56,7 +62,22 @@ fn infer_expected_type(violation_type: &ViolationType) -> Option<String> {
         | ViolationType::LineTooLong
         | ViolationType::MissingDocs
         | ViolationType::MissingDependencies
-        | ViolationType::OldRustVersion => None,
+        | ViolationType::OldRustVersion
+        | ViolationType::LockedSetting
+        | ViolationType::MissingModuleDoc
+        | ViolationType::MissingDocConfig => None,
+    }
+}
+
+/// Return an empty SemanticAnalysis (used for locked settings that skip content analysis)
+pub fn empty_semantic_analysis() -> SemanticAnalysis {
+    SemanticAnalysis {
+        actual_type: None,
+        expected_type: None,
+        data_flow: vec![],
+        control_flow: vec![],
+        dependencies: vec![],
+        error_propagation: vec![],
     }
 }
 
@@ -154,6 +175,9 @@ pub fn assess_fix_complexity(
         ViolationType::LineTooLong => FixComplexity::Trivial,
         ViolationType::FunctionTooLarge => FixComplexity::Complex,
         ViolationType::FileTooLarge => FixComplexity::Architectural,
+        ViolationType::WrongEdition
+        | ViolationType::OldRustVersion
+        | ViolationType::LockedSetting => FixComplexity::Architectural,
         _ => FixComplexity::Moderate,
     }
 }

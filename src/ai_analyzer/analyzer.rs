@@ -10,7 +10,7 @@ use super::strategies::{
     generate_ai_instructions, generate_fix_strategies, identify_code_patterns,
 };
 use super::types::*;
-use crate::validation::Violation;
+use crate::validation::{Violation, ViolationType};
 
 /// AI analyzer for automated violation analysis
 pub struct AIAnalyzer {
@@ -29,7 +29,7 @@ impl AIAnalyzer {
         let mut analyzable_count = 0;
 
         for violation in &violations {
-            if let Ok(analysis) = self.analyze_single_violation(&violation) {
+            if let Ok(analysis) = self.analyze_single_violation(violation) {
                 if analysis.ai_fixable {
                     analyzable_count += 1;
                 }
@@ -58,6 +58,11 @@ impl AIAnalyzer {
     }
 
     fn analyze_single_violation(&self, violation: &Violation) -> Result<ViolationAnalysis> {
+        // Locked settings are never AI-fixable — return early with explicit guidance
+        if violation.is_locked_setting() {
+            return Ok(self.build_locked_analysis(violation));
+        }
+
         let content = fs::read_to_string(&violation.file)?;
         let code_context = extract_code_context(violation.line, &content);
         let semantic_analysis = perform_semantic_analysis(violation, &code_context, &content);
@@ -71,12 +76,12 @@ impl AIAnalyzer {
         );
 
         let fix_recommendation = if ai_fixable {
-            self.generate_fix_recommendation(&violation, &code_context, &semantic_analysis)
+            self.generate_fix_recommendation(violation, &code_context, &semantic_analysis)
         } else {
             None
         };
 
-        let side_effects = self.identify_side_effects(&violation, &code_context);
+        let side_effects = self.identify_side_effects(violation, &code_context);
 
         Ok(ViolationAnalysis {
             violation: violation.clone(),
@@ -90,6 +95,38 @@ impl AIAnalyzer {
         })
     }
 
+    /// Build a ViolationAnalysis for locked settings (edition, rust-version)
+    fn build_locked_analysis(&self, violation: &Violation) -> ViolationAnalysis {
+        ViolationAnalysis {
+            violation: violation.clone(),
+            code_context: CodeContext {
+                function_name: None,
+                function_signature: None,
+                return_type: None,
+                is_async: false,
+                is_generic: false,
+                trait_impl: None,
+                surrounding_code: vec![],
+                imports: vec![],
+                error_handling_style: ErrorHandlingStyle::Unknown,
+            },
+            semantic_analysis: super::semantic::empty_semantic_analysis(),
+            fix_complexity: FixComplexity::Architectural,
+            ai_fixable: false,
+            fix_recommendation: Some(
+                "DO NOT change edition or rust-version in Cargo.toml.\n\
+                 These are locked by .ferrous-forge/config.toml.\n\
+                 This violation requires human intervention — escalate to the project owner."
+                    .to_string(),
+            ),
+            side_effects: vec![
+                "Changing locked settings may break CI, team standards, and edition guarantees."
+                    .to_string(),
+            ],
+            confidence_score: 0.0,
+        }
+    }
+
     fn assess_fixability(
         &self,
         violation: &Violation,
@@ -98,7 +135,7 @@ impl AIAnalyzer {
         complexity: &FixComplexity,
     ) -> (bool, f32) {
         match (&violation.violation_type, complexity) {
-            (crate::validation::ViolationType::UnwrapInProduction, FixComplexity::Trivial) => {
+            (ViolationType::UnwrapInProduction, FixComplexity::Trivial) => {
                 if context
                     .return_type
                     .as_ref()
@@ -109,13 +146,15 @@ impl AIAnalyzer {
                     (true, 0.75)
                 }
             }
-            (crate::validation::ViolationType::UnwrapInProduction, FixComplexity::Simple) => {
-                (true, 0.65)
-            }
-            (crate::validation::ViolationType::LineTooLong, _) => (true, 1.0),
-            (crate::validation::ViolationType::UnderscoreBandaid, _) => (true, 0.85),
-            (crate::validation::ViolationType::FunctionTooLarge, _) => (false, 0.3),
-            (crate::validation::ViolationType::FileTooLarge, _) => (false, 0.2),
+            (ViolationType::UnwrapInProduction, FixComplexity::Simple) => (true, 0.65),
+            (ViolationType::LineTooLong, _) => (true, 1.0),
+            (ViolationType::UnderscoreBandaid, _) => (true, 0.85),
+            (ViolationType::FunctionTooLarge, _) => (false, 0.3),
+            (ViolationType::FileTooLarge, _) => (false, 0.2),
+            // Locked settings are never AI-fixable (handled in build_locked_analysis)
+            (ViolationType::WrongEdition, _)
+            | (ViolationType::OldRustVersion, _)
+            | (ViolationType::LockedSetting, _) => (false, 0.0),
             _ => (false, 0.0),
         }
     }
@@ -127,7 +166,7 @@ impl AIAnalyzer {
         _semantic: &SemanticAnalysis,
     ) -> Option<String> {
         match violation.violation_type {
-            crate::validation::ViolationType::UnwrapInProduction => {
+            ViolationType::UnwrapInProduction => {
                 if context
                     .return_type
                     .as_ref()
@@ -138,10 +177,10 @@ impl AIAnalyzer {
                     Some("Change function return type to Result and use ?".to_string())
                 }
             }
-            crate::validation::ViolationType::LineTooLong => {
+            ViolationType::LineTooLong => {
                 Some("Break line at appropriate point (e.g., after comma, operator)".to_string())
             }
-            crate::validation::ViolationType::UnderscoreBandaid => {
+            ViolationType::UnderscoreBandaid => {
                 Some("Either use the parameter or remove it from function signature".to_string())
             }
             _ => None,
@@ -152,7 +191,7 @@ impl AIAnalyzer {
         let mut effects = Vec::new();
 
         match violation.violation_type {
-            crate::validation::ViolationType::UnwrapInProduction => {
+            ViolationType::UnwrapInProduction => {
                 if !context
                     .return_type
                     .as_ref()
@@ -162,7 +201,7 @@ impl AIAnalyzer {
                     effects.push("All callers must be updated".to_string());
                 }
             }
-            crate::validation::ViolationType::FunctionTooLarge => {
+            ViolationType::FunctionTooLarge => {
                 effects.push("May require creating new helper functions".to_string());
                 effects.push("Could affect function testing".to_string());
             }
@@ -174,12 +213,8 @@ impl AIAnalyzer {
 
     fn analyze_project_patterns(&self) -> Result<CodePatterns> {
         let mut all_content = String::new();
-
-        // Sample a few files for pattern analysis
-        use std::fs;
         let mut count = 0;
 
-        // Simple file traversal
         fn visit_dir(
             dir: &std::path::Path,
             content: &mut String,
@@ -230,8 +265,6 @@ impl AIAnalyzer {
         &self,
         violations: Vec<Violation>,
     ) -> Result<AIAnalysisReport> {
-        // For now, just call the sync version
-        // In future could parallelize with tokio
         self.analyze_violations(violations)
     }
 
@@ -249,13 +282,12 @@ impl AIAnalyzer {
 
         println!("📊 AI analysis saved to: {}", filepath.display());
 
-        // Also save orchestrator instructions
         self.save_orchestrator_instructions(report)?;
 
         Ok(())
     }
 
-    /// Save orchestrator instructions to file
+    /// Save orchestrator instructions to file, including locked settings section
     pub fn save_orchestrator_instructions(&self, report: &AIAnalysisReport) -> Result<()> {
         let analysis_dir = self.project_root.join(".ferrous-forge").join("ai-analysis");
         let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
@@ -264,6 +296,40 @@ impl AIAnalyzer {
 
         let mut instructions = String::new();
         instructions.push_str("# AI Orchestrator Instructions\n\n");
+
+        // Locked settings section — appears first so agents see it immediately
+        let locked_analyses: Vec<&ViolationAnalysis> = report
+            .violation_analyses
+            .iter()
+            .filter(|a| a.violation.is_locked_setting())
+            .collect();
+
+        if !locked_analyses.is_empty() {
+            instructions.push_str("## Locked Settings (DO NOT MODIFY)\n\n");
+            instructions.push_str(
+                "The following are locked by Ferrous Forge project configuration.\n\
+                 DO NOT change these to resolve compilation errors — escalate to human.\n\n",
+            );
+            instructions.push_str("| Setting | Violation | Config |\n");
+            instructions.push_str("|---------|-----------|--------|\n");
+            for a in &locked_analyses {
+                let setting = match a.violation.violation_type {
+                    ViolationType::WrongEdition => "edition",
+                    ViolationType::OldRustVersion => "rust-version",
+                    _ => "locked setting",
+                };
+                instructions.push_str(&format!(
+                    "| {} | {} | .ferrous-forge/config.toml |\n",
+                    setting,
+                    a.violation.file.display()
+                ));
+            }
+            instructions.push_str(
+                "\n**AI Agent Rule**: `ai_fixable = false`, \
+                 `confidence = 0%` for all locked violations above.\n\n",
+            );
+        }
+
         instructions.push_str(&format!(
             "## Summary\n{}\n\n",
             report.ai_instructions.summary

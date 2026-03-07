@@ -30,6 +30,14 @@ pub async fn execute(channel: String, rules_only: bool, dry_run: bool) -> Result
     Ok(())
 }
 
+/// Update the Ferrous Forge binary to the latest version
+///
+/// Checks GitHub releases for a newer version on the specified channel
+/// and downloads/installs it if available.
+///
+/// # Arguments
+/// * `channel` - Update channel (stable, beta, nightly)
+/// * `dry_run` - If true, only shows what would be updated without making changes
 async fn update_binary(channel: &str, dry_run: bool) -> Result<()> {
     println!("📦 Checking for binary updates on {} channel...", channel);
 
@@ -46,6 +54,14 @@ async fn update_binary(channel: &str, dry_run: bool) -> Result<()> {
     Ok(())
 }
 
+/// Update validation rules from the remote repository
+///
+/// Fetches the latest clippy rules and other validation configurations
+/// from the Ferrous Forge repository for the specified channel.
+///
+/// # Arguments
+/// * `channel` - Update channel for rules (stable, beta, nightly)
+/// * `dry_run` - If true, only shows what would be updated without making changes
 async fn update_rules(channel: &str, dry_run: bool) -> Result<()> {
     println!("📋 Checking for rules updates on {} channel...", channel);
 

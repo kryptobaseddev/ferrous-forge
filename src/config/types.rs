@@ -19,8 +19,10 @@ pub struct Config {
     pub max_file_lines: usize,
     /// Function size limit in lines
     pub max_function_lines: usize,
-    /// Whether to enforce Edition 2024
-    pub enforce_edition_2024: bool,
+    /// Required Rust edition (e.g. "2024") — locked; LLM agents must not change this
+    pub required_edition: String,
+    /// Required minimum rust-version (e.g. "1.85.0") — locked; LLM agents must not change this
+    pub required_rust_version: String,
     /// Whether to ban underscore bandaid patterns
     pub ban_underscore_bandaid: bool,
     /// Whether to require documentation
@@ -58,7 +60,8 @@ impl Default for Config {
             ],
             max_file_lines: 300,
             max_function_lines: 50,
-            enforce_edition_2024: true,
+            required_edition: "2024".to_string(),
+            required_rust_version: "1.85.0".to_string(),
             ban_underscore_bandaid: true,
             require_documentation: true,
             custom_rules: vec![],

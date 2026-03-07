@@ -1,6 +1,9 @@
 //! Template registry for managing available templates
 
-use super::builtin::{create_cli_template, create_library_template, create_web_service_template};
+use super::builtin::{
+    create_cli_template, create_embedded_template, create_library_template, create_plugin_template,
+    create_wasm_template, create_web_service_template, create_workspace_template,
+};
 use super::manifest::{TemplateKind, TemplateManifest};
 use crate::{Error, Result};
 use std::collections::HashMap;
@@ -38,10 +41,22 @@ impl TemplateRegistry {
             .insert("cli-app".to_string(), create_cli_template());
         registry
             .builtin
+            .insert("embedded".to_string(), create_embedded_template());
+        registry
+            .builtin
             .insert("library".to_string(), create_library_template());
         registry
             .builtin
+            .insert("plugin".to_string(), create_plugin_template());
+        registry
+            .builtin
+            .insert("wasm".to_string(), create_wasm_template());
+        registry
+            .builtin
             .insert("web-service".to_string(), create_web_service_template());
+        registry
+            .builtin
+            .insert("workspace".to_string(), create_workspace_template());
 
         registry
     }

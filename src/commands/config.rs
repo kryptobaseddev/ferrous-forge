@@ -1,6 +1,7 @@
 //! Config command implementation
 
-use crate::{Result, config::Config};
+use crate::Result;
+use crate::config::{Config, HierarchicalConfig};
 use console::style;
 
 /// Execute the config command
@@ -98,6 +99,13 @@ fn show_help() {
     println!("  ferrous-forge config --get key        # Get a setting");
     println!("  ferrous-forge config --set key=value  # Set a setting");
     println!("  ferrous-forge config --reset          # Reset to defaults");
+    println!("  ferrous-forge config --sources        # Show config hierarchy");
+    println!("  ferrous-forge config --migrate        # Migrate old config");
+    println!();
+    println!("Configuration Hierarchy:");
+    println!("  1. System: /etc/ferrous-forge/config.toml");
+    println!("  2. User: ~/.config/ferrous-forge/config.toml");
+    println!("  3. Project: ./.ferrous-forge/config.toml");
     println!();
     println!("Available settings:");
     println!("  update_channel (stable, beta, nightly)");
@@ -107,4 +115,28 @@ fn show_help() {
     println!("  enforce_edition_2024 (true, false)");
     println!("  ban_underscore_bandaid (true, false)");
     println!("  require_documentation (true, false)");
+}
+
+/// Show configuration sources
+pub async fn show_sources() -> Result<()> {
+    println!("{}", style("🔍 Configuration Hierarchy").bold().cyan());
+    println!();
+
+    let hier = HierarchicalConfig::load().await?;
+    println!("{}", hier.sources_report());
+
+    Ok(())
+}
+
+/// Migrate old configuration to hierarchical system
+pub async fn migrate_config() -> Result<()> {
+    println!("{}", style("📦 Migrating configuration...").bold().cyan());
+
+    crate::config::hierarchy::migrate_config().await?;
+
+    println!(
+        "{}",
+        style("✅ Configuration migrated successfully").green()
+    );
+    Ok(())
 }
