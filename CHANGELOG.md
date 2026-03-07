@@ -58,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Library template**: `Cargo.toml` includes full `[lints]` block, `rust-version = "1.85.0"`,
   generates `rustfmt.toml` and `clippy.toml`, and `lib.rs` has a proper `//!` doc block.
 
-## [1.6.0] - 2025-09-26 🎯 FEATURE-COMPLETE RELEASE
+## [1.6.0] - 2026-03-07 🎯 FEATURE-COMPLETE RELEASE
 
 ### Added
 - **Git Hooks System**: Automatic pre-commit and pre-push hooks installation
@@ -119,6 +119,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Test Compilation**: Fixed missing PartialEq on Violation struct
 - **Clippy Warnings**: Resolved field reassignment and unused mutable warnings
 - **Test Code**: Added appropriate clippy allows for test modules
+- **Config Wiring**: Fixed config values (`max_file_lines`, `max_function_lines`) to actually be used by validators (was hardcoded)
+- **Function Tracking**: Fixed brace depth stack to correctly measure function sizes and handle nested closures
+- **Cargo.toml Include**: Fixed package.include directive to include templates directory for cargo publish
+- **Performance Tests**: Fixed test compilation issues in performance module
+- **Rustdoc Lints**: Added missing `[lints.rustdoc]` configuration to Cargo.toml
+- **Locked Settings**: Updated required_rust_version to 1.88 in config
 
 ### Technical
 - **Dependencies**: Added rayon and dashmap for performance
