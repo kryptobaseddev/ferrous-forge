@@ -12,6 +12,11 @@ use display::{
 use utils::{create_spinner, fetch_latest_version};
 
 /// Handle rust version check command
+///
+/// # Errors
+///
+/// Returns an error if the version manager fails to initialize, the current
+/// version cannot be determined, or the recommendation cannot be fetched.
 pub async fn handle_check(verbose: bool) -> Result<()> {
     let spinner = create_spinner("Checking Rust version...");
     let manager = VersionManager::new()?;
@@ -34,6 +39,11 @@ pub async fn handle_check(verbose: bool) -> Result<()> {
 }
 
 /// Handle rust recommendation command
+///
+/// # Errors
+///
+/// Returns an error if the version manager fails to initialize or the
+/// recommendation cannot be fetched.
 pub async fn handle_recommend(stable_only: bool) -> Result<()> {
     let manager = VersionManager::new()?;
     let current = manager.check_current().await?;
@@ -47,6 +57,11 @@ pub async fn handle_recommend(stable_only: bool) -> Result<()> {
 }
 
 /// Handle rust list command
+///
+/// # Errors
+///
+/// Returns an error if the version manager fails to initialize or the
+/// release list cannot be fetched.
 pub async fn handle_list(count: usize) -> Result<()> {
     let manager = VersionManager::new()?;
     let releases = manager.get_recent_releases(count).await?;

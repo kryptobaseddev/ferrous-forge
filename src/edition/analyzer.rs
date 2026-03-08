@@ -21,6 +21,11 @@ impl EditionAnalyzer {
     }
 
     /// Analyze the project for edition compatibility issues
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if edition lint checks fail or the current edition
+    /// cannot be detected from `Cargo.toml`.
     pub async fn analyze(&self, target_edition: Edition) -> Result<AnalysisReport> {
         let mut report = AnalysisReport {
             target_edition,

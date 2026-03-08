@@ -29,6 +29,11 @@ pub enum Edition {
 
 impl Edition {
     /// Parse edition from string
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the string does not match a known edition
+    /// (`"2015"`, `"2018"`, `"2021"`, or `"2024"`).
     pub fn parse_edition(s: &str) -> Result<Self> {
         match s {
             "2015" => Ok(Self::Edition2015),
@@ -131,6 +136,11 @@ impl EditionStatus {
 }
 
 /// Detect edition from Cargo.toml
+///
+/// # Errors
+///
+/// Returns an error if the manifest file does not exist, cannot be read,
+/// or contains an invalid edition value.
 pub async fn detect_edition(manifest_path: &Path) -> Result<Edition> {
     if !manifest_path.exists() {
         return Err(Error::file_not_found(format!(
@@ -154,6 +164,10 @@ pub async fn detect_edition(manifest_path: &Path) -> Result<Edition> {
 }
 
 /// Check edition compliance for a project
+///
+/// # Errors
+///
+/// Returns an error if the `Cargo.toml` cannot be found, read, or parsed.
 pub async fn check_compliance(project_path: &Path) -> Result<EditionStatus> {
     let manifest_path = project_path.join("Cargo.toml");
     let edition = detect_edition(&manifest_path).await?;

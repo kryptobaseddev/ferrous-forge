@@ -62,6 +62,12 @@ impl CargoInterceptor {
 }
 
 /// Intercept cargo publish command and run full validation (all violations block)
+///
+/// # Errors
+///
+/// Returns [`crate::Error::Validation`] if pre-publish validation or version consistency
+/// checks fail. Returns [`crate::Error::Standards`] if dogfooding enforcement detects
+/// violations.
 pub async fn intercept_publish_command(project_path: &Path) -> Result<()> {
     let interceptor = CargoInterceptor::new();
 
@@ -96,6 +102,11 @@ pub async fn intercept_publish_command(project_path: &Path) -> Result<()> {
 /// Intercept dev commands (build, test, run, check) with tiered blocking:
 /// - Locked settings (edition/version) → ALWAYS block
 /// - Style violations → WARN only (unless `enforce_style` is true)
+///
+/// # Errors
+///
+/// Returns [`crate::Error::Validation`] if locked settings (edition, rust-version) are
+/// violated. Style violations produce warnings but do not return errors.
 pub async fn intercept_dev_command(project_path: &Path) -> Result<()> {
     let interceptor = CargoInterceptor::new();
 
@@ -145,9 +156,7 @@ pub async fn intercept_dev_command(project_path: &Path) -> Result<()> {
                 );
             }
             eprintln!("   (These will block 'cargo publish'. Fix before publishing.)");
-            eprintln!(
-            "   (Set FERROUS_FORGE_BYPASS=true to suppress these warnings.)\n"
-        );
+            eprintln!("   (Set FERROUS_FORGE_BYPASS=true to suppress these warnings.)\n");
         }
     } else {
         tracing::info!(

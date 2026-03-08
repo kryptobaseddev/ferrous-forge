@@ -72,7 +72,7 @@ impl TemplateKind {
 /// Variable that can be substituted in templates
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TemplateVariable {
-    /// Variable name (e.g., "project_name")
+    /// Variable name (e.g., `project_name`)
     pub name: String,
 
     /// Description shown to user
@@ -137,6 +137,11 @@ impl TemplateManifest {
     }
 
     /// Validate the manifest
+    ///
+    /// # Errors
+    ///
+    /// Returns [`crate::Error::Validation`] if the name is empty, no files are defined,
+    /// or variable names are duplicated.
     pub fn validate(&self) -> crate::Result<()> {
         if self.name.is_empty() {
             return Err(crate::Error::validation("Template name cannot be empty"));

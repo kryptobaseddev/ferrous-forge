@@ -7,6 +7,11 @@ use tokio::fs;
 
 impl Config {
     /// Load configuration from file, or return default if not found
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Config`] if both the hierarchical config and the
+    /// fallback config file exist but fail to parse.
     pub async fn load_or_default() -> Result<Self> {
         match Self::load().await {
             Ok(config) => Ok(config),
@@ -15,6 +20,10 @@ impl Config {
     }
 
     /// Load configuration using hierarchical system
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Config`] if the config file cannot be read or parsed.
     pub async fn load() -> Result<Self> {
         // Try hierarchical config first
         match super::HierarchicalConfig::load().await {
@@ -40,6 +49,11 @@ impl Config {
     }
 
     /// Save configuration to file
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Config`] if serialization fails or the file cannot be
+    /// written. Returns [`Error::Io`] if directory creation fails.
     pub async fn save(&self) -> Result<()> {
         let config_path = Self::config_file_path()?;
 
@@ -59,6 +73,10 @@ impl Config {
     }
 
     /// Get the path to the configuration file
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Config`] if the system config directory cannot be determined.
     pub fn config_file_path() -> Result<PathBuf> {
         let config_dir =
             dirs::config_dir().ok_or_else(|| Error::config("Could not find config directory"))?;
@@ -67,6 +85,10 @@ impl Config {
     }
 
     /// Get the path to the configuration directory
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Config`] if the system config directory cannot be determined.
     pub fn config_dir_path() -> Result<PathBuf> {
         let config_dir =
             dirs::config_dir().ok_or_else(|| Error::config("Could not find config directory"))?;
@@ -75,6 +97,10 @@ impl Config {
     }
 
     /// Ensure configuration directories exist
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Io`] if directory creation fails.
     pub async fn ensure_directories(&self) -> Result<()> {
         let config_dir = Self::config_dir_path()?;
         fs::create_dir_all(&config_dir).await?;

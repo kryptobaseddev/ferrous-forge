@@ -69,7 +69,7 @@ fn infer_expected_type(violation_type: &ViolationType) -> Option<String> {
     }
 }
 
-/// Return an empty SemanticAnalysis (used for locked settings that skip content analysis)
+/// Return an empty [`SemanticAnalysis`] (used for locked settings that skip content analysis)
 pub fn empty_semantic_analysis() -> SemanticAnalysis {
     SemanticAnalysis {
         actual_type: None,

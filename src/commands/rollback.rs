@@ -4,6 +4,11 @@ use crate::Result;
 use console::style;
 
 /// Execute the rollback command
+///
+/// # Errors
+///
+/// This function currently always succeeds. Errors will be returned once
+/// rollback logic is implemented.
 pub async fn execute(version: String) -> Result<()> {
     println!(
         "{}",

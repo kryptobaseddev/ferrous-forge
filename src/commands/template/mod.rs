@@ -48,6 +48,11 @@ pub enum TemplateCommand {
 
 impl TemplateCommand {
     /// Execute the template command
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the template cannot be found, variables are
+    /// invalid, or the project files cannot be written.
     pub async fn execute(&self) -> Result<()> {
         match self {
             TemplateCommand::List => {

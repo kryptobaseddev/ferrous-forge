@@ -36,6 +36,11 @@ impl EditionMigrator {
     }
 
     /// Migrate project to target edition
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the current edition cannot be detected, backup
+    /// creation fails, or any migration step fails.
     pub async fn migrate(
         &self,
         target_edition: Edition,

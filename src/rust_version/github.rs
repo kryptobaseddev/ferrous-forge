@@ -58,6 +58,10 @@ pub struct GitHubClient {
 
 impl GitHubClient {
     /// Create a new GitHub client
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the HTTP client cannot be constructed.
     pub fn new(auth_token: Option<String>) -> Result<Self> {
         let client = Client::builder()
             .timeout(std::time::Duration::from_secs(30))
@@ -69,6 +73,11 @@ impl GitHubClient {
     }
 
     /// Get the latest stable release
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GitHub API request fails, the response status
+    /// indicates an error, or the response JSON cannot be parsed.
     pub async fn get_latest_release(&self) -> Result<GitHubRelease> {
         let url = format!(
             "{}/repos/{}/{}/releases/latest",
@@ -130,6 +139,11 @@ impl GitHubClient {
     }
 
     /// Get multiple recent releases
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GitHub API request fails, the response status
+    /// indicates an error, or the response JSON cannot be parsed.
     pub async fn get_releases(&self, count: usize) -> Result<Vec<GitHubRelease>> {
         let url = format!(
             "{}/repos/{}/{}/releases?per_page={}",

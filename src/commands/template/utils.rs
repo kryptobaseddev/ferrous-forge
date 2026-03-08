@@ -4,6 +4,10 @@ use crate::{Error, Result};
 use std::collections::HashMap;
 
 /// Parse variable from key=value format
+///
+/// # Errors
+///
+/// Returns an error if the string is not in `key=value` format.
 pub fn parse_var(s: &str) -> Result<(String, String)> {
     let parts: Vec<&str> = s.splitn(2, '=').collect();
     if parts.len() != 2 {
@@ -16,6 +20,10 @@ pub fn parse_var(s: &str) -> Result<(String, String)> {
 }
 
 /// Collect template variables from command line arguments
+///
+/// # Errors
+///
+/// Returns an error if any variable string is not in `key=value` format.
 pub fn collect_template_variables(variables: &[String]) -> Result<HashMap<String, String>> {
     let mut template_vars = HashMap::new();
 

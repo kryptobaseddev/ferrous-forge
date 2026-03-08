@@ -7,6 +7,10 @@ use indicatif::{ProgressBar, ProgressStyle};
 use std::path::Path;
 
 /// Handle edition check command
+///
+/// # Errors
+///
+/// Returns an error if the edition compliance check fails.
 pub async fn handle_check(path: &Path) -> Result<()> {
     let status = run_compliance_check_with_progress(path).await?;
 

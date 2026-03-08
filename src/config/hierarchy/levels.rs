@@ -16,6 +16,10 @@ pub enum ConfigLevel {
 
 impl ConfigLevel {
     /// Get the configuration file path for this level
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the user config directory cannot be determined.
     pub fn path(&self) -> Result<PathBuf> {
         match self {
             ConfigLevel::System => Ok(PathBuf::from("/etc/ferrous-forge/config.toml")),

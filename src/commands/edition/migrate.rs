@@ -6,6 +6,11 @@ use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
 
 /// Handle edition migrate command
+///
+/// # Errors
+///
+/// Returns an error if the edition string is invalid, the current directory
+/// cannot be determined, or the migration process fails.
 pub async fn handle_migrate(
     edition_str: &str,
     no_backup: bool,

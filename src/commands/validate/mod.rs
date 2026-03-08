@@ -17,6 +17,11 @@ use console::style;
 use std::path::{Path, PathBuf};
 
 /// Execute the validate command
+///
+/// # Errors
+///
+/// Returns an error if the configuration cannot be loaded, the validator
+/// fails to initialize, or the validation process encounters an I/O error.
 pub async fn execute(path: Option<PathBuf>, ai_report: bool, locked_only: bool) -> Result<()> {
     let project_path = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
 

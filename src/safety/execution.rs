@@ -48,6 +48,10 @@ impl ExecutionManager {
     }
 
     /// Execute checks for the stage
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if any individual check fails to execute.
     pub async fn execute_stage_checks(
         &self,
         stage_config: &StageConfig,
@@ -129,6 +133,10 @@ impl ExecutionManager {
 }
 
 /// Execute a specific check type
+///
+/// # Errors
+///
+/// Returns an error if the underlying check command fails to run.
 pub async fn execute_check(check_type: CheckType, project_path: &Path) -> Result<CheckResult> {
     match check_type {
         CheckType::Format => checks::format::run(project_path).await,
@@ -146,6 +154,11 @@ pub async fn execute_check(check_type: CheckType, project_path: &Path) -> Result
 }
 
 /// Handle check result and convert errors to check results
+///
+/// # Errors
+///
+/// This function converts check errors into [`CheckResult`] values and
+/// does not itself return errors.
 pub fn handle_check_result(
     check_result: Result<CheckResult>,
     check_type: CheckType,

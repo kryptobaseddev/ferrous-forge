@@ -7,6 +7,11 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 /// Create a new project from template
+///
+/// # Errors
+///
+/// Returns an error if the template is not found, variables are invalid,
+/// temporary files cannot be created, or the project generation fails.
 pub async fn create_from_template(
     template_name: &str,
     output_dir: &Path,

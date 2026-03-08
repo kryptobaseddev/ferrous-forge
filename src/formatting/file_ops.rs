@@ -6,6 +6,10 @@ use std::path::Path;
 use std::process::Command;
 
 /// Check if a single file is properly formatted
+///
+/// # Errors
+///
+/// Returns [`Error::Process`] if rustfmt is not installed or fails to execute.
 pub async fn check_file_formatting(file_path: &Path) -> Result<bool> {
     ensure_rustfmt_installed().await?;
 
@@ -19,6 +23,10 @@ pub async fn check_file_formatting(file_path: &Path) -> Result<bool> {
 }
 
 /// Format a single file
+///
+/// # Errors
+///
+/// Returns [`Error::Process`] if rustfmt is not installed or fails to execute.
 pub async fn format_file(file_path: &Path) -> Result<()> {
     ensure_rustfmt_installed().await?;
 

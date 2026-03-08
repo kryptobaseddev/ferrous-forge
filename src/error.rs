@@ -99,11 +99,27 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 impl Error {
     /// Create a new configuration error
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use ferrous_forge::Error;
+    /// let err = Error::config("missing config key");
+    /// assert!(err.to_string().contains("missing config key"));
+    /// ```
     pub fn config(msg: impl Into<String>) -> Self {
         Self::Config(msg.into())
     }
 
     /// Create a new validation error
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use ferrous_forge::Error;
+    /// let err = Error::validation("invalid field value");
+    /// assert!(err.to_string().contains("invalid field value"));
+    /// ```
     pub fn validation(msg: impl Into<String>) -> Self {
         Self::Validation(msg.into())
     }
@@ -129,6 +145,14 @@ impl Error {
     }
 
     /// Create a new process error
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use ferrous_forge::Error;
+    /// let err = Error::process("cargo build failed");
+    /// assert!(err.to_string().contains("cargo build failed"));
+    /// ```
     pub fn process(msg: impl Into<String>) -> Self {
         Self::Process(msg.into())
     }

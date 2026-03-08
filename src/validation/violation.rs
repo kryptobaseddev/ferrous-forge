@@ -16,7 +16,7 @@ pub enum ViolationType {
     FunctionTooLarge,
     /// Line exceeds length limit
     LineTooLong,
-    /// Use of .unwrap() or .expect() in production code
+    /// Use of `.unwrap()` or `.expect()` in production code
     UnwrapInProduction,
     /// Missing documentation
     MissingDocs,

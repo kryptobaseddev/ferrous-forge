@@ -184,7 +184,7 @@ pub enum PluginError {
     .to_string()
 }
 
-/// examples/example_plugin.rs content for example plugin
+/// `examples/example_plugin.rs` content for example plugin
 pub fn plugin_example_content() -> String {
     r#"//! Example plugin implementation
 

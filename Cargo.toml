@@ -1,6 +1,6 @@
 [package]
 name = "ferrous-forge"
-version = "1.6.0"
+version = "1.7.0"
 edition = "2024"
 rust-version = "1.88"
 authors = ["Ferrous Forge Contributors"]
@@ -136,7 +136,13 @@ todo = "deny"
 
 # Allow these specific pedantic lints
 module_name_repetitions = "allow"
-missing_errors_doc = "allow"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+empty_docs = "warn"
+doc_markdown = "warn"
+needless_doctest_main = "warn"
+suspicious_doc_comments = "warn"
+too_long_first_doc_paragraph = "warn"
 multiple_crate_versions = "allow"  # This is normal with transitive dependencies
 uninlined_format_args = "allow"  # Personal preference, both styles are fine
 format_push_string = "allow"  # format! in tests is fine
@@ -154,6 +160,9 @@ private_doc_tests = "allow"
 invalid_codeblock_attributes = "deny"
 invalid_rust_codeblocks = "deny"
 bare_urls = "warn"
+invalid_html_tags = "deny"
+redundant_explicit_links = "warn"
+unescaped_backticks = "warn"
 
 [[bin]]
 name = "ferrous-forge"

@@ -4,6 +4,11 @@ use crate::{Result, config::Config};
 use console::style;
 
 /// Execute the system-wide init command
+///
+/// # Errors
+///
+/// Returns an error if the configuration cannot be loaded, directories
+/// cannot be created, or system integration files fail to install.
 pub async fn execute(force: bool) -> Result<()> {
     println!(
         "{}",
@@ -24,8 +29,13 @@ pub async fn execute(force: bool) -> Result<()> {
 /// Execute the project-level init command (`ferrous-forge init --project`)
 ///
 /// Writes project-level tooling files into the current directory:
-/// rustfmt.toml, clippy.toml, .vscode/settings.json, Cargo.toml [lints],
+/// rustfmt.toml, clippy.toml, .vscode/settings.json, `Cargo.toml` `[lints]`,
 /// docs scaffold, .github/workflows/ci.yml, and git hooks.
+///
+/// # Errors
+///
+/// Returns an error if the current directory cannot be determined, no
+/// `Cargo.toml` is found, or any tooling file fails to write.
 pub async fn execute_project() -> Result<()> {
     println!(
         "{}",

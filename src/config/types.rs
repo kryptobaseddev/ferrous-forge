@@ -44,6 +44,13 @@ pub struct CustomRule {
     pub enabled: bool,
 }
 
+/// # Examples
+///
+/// ```rust
+/// # use ferrous_forge::Config;
+/// let config = Config::default();
+/// assert_eq!(config.required_edition, "2024");
+/// ```
 impl Default for Config {
     fn default() -> Self {
         Self {

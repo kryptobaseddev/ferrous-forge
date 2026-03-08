@@ -4,6 +4,10 @@ use crate::{Result, config::Config};
 use console::style;
 
 /// Execute the status command
+///
+/// # Errors
+///
+/// Returns an error if the configuration cannot be loaded.
 pub async fn execute() -> Result<()> {
     println!("{}", style("🔨 Ferrous Forge Status").bold().cyan());
     println!();

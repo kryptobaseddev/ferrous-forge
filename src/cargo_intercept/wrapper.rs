@@ -4,6 +4,10 @@ use crate::{Error, Result};
 use std::path::Path;
 
 /// Create wrapper script for cargo publish
+///
+/// # Errors
+///
+/// Returns an error if writing the wrapper script or setting file permissions fails.
 pub fn create_publish_wrapper(install_path: &Path) -> Result<()> {
     let wrapper_content = include_str!("../../templates/cargo-publish-wrapper.sh");
 
@@ -31,6 +35,11 @@ pub fn create_publish_wrapper(install_path: &Path) -> Result<()> {
 }
 
 /// Install cargo interception system
+///
+/// # Errors
+///
+/// Returns an error if the home directory cannot be determined, the install
+/// directory cannot be created, or the wrapper script cannot be written.
 pub fn install_cargo_intercept() -> Result<()> {
     let install_dir = dirs::home_dir()
         .ok_or_else(|| Error::config("Unable to determine home directory"))?

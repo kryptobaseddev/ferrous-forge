@@ -27,6 +27,11 @@ struct GitHubReleases {
 }
 
 /// Fetch update information from GitHub releases
+///
+/// # Errors
+///
+/// Returns an error if the GitHub API request fails or the response
+/// cannot be parsed.
 pub async fn fetch_update_info(
     current_version: &Version,
     channel: &UpdateChannel,

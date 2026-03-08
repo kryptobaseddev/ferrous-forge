@@ -30,6 +30,10 @@ impl Config {
     }
 
     /// Set a configuration value by key
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the key is unknown or the value is invalid for the key's type.
     pub fn set(&mut self, key: &str, value: &str) -> Result<()> {
         match key {
             "update_channel" => self.set_update_channel(value)?,

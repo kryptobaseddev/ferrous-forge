@@ -11,14 +11,18 @@ pub struct ValidationPatterns {
     pub underscore_param: Regex,
     /// Pattern for detecting underscore in let bindings
     pub underscore_let: Regex,
-    /// Pattern for detecting unwrap() calls
+    /// Pattern for detecting `unwrap()` calls
     pub unwrap_call: Regex,
-    /// Pattern for detecting expect() calls
+    /// Pattern for detecting `expect()` calls
     pub expect_call: Regex,
 }
 
 impl ValidationPatterns {
     /// Create and compile all validation patterns
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if any regex pattern fails to compile.
     pub fn new() -> Result<Self> {
         Ok(Self {
             function_def: Regex::new(r"^\s*(pub\s+)?(async\s+)?fn\s+")

@@ -26,6 +26,10 @@ impl SafetyCheck for AuditCheck {
 }
 
 /// Run cargo audit
+///
+/// # Errors
+///
+/// Returns an error if the `cargo audit` command fails to execute.
 pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Audit);

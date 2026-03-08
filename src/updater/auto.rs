@@ -4,6 +4,11 @@ use super::types::{UpdateChannel, UpdateManager};
 use crate::{Result, config::Config};
 
 /// Check for automatic updates based on configuration
+///
+/// # Errors
+///
+/// Returns an error if the configuration cannot be loaded, the update channel is
+/// invalid, or the update check/download fails.
 pub async fn check_auto_update() -> Result<()> {
     let config = Config::load_or_default().await?;
 

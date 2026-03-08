@@ -4,7 +4,7 @@
 //! - Underscore bandaid parameters (_unused, _param naming)
 //! - Function size (config-driven, tracked via brace depth)
 //!
-//! NOTE: Line length is owned by rustfmt (max_width). Unwrap/expect are owned by
+//! NOTE: Line length is owned by rustfmt (`max_width`). Unwrap/expect are owned by
 //! clippy lints injected via `ferrous-forge init --project`. This module does NOT
 //! duplicate those checks.
 

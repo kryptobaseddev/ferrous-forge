@@ -5,6 +5,11 @@ use console::style;
 use std::io::{self, Write};
 
 /// Execute the uninstall command
+///
+/// # Errors
+///
+/// Returns an error if user confirmation fails to read, or if any
+/// uninstall step (removing files, shell integration) fails.
 pub async fn execute(confirm: bool) -> Result<()> {
     if !confirm && !get_user_confirmation()? {
         println!("Uninstall cancelled.");

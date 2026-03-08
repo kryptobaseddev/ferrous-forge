@@ -33,11 +33,19 @@ pub struct RustValidator {
 
 impl RustValidator {
     /// Create a new validator with default configuration
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the validation regex patterns fail to compile.
     pub fn new(project_root: PathBuf) -> Result<Self> {
         Self::with_config(project_root, Config::default())
     }
 
     /// Create a new validator with explicit configuration
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the validation regex patterns fail to compile.
     pub fn with_config(project_root: PathBuf, config: Config) -> Result<Self> {
         let patterns = ValidationPatterns::new()?;
         Ok(Self {
@@ -53,6 +61,11 @@ impl RustValidator {
     }
 
     /// Validate all Rust code in the project
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if files cannot be read, the Rust compiler version
+    /// cannot be determined, or `Cargo.toml` files cannot be parsed.
     pub async fn validate_project(&self) -> Result<Vec<Violation>> {
         let mut violations = Vec::new();
 
@@ -159,6 +172,10 @@ impl RustValidator {
     }
 
     /// Run clippy with strict configuration
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the clippy command fails to execute.
     pub async fn run_clippy(&self) -> Result<ClippyResult> {
         let output = Command::new("cargo")
             .args(&[
@@ -232,7 +249,7 @@ impl RustValidator {
         Ok(())
     }
 
-    /// Parse the minor version number from the required_rust_version string
+    /// Parse the minor version number from the `required_rust_version` string
     fn parse_required_minor(&self) -> u32 {
         let parts: Vec<&str> = self.config.required_rust_version.split('.').collect();
         if parts.len() >= 2 {

@@ -118,6 +118,10 @@ async fn check_test_coverage(project_path: &Path) {
 }
 
 /// Run clippy validation
+///
+/// # Errors
+///
+/// Returns an error if clippy fails to execute.
 pub async fn run_clippy_validation(
     validator: &RustValidator,
 ) -> Result<crate::validation::ClippyResult> {

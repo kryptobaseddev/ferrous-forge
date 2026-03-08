@@ -33,6 +33,10 @@ impl TemplateEngine {
     }
 
     /// Set a variable value
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Validation`] if the value does not match the variable's pattern.
     pub fn set_variable(&mut self, name: String, value: String) -> Result<()> {
         // Validate against pattern if specified
         if let Some(var_def) = self.manifest.variables.iter().find(|v| v.name == name) {
@@ -62,6 +66,10 @@ impl TemplateEngine {
     }
 
     /// Set multiple variables at once
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Validation`] if any value does not match its variable's pattern.
     pub fn set_variables(&mut self, vars: HashMap<String, String>) -> Result<()> {
         for (name, value) in vars {
             self.set_variable(name, value)?;
@@ -70,6 +78,11 @@ impl TemplateEngine {
     }
 
     /// Generate project from template
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Validation`] if required variables are missing or the target
+    /// directory already exists. Returns [`Error::Process`] if post-generation commands fail.
     pub fn generate(&self, target_dir: &Path) -> Result<()> {
         // Validate all required variables are set
         self.validate_variables()?;

@@ -24,6 +24,10 @@ impl AIAnalyzer {
     }
 
     /// Analyze violations and generate report
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if reading source files or analyzing project patterns fails.
     pub fn analyze_violations(&self, violations: Vec<Violation>) -> Result<AIAnalysisReport> {
         let mut violation_analyses = Vec::new();
         let mut analyzable_count = 0;
@@ -95,7 +99,7 @@ impl AIAnalyzer {
         })
     }
 
-    /// Build a ViolationAnalysis for locked settings (edition, rust-version)
+    /// Build a [`ViolationAnalysis`] for locked settings (edition, rust-version)
     fn build_locked_analysis(&self, violation: &Violation) -> ViolationAnalysis {
         ViolationAnalysis {
             violation: violation.clone(),
@@ -260,7 +264,11 @@ impl AIAnalyzer {
         Ok(identify_code_patterns(&all_content))
     }
 
-    /// Async version of analyze_violations
+    /// Async version of [`analyze_violations`](Self::analyze_violations)
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if reading source files or analyzing project patterns fails.
     pub async fn analyze_violations_async(
         &self,
         violations: Vec<Violation>,
@@ -269,6 +277,11 @@ impl AIAnalyzer {
     }
 
     /// Save analysis report to disk
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if creating the analysis directory, serializing the report,
+    /// or writing files fails.
     pub fn save_analysis(&self, report: &AIAnalysisReport) -> Result<()> {
         let analysis_dir = self.project_root.join(".ferrous-forge").join("ai-analysis");
         fs::create_dir_all(&analysis_dir)?;
@@ -288,6 +301,10 @@ impl AIAnalyzer {
     }
 
     /// Save orchestrator instructions to file, including locked settings section
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if writing the instructions file fails.
     pub fn save_orchestrator_instructions(&self, report: &AIAnalysisReport) -> Result<()> {
         let analysis_dir = self.project_root.join(".ferrous-forge").join("ai-analysis");
         let timestamp = Utc::now().format("%Y%m%d_%H%M%S");

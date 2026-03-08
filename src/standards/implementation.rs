@@ -5,6 +5,10 @@ use crate::Result;
 
 impl CodingStandards {
     /// Load standards from configuration
+    ///
+    /// # Errors
+    ///
+    /// Currently infallible, but returns `Result` for future configuration loading.
     pub fn load() -> Result<Self> {
         // For now, return defaults
         // TODO: Load from configuration file or remote source
@@ -12,6 +16,10 @@ impl CodingStandards {
     }
 
     /// Save standards to configuration
+    ///
+    /// # Errors
+    ///
+    /// Currently infallible, but returns `Result` for future configuration saving.
     pub fn save(&self) -> Result<()> {
         // TODO: Save to configuration file
         Ok(())
@@ -102,6 +110,10 @@ arithmetic-side-effects-allowed = []
     }
 
     /// Check if a project complies with these standards
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if reading `Cargo.toml` fails.
     pub async fn check_compliance(&self, project_path: &std::path::Path) -> Result<Vec<String>> {
         let mut violations = Vec::new();
 

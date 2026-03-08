@@ -20,6 +20,11 @@ pub struct SafetyPipeline {
 
 impl SafetyPipeline {
     /// Create a new safety pipeline
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the safety configuration cannot be loaded or
+    /// the bypass manager fails to initialize.
     pub async fn new(project_path: impl AsRef<Path>) -> Result<Self> {
         let config = SafetyConfig::load_or_default().await?;
         let bypass_manager = BypassManager::new(&config.bypass)?;
@@ -34,6 +39,10 @@ impl SafetyPipeline {
     }
 
     /// Run safety checks for a specific stage
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if any safety check fails to execute.
     pub async fn run_checks(&self, stage: PipelineStage) -> Result<SafetyReport> {
         // Check if pipeline or stage is disabled
         if let Some(report) = self.check_disabled_pipeline(stage) {
@@ -89,6 +98,11 @@ impl SafetyPipeline {
     }
 
     /// Enforce safety checks and block operation if they fail
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if checking for an active bypass fails or if
+    /// safety checks fail to execute.
     pub async fn enforce_safety(&self, stage: PipelineStage) -> Result<SafetyResult> {
         // Check for active bypass first
         if let Some(bypass) = self.bypass_manager.check_active_bypass(stage).await? {

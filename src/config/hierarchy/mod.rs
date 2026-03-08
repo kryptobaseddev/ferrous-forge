@@ -28,6 +28,10 @@ pub struct HierarchicalConfig {
 
 impl HierarchicalConfig {
     /// Load configuration from all levels
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if reading or parsing any configuration level fails.
     pub async fn load() -> Result<Self> {
         let system = PartialConfig::load_from_level(ConfigLevel::System).await?;
         let user = PartialConfig::load_from_level(ConfigLevel::User).await?;
@@ -59,6 +63,11 @@ impl HierarchicalConfig {
     }
 
     /// Save configuration at a specific level
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if serializing the config, creating directories,
+    /// or writing the file fails.
     pub async fn save_at_level(config: &Config, level: ConfigLevel) -> Result<()> {
         let path = level.path()?;
 
@@ -114,6 +123,11 @@ impl HierarchicalConfig {
 }
 
 /// Migrate from old single-file config to hierarchical system
+///
+/// # Errors
+///
+/// Returns an error if reading the old config, parsing it, saving the migrated
+/// config, or renaming the backup file fails.
 pub async fn migrate_config() -> Result<()> {
     let old_path = Config::config_file_path()?;
 

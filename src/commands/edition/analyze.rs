@@ -7,6 +7,10 @@ use indicatif::{ProgressBar, ProgressStyle};
 use std::path::Path;
 
 /// Handle edition analyze command
+///
+/// # Errors
+///
+/// Returns an error if the edition string is invalid or the analysis fails.
 pub async fn handle_analyze(path: &Path, edition_str: &str) -> Result<()> {
     let target_edition = Edition::parse_edition(edition_str)?;
 

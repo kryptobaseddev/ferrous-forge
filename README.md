@@ -29,6 +29,10 @@ This is as much about my **Rust learning journey** as it is about building somet
 
 ---
 
+<!-- cargo-rdme start -->
+
+<!-- cargo-rdme end -->
+
 Ferrous Forge is a **system-wide Rust development standards enforcer** that automatically applies professional-grade coding standards to **every** Rust project on your machine. No more inconsistent code, no more forgotten lint rules, no more `_parameter` bandaids.
 
 ## ✨ Features

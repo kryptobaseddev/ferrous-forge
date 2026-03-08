@@ -26,6 +26,10 @@ impl SafetyCheck for FormatCheck {
 }
 
 /// Run cargo fmt --check
+///
+/// # Errors
+///
+/// Returns an error if the `cargo fmt --check` command fails to execute.
 pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Format);

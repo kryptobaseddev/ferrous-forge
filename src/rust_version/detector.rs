@@ -29,6 +29,11 @@ pub struct RustVersion {
 
 impl RustVersion {
     /// Parse rustc version output
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the version output does not match the expected
+    /// `rustc` format or the version string cannot be parsed.
     pub fn parse(version_output: &str) -> Result<Self> {
         // Example: rustc 1.90.0 (4b06a43a1 2025-08-07)
         let regex = Regex::new(
@@ -66,6 +71,11 @@ impl std::fmt::Display for RustVersion {
 }
 
 /// Detect the currently installed Rust version
+///
+/// # Errors
+///
+/// Returns an error if `rustc` is not found on the system path or its
+/// version output cannot be parsed.
 pub fn detect_rust_version() -> Result<RustVersion> {
     // Check if rustc is available
     let rustc_path = which::which("rustc").map_err(|_| {
@@ -119,6 +129,11 @@ fn detect_host() -> String {
 }
 
 /// Get installed toolchains via rustup
+///
+/// # Errors
+///
+/// Returns an error if `rustup` is not found or the `toolchain list`
+/// command fails.
 pub fn get_installed_toolchains() -> Result<Vec<String>> {
     let rustup_path =
         which::which("rustup").map_err(|_| Error::rust_not_found("rustup not found"))?;
@@ -151,6 +166,11 @@ pub fn is_rustup_available() -> bool {
 }
 
 /// Get the active toolchain
+///
+/// # Errors
+///
+/// Returns an error if `rustup` is not found or the `show active-toolchain`
+/// command fails.
 pub fn get_active_toolchain() -> Result<String> {
     let rustup_path =
         which::which("rustup").map_err(|_| Error::rust_not_found("rustup not found"))?;

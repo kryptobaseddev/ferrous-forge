@@ -5,8 +5,12 @@ use crate::validation::{Severity, Violation, ViolationType};
 use std::path::Path;
 use tokio::fs;
 
-/// Validates a Cargo.toml file for standards compliance (reads file itself).
+/// Validates a `Cargo.toml` file for standards compliance (reads file itself).
 /// Used by tests and legacy callers.
+///
+/// # Errors
+///
+/// Returns an error if the file cannot be read.
 pub async fn validate_cargo_toml(
     cargo_file: &Path,
     violations: &mut Vec<Violation>,
@@ -15,12 +19,18 @@ pub async fn validate_cargo_toml(
 ) -> Result<()> {
     let content = fs::read_to_string(cargo_file).await?;
     let lines: Vec<&str> = content.lines().collect();
-    validate_cargo_toml_content(cargo_file, &lines, violations, required_edition, required_rust_version);
+    validate_cargo_toml_content(
+        cargo_file,
+        &lines,
+        violations,
+        required_edition,
+        required_rust_version,
+    );
     Ok(())
 }
 
-/// Validates Cargo.toml content that has already been read into lines.
-/// Used by file_checks.rs to avoid double file reads.
+/// Validates `Cargo.toml` content that has already been read into lines.
+/// Used by `file_checks.rs` to avoid double file reads.
 pub fn validate_cargo_toml_content(
     cargo_file: &Path,
     lines: &[&str],

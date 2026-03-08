@@ -9,6 +9,11 @@ use console::style;
 use std::path::Path;
 
 /// Handle safety install command
+///
+/// # Errors
+///
+/// Returns an error if the project path is not a git repository, the hooks
+/// directory cannot be created, or any hook file fails to write.
 pub async fn handle_install(force: bool, project_path: &Path, install_cargo: bool) -> Result<()> {
     hooks::display_install_header();
     let hooks_dir = hooks::validate_git_repo_and_create_hooks_dir(project_path)?;
@@ -26,6 +31,11 @@ pub async fn handle_install(force: bool, project_path: &Path, install_cargo: boo
 }
 
 /// Handle safety check command
+///
+/// # Errors
+///
+/// Returns an error if the stage string cannot be parsed, the safety pipeline
+/// fails to initialize, or the checks fail to run.
 pub async fn handle_check(stage_str: &str, project_path: &Path, verbose: bool) -> Result<()> {
     let stage = stage_str.parse::<PipelineStage>()?;
 
@@ -62,6 +72,10 @@ pub async fn handle_check(stage_str: &str, project_path: &Path, verbose: bool) -
 }
 
 /// Handle safety status command
+///
+/// # Errors
+///
+/// Returns an error if the safety configuration cannot be loaded.
 pub async fn handle_status() -> Result<()> {
     status::display_status_header();
     status::display_safety_configuration().await;
@@ -70,6 +84,10 @@ pub async fn handle_status() -> Result<()> {
 }
 
 /// Test individual safety checks
+///
+/// # Errors
+///
+/// Returns an error if any safety check fails to execute.
 pub async fn test_individual_checks(project_path: &Path) -> Result<()> {
     crate::safety::checks::test_runner::test_safety_checks(project_path).await
 }

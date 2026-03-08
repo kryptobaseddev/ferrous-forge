@@ -85,6 +85,11 @@ pub struct FixInstruction {
 }
 
 /// Generate AI-friendly compliance report
+///
+/// # Errors
+///
+/// Returns an error if the reports directory cannot be created, the compliance
+/// calculation fails, or the report files cannot be written.
 pub async fn generate_ai_report(project_path: &PathBuf, violations: &[Violation]) -> Result<()> {
     let timestamp = chrono::Utc::now();
     let reports_dir = setup_reports_directory(project_path).await?;

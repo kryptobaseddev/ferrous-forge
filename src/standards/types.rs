@@ -70,9 +70,9 @@ pub struct DocumentationStandards {
 /// Banned patterns and practices
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BannedPatterns {
-    /// Ban unwrap() in production code
+    /// Ban `unwrap()` in production code
     pub ban_unwrap: bool,
-    /// Ban expect() in production code
+    /// Ban `expect()` in production code
     pub ban_expect: bool,
     /// Ban panic!() in production code
     pub ban_panic: bool,

@@ -26,6 +26,10 @@ impl SafetyCheck for ClippyCheck {
 }
 
 /// Run cargo clippy with strict warnings
+///
+/// # Errors
+///
+/// Returns an error if the clippy command fails to execute.
 pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Clippy);

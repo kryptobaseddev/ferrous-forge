@@ -4,6 +4,10 @@ use crate::Result;
 use console::style;
 
 /// Execute the update command
+///
+/// # Errors
+///
+/// Returns an error if the binary or rules update process fails.
 pub async fn execute(channel: String, rules_only: bool, dry_run: bool) -> Result<()> {
     if dry_run {
         println!(

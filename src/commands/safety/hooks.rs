@@ -11,6 +11,11 @@ pub fn display_install_header() {
 }
 
 /// Validate git repository and create hooks directory
+///
+/// # Errors
+///
+/// Returns an error if the project path is not a git repository or the
+/// hooks directory cannot be created.
 pub fn validate_git_repo_and_create_hooks_dir(project_path: &Path) -> Result<std::path::PathBuf> {
     let git_dir = project_path.join(".git");
     if !git_dir.exists() {
@@ -25,6 +30,11 @@ pub fn validate_git_repo_and_create_hooks_dir(project_path: &Path) -> Result<std
 }
 
 /// Install pre-commit hook
+///
+/// # Errors
+///
+/// Returns an error if the hook file cannot be written or permissions
+/// cannot be set.
 pub fn install_pre_commit_hook(hooks_dir: &Path, force: bool) -> Result<()> {
     let pre_commit_path = hooks_dir.join("pre-commit");
 
@@ -40,6 +50,11 @@ pub fn install_pre_commit_hook(hooks_dir: &Path, force: bool) -> Result<()> {
 }
 
 /// Install pre-push hook
+///
+/// # Errors
+///
+/// Returns an error if the hook file cannot be written or permissions
+/// cannot be set.
 pub fn install_pre_push_hook(hooks_dir: &Path, force: bool) -> Result<()> {
     let pre_push_path = hooks_dir.join("pre-push");
 
@@ -55,6 +70,11 @@ pub fn install_pre_push_hook(hooks_dir: &Path, force: bool) -> Result<()> {
 }
 
 /// Install cargo interception system
+///
+/// # Errors
+///
+/// Returns an error if the home directory cannot be determined, the install
+/// directory cannot be created, or the wrapper script fails to write.
 pub fn install_cargo_interception(force: bool) -> Result<()> {
     let home_dir = dirs::home_dir()
         .ok_or_else(|| crate::Error::Config("Unable to determine home directory".into()))?;

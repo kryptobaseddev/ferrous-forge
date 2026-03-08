@@ -26,6 +26,10 @@ impl CoverageAnalyzer {
     }
 
     /// Check if cargo-tarpaulin is installed
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the `cargo` command cannot be executed.
     pub fn check_tarpaulin_installed(&self) -> Result<bool> {
         let output = Command::new("cargo")
             .args(["tarpaulin", "--version"])
@@ -38,6 +42,11 @@ impl CoverageAnalyzer {
     }
 
     /// Install cargo-tarpaulin if not already installed
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `cargo install` fails to run or the installation
+    /// process exits with a non-zero status.
     pub async fn install_tarpaulin(&self) -> Result<()> {
         if self.check_tarpaulin_installed()? {
             tracing::info!("cargo-tarpaulin already installed");
@@ -64,6 +73,11 @@ impl CoverageAnalyzer {
     }
 
     /// Run test coverage analysis
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `cargo-tarpaulin` is not installed, the tarpaulin
+    /// command fails, or the output cannot be parsed.
     pub async fn run_coverage(&self, project_path: &Path) -> Result<CoverageReport> {
         if !self.check_tarpaulin_installed()? {
             return Err(Error::validation(
@@ -135,23 +149,36 @@ impl CoverageAnalyzer {
 
     /// Run tarpaulin and get coverage report
     ///
-    /// This is a convenience wrapper around run_coverage that's more explicit
+    /// This is a convenience wrapper around `run_coverage` that's more explicit
     /// about running tarpaulin
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `cargo-tarpaulin` is not installed or the coverage
+    /// run fails.
     pub async fn run_tarpaulin(&self, project_path: &Path) -> Result<CoverageReport> {
         self.run_coverage(project_path).await
     }
 
     /// Parse a coverage report from tarpaulin output
     ///
-    /// Parses the JSON output from cargo-tarpaulin and converts it to our
-    /// CoverageReport format
+    /// Parses the JSON output from `cargo-tarpaulin` and converts it to our
+    /// `CoverageReport` format
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the JSON output cannot be parsed.
     pub fn parse_coverage_report(&self, tarpaulin_output: &str) -> Result<CoverageReport> {
         self.parse_tarpaulin_output(tarpaulin_output)
     }
 
     /// Enforce minimum coverage threshold
     ///
-    /// Returns an error if the coverage is below the specified threshold
+    /// Returns an error if the coverage is below the specified threshold.
+    ///
+    /// # Errors
+    ///
+    /// Returns a validation error if `report.line_coverage` is below `threshold`.
     pub fn enforce_minimum_coverage(&self, report: &CoverageReport, threshold: f64) -> Result<()> {
         if report.line_coverage < threshold {
             return Err(Error::validation(format!(

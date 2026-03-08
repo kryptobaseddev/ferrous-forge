@@ -6,6 +6,11 @@ use std::path::Path;
 use tokio::fs;
 
 /// Install git hooks for a project
+///
+/// # Errors
+///
+/// Returns [`Error::Validation`] if the path is not a git repository.
+/// Returns [`Error::Process`] if hook files cannot be written.
 pub async fn install_git_hooks(project_path: &Path) -> Result<()> {
     // Check if we're in a git repository
     let git_dir = project_path.join(".git");
@@ -100,6 +105,10 @@ async fn install_hook(hooks_dir: &Path, name: &str, content: &str) -> Result<()>
 }
 
 /// Remove git hooks from a project
+///
+/// # Errors
+///
+/// Returns [`Error::Process`] if hook files cannot be removed or backups cannot be restored.
 pub async fn uninstall_git_hooks(project_path: &Path) -> Result<()> {
     let git_dir = project_path.join(".git");
     if !git_dir.exists() {

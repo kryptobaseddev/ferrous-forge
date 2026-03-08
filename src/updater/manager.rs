@@ -12,6 +12,11 @@ use tokio::fs;
 
 impl UpdateManager {
     /// Create a new update manager
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the current package version cannot be parsed or
+    /// the current executable path cannot be determined.
     pub fn new(channel: UpdateChannel) -> Result<Self> {
         let current_version = Version::parse(env!("CARGO_PKG_VERSION"))
             .map_err(|e| Error::config(format!("Invalid current version: {}", e)))?;
@@ -27,6 +32,11 @@ impl UpdateManager {
     }
 
     /// Check for available updates
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GitHub API request fails or the response
+    /// cannot be parsed.
     pub async fn check_for_updates(&self) -> Result<Option<UpdateInfo>> {
         println!("🔍 Checking for updates on {} channel...", self.channel);
 
@@ -34,6 +44,11 @@ impl UpdateManager {
     }
 
     /// Perform the actual update
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the download fails, hash verification fails, or
+    /// the binary cannot be replaced.
     pub async fn perform_update(&self, update_info: &UpdateInfo) -> Result<()> {
         println!(
             "📥 Downloading update {} ({})",
@@ -150,6 +165,10 @@ impl UpdateManager {
     }
 
     /// Interactive update prompt
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if stdout cannot be flushed or stdin cannot be read.
     pub async fn prompt_for_update(&self, update_info: &UpdateInfo) -> Result<bool> {
         println!();
         println!("{}", style("🆕 Update Available!").green().bold());

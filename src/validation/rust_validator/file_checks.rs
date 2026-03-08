@@ -22,6 +22,10 @@ use tokio::fs;
 pub use cargo_validation::validate_cargo_toml;
 
 /// Validates a Rust source file for standards compliance
+///
+/// # Errors
+///
+/// Returns an error if the file cannot be read or a validation check fails.
 pub async fn validate_rust_file(
     rust_file: &Path,
     violations: &mut Vec<Violation>,
@@ -46,7 +50,11 @@ pub async fn validate_rust_file(
     Ok(())
 }
 
-/// Validates a Cargo.toml file: edition/version locks + doc config
+/// Validates a `Cargo.toml` file: edition/version locks + doc config
+///
+/// # Errors
+///
+/// Returns an error if the file cannot be read or doc config validation fails.
 pub async fn validate_cargo_toml_full(
     cargo_file: &Path,
     violations: &mut Vec<Violation>,

@@ -59,7 +59,7 @@ fn extract_imports(content: &str) -> Vec<String> {
 /// Searches backwards from the violation line to find the containing function,
 /// extracting its name, signature, and return type.
 ///
-/// Returns a tuple of (function_name, function_signature, return_type)
+/// Returns a tuple of (`function_name`, `function_signature`, `return_type`)
 fn extract_function_info(
     lines: &[&str],
     line_number: usize,

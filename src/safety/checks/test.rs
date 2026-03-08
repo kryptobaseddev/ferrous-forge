@@ -26,6 +26,10 @@ impl SafetyCheck for TestCheck {
 }
 
 /// Run cargo test --all-targets --all-features
+///
+/// # Errors
+///
+/// Returns an error if the `cargo test` command fails to execute.
 pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Test);

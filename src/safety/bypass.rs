@@ -45,6 +45,10 @@ pub struct BypassLogEntry {
 
 impl BypassManager {
     /// Create a new bypass manager
+    ///
+    /// # Errors
+    ///
+    /// This function is infallible but returns `Result` for future extensibility.
     pub fn new(config: &BypassConfig) -> Result<Self> {
         Ok(Self {
             config: config.clone(),
@@ -57,6 +61,12 @@ impl BypassManager {
     }
 
     /// Create a temporary bypass
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the bypass system is disabled, the reason is empty
+    /// when required, the daily bypass limit is reached, or the bypass cannot
+    /// be saved to disk.
     pub async fn create_bypass(
         &self,
         stage: PipelineStage,
@@ -103,6 +113,10 @@ impl BypassManager {
     }
 
     /// Check for active bypass
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the bypass file cannot be read or parsed.
     pub async fn check_active_bypass(&self, stage: PipelineStage) -> Result<Option<ActiveBypass>> {
         if !self.config.enabled {
             return Ok(None);
@@ -131,6 +145,11 @@ impl BypassManager {
     }
 
     /// Remove an active bypass
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the bypass file path cannot be resolved or
+    /// the file cannot be deleted.
     pub async fn remove_bypass(&self, stage: PipelineStage) -> Result<()> {
         let bypass_path = self.get_active_bypass_path(stage)?;
 
@@ -142,6 +161,11 @@ impl BypassManager {
     }
 
     /// Get bypass audit log
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the audit log path cannot be resolved or the
+    /// log file cannot be read.
     pub async fn get_audit_log(&self, limit: usize) -> Result<Vec<BypassLogEntry>> {
         let log_path = self.get_audit_log_path()?;
 

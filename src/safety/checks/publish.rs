@@ -26,6 +26,10 @@ impl SafetyCheck for PublishCheck {
 }
 
 /// Run cargo publish --dry-run
+///
+/// # Errors
+///
+/// Returns an error if the `cargo publish --dry-run` command fails to execute.
 pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::PublishDryRun);

@@ -18,6 +18,11 @@ use crate::validation::Violation;
 use std::path::Path;
 
 /// Legacy async API for backwards compatibility
+///
+/// # Errors
+///
+/// Returns an error if the AI analysis fails to process the violations
+/// or encounters issues reading project files.
 pub async fn analyze_violations_for_ai(
     violations: &[Violation],
     project_path: &Path,
@@ -27,6 +32,11 @@ pub async fn analyze_violations_for_ai(
 }
 
 /// Analyze violations and generate a comprehensive report
+///
+/// # Errors
+///
+/// Returns an error if analysis fails, the report cannot be saved to disk,
+/// or orchestrator instruction generation fails.
 pub async fn analyze_and_generate_report(
     project_path: &Path,
     violations: &[Violation],
@@ -47,6 +57,10 @@ pub async fn analyze_and_generate_report(
 }
 
 /// Generate orchestrator instructions from analysis report
+///
+/// # Errors
+///
+/// Returns an error if instruction generation fails.
 pub async fn generate_orchestrator_instructions(
     report: &AIAnalysisReport,
 ) -> anyhow::Result<AIAnalysisReport> {

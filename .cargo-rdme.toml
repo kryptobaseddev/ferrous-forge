@@ -1,0 +1,5 @@
+# cargo-rdme configuration
+# Syncs crate-level rustdoc (src/lib.rs //! comments) into README.md
+
+[rustdoc]
+# Use the default lib.rs target

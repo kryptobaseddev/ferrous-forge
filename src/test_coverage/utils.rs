@@ -53,6 +53,11 @@ pub struct FunctionStats {
 }
 
 /// Parse tarpaulin JSON output
+///
+/// # Errors
+///
+/// Returns an error if the output string is not valid JSON or does not
+/// match the expected tarpaulin format.
 pub fn parse_tarpaulin_json(output: &str) -> Result<TarpaulinOutput> {
     serde_json::from_str(output)
         .map_err(|e| Error::process(format!("Failed to parse tarpaulin output: {}", e)))

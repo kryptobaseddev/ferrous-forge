@@ -16,6 +16,21 @@
 //!
 //! ## Quick Start
 //!
+//! ```rust,no_run
+//! use ferrous_forge::{Config, Result};
+//!
+//! #[tokio::main]
+//! async fn main() -> Result<()> {
+//!     // Load or create default configuration
+//!     let config = Config::load_or_default().await?;
+//!     println!("Ferrous Forge v{}", ferrous_forge::VERSION);
+//!     println!("Required edition: {}", config.required_edition);
+//!     Ok(())
+//! }
+//! ```
+//!
+//! ### CLI Usage
+//!
 //! ```bash
 //! cargo install ferrous-forge
 //! ferrous-forge init
@@ -24,13 +39,34 @@
 //!
 //! ## Modules
 //!
-//! - [`cli`] - Command line interface definitions
-//! - [`commands`] - Command implementations
-//! - [`config`] - Configuration management
-//! - [`standards`] - Standards definitions and enforcement
-//! - [`templates`] - Project template system
-//! - [`validation`] - Code validation and linting
-//! - [`updater`] - Self-update and version management
+//! ### Core
+//! - [`cli`] — Command line interface definitions and argument parsing
+//! - [`commands`] — Implementation of all Ferrous Forge commands
+//! - [`config`] — Configuration management and hierarchical config system
+//! - [`error`] — Error types and result handling
+//!
+//! ### Standards & Validation
+//! - [`standards`] — Development standards definitions and enforcement
+//! - [`validation`] — Core validation logic and rule enforcement
+//! - [`safety`] — Safety pipeline and enforcement mechanisms
+//! - [`formatting`] — Code formatting enforcement and validation
+//!
+//! ### Rust Ecosystem
+//! - [`edition`] — Rust edition management and upgrade assistance
+//! - [`rust_version`] — Rust version checking and compatibility validation
+//! - [`doc_coverage`] — Documentation coverage checking and reporting
+//! - [`security`] — Security auditing and vulnerability scanning
+//! - [`test_coverage`] — Test coverage integration and reporting
+//!
+//! ### Tooling
+//! - [`templates`] — Project template system and built-in templates
+//! - [`git_hooks`] — Git hooks installation and management
+//! - [`cargo_intercept`] — Cargo command interception for publish validation
+//! - [`updater`] — Self-update functionality and version management
+//!
+//! ### Analysis
+//! - [`ai_analyzer`] — AI-powered violation analysis and fix suggestions
+//! - [`performance`] — Performance optimizations for validation
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]

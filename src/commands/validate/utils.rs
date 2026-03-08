@@ -17,6 +17,10 @@ pub fn count_violations_by_type(violations: &[Violation]) -> HashMap<String, usi
 }
 
 /// Get code snippet from a file at specific line
+///
+/// # Errors
+///
+/// Returns an error if the file cannot be read.
 pub async fn get_code_snippet(file_path: &PathBuf, line: usize) -> Result<String> {
     if !file_path.exists() {
         return Ok("File not found".to_string());
@@ -33,6 +37,10 @@ pub async fn get_code_snippet(file_path: &PathBuf, line: usize) -> Result<String
 }
 
 /// Count Rust files in a directory
+///
+/// # Errors
+///
+/// Returns an error if the directory cannot be read.
 pub async fn count_rust_files(project_path: &PathBuf) -> Result<usize> {
     let mut count = 0;
     let mut entries = fs::read_dir(project_path).await?;
@@ -46,6 +54,10 @@ pub async fn count_rust_files(project_path: &PathBuf) -> Result<usize> {
 }
 
 /// Calculate compliance percentage
+///
+/// # Errors
+///
+/// Returns an error if the Rust files in the project directory cannot be counted.
 pub async fn calculate_compliance(project_path: &PathBuf, violations: &[Violation]) -> Result<f64> {
     let total_files = count_rust_files(project_path).await?;
     let files_with_violations = violations

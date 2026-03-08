@@ -40,7 +40,7 @@ fn fix_unwrap_in_line(line: &str, violation: &Violation, context: &FileContext) 
     }
 }
 
-/// Fix .unwrap() calls in a line
+/// Fix `.unwrap()` calls in a line
 #[allow(dead_code)]
 fn fix_unwrap_call(line: &str, context: &FileContext) -> FixResult {
     // Don't fix if it's in a string literal
@@ -67,7 +67,7 @@ fn fix_unwrap_call(line: &str, context: &FileContext) -> FixResult {
     }
 }
 
-/// Fix .expect() calls in a line
+/// Fix `.expect()` calls in a line
 #[allow(dead_code)]
 fn fix_expect_call(line: &str, context: &FileContext) -> FixResult {
     // For expect, we can potentially replace with ? if the context allows
@@ -89,7 +89,7 @@ fn fix_expect_call(line: &str, context: &FileContext) -> FixResult {
     }
 }
 
-/// Replace .expect() call with ? operator at the given position
+/// Replace `.expect()` call with `?` operator at the given position
 #[allow(dead_code)]
 fn replace_expect_with_question_mark(line: &str, start: usize) -> Option<String> {
     let before = &line[..start];
@@ -101,7 +101,7 @@ fn replace_expect_with_question_mark(line: &str, start: usize) -> Option<String>
     })
 }
 
-/// Find the matching closing parenthesis for an .expect() call
+/// Find the matching closing parenthesis for an `.expect()` call
 #[allow(dead_code)]
 fn find_matching_paren(text: &str) -> Option<usize> {
     let mut paren_count = 1;

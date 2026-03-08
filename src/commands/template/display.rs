@@ -6,6 +6,10 @@ use console::style;
 use std::path::Path;
 
 /// Show detailed information about a template
+///
+/// # Errors
+///
+/// Returns an error if the template is not found in the registry.
 pub async fn show_template_info(template_name: &str) -> Result<()> {
     let registry = TemplateRegistry::new();
     let template = registry
@@ -22,6 +26,11 @@ pub async fn show_template_info(template_name: &str) -> Result<()> {
 }
 
 /// Validate a template manifest
+///
+/// # Errors
+///
+/// Returns an error if the manifest file cannot be read or contains
+/// invalid TOML.
 pub async fn validate_template_manifest(manifest_path: &Path) -> Result<()> {
     let content = tokio::fs::read_to_string(manifest_path)
         .await

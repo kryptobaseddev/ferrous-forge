@@ -5,6 +5,11 @@ use crate::config::{Config, HierarchicalConfig};
 use console::style;
 
 /// Execute the config command
+///
+/// # Errors
+///
+/// Returns an error if the configuration cannot be loaded, saved, or if
+/// an invalid key or value is provided.
 pub async fn execute(
     set: Option<String>,
     get: Option<String>,
@@ -118,6 +123,10 @@ fn show_help() {
 }
 
 /// Show configuration sources
+///
+/// # Errors
+///
+/// Returns an error if the hierarchical configuration cannot be loaded.
 pub async fn show_sources() -> Result<()> {
     println!("{}", style("🔍 Configuration Hierarchy").bold().cyan());
     println!();
@@ -129,6 +138,10 @@ pub async fn show_sources() -> Result<()> {
 }
 
 /// Migrate old configuration to hierarchical system
+///
+/// # Errors
+///
+/// Returns an error if the configuration migration fails.
 pub async fn migrate_config() -> Result<()> {
     println!("{}", style("📦 Migrating configuration...").bold().cyan());
 

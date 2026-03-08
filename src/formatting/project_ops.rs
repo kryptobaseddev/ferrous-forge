@@ -8,6 +8,10 @@ use std::process::Command;
 use tokio::fs;
 
 /// Check formatting for entire project
+///
+/// # Errors
+///
+/// Returns [`Error::Process`] if `cargo fmt` fails to execute.
 pub async fn check_formatting(project_path: &Path) -> Result<FormatResult> {
     ensure_rustfmt_installed().await?;
 
@@ -32,6 +36,10 @@ pub async fn check_formatting(project_path: &Path) -> Result<FormatResult> {
 }
 
 /// Auto-format entire project
+///
+/// # Errors
+///
+/// Returns [`Error::Process`] if `cargo fmt` fails to execute.
 pub async fn auto_format(project_path: &Path) -> Result<()> {
     ensure_rustfmt_installed().await?;
 
@@ -49,6 +57,10 @@ pub async fn auto_format(project_path: &Path) -> Result<()> {
 }
 
 /// Get formatting diff for the project
+///
+/// # Errors
+///
+/// Returns [`Error::Process`] if `cargo fmt` fails to execute.
 pub async fn get_format_diff(project_path: &Path) -> Result<String> {
     ensure_rustfmt_installed().await?;
 
@@ -62,6 +74,10 @@ pub async fn get_format_diff(project_path: &Path) -> Result<String> {
 }
 
 /// Apply rustfmt configuration to project
+///
+/// # Errors
+///
+/// Returns an error if the configuration file cannot be written to disk.
 pub async fn apply_rustfmt_config(project_path: &Path) -> Result<()> {
     let config_content = r#"# Ferrous Forge rustfmt configuration
 max_width = 100

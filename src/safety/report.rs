@@ -217,6 +217,11 @@ impl SafetyReport {
     }
 
     /// Save report to file for audit trail
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the reports directory cannot be created, the
+    /// report cannot be serialized, or the file cannot be written.
     pub async fn save_to_file(&self) -> Result<()> {
         let reports_dir = crate::config::Config::config_dir_path()?.join("safety-reports");
         fs::create_dir_all(&reports_dir).await?;

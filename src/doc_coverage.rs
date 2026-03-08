@@ -64,6 +64,11 @@ impl DocCoverage {
 }
 
 /// Check documentation coverage for a Rust project
+///
+/// # Errors
+///
+/// Returns [`Error::Process`] if `cargo doc` fails to execute.
+/// Returns [`Error::Io`] if project source files cannot be read.
 pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCoverage> {
     let output = run_cargo_doc(project_path)?;
     let missing = find_missing_docs(&output)?;

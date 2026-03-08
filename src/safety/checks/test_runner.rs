@@ -6,6 +6,10 @@ use std::path::Path;
 use super::{build, clippy, format, standards};
 
 /// Run a quick test of the safety checks
+///
+/// # Errors
+///
+/// Returns an error if any safety check command fails to execute.
 pub async fn test_safety_checks(project_path: &Path) -> Result<()> {
     println!("🧪 Testing Safety Pipeline Checks");
     println!("==================================");

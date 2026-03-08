@@ -27,6 +27,10 @@ impl SafetyCheck for SemverCheck {
 }
 
 /// Check semantic versioning compliance
+///
+/// # Errors
+///
+/// Returns an error if `Cargo.toml` cannot be read or parsed.
 pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Semver);

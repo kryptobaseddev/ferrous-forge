@@ -38,6 +38,10 @@ pub struct PartialConfig {
 
 impl PartialConfig {
     /// Load partial config from a specific level
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if reading or parsing the config file fails.
     pub async fn load_from_level(level: ConfigLevel) -> Result<Option<Self>> {
         let path = level.path()?;
 

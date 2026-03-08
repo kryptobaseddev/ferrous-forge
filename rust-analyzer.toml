@@ -1,0 +1,12 @@
+[check]
+command = "clippy"
+extra_args = [
+  "--",
+  "-W", "clippy::missing_errors_doc",
+  "-W", "clippy::missing_panics_doc",
+  "-W", "clippy::empty_docs",
+  "-W", "clippy::doc_markdown",
+]
+
+[diagnostics]
+styleLints.enable = true

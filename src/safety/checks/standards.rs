@@ -25,6 +25,10 @@ impl SafetyCheck for StandardsCheck {
 }
 
 /// Run Ferrous Forge standards validation
+///
+/// # Errors
+///
+/// Returns an error if the `RustValidator` cannot be created.
 pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Standards);

@@ -95,6 +95,11 @@ impl Default for SafetyConfig {
 
 impl SafetyConfig {
     /// Load configuration from file, or return default if not found
+    ///
+    /// # Errors
+    ///
+    /// This function falls back to defaults on error and does not itself
+    /// return errors.
     pub async fn load_or_default() -> Result<Self> {
         match Self::load().await {
             Ok(config) => Ok(config),
@@ -103,6 +108,10 @@ impl SafetyConfig {
     }
 
     /// Load configuration from file
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the config file cannot be read or parsed.
     pub async fn load() -> Result<Self> {
         let config_path = Self::config_file_path()?;
         let contents = fs::read_to_string(&config_path)
@@ -116,6 +125,11 @@ impl SafetyConfig {
     }
 
     /// Save configuration to file
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the config directory cannot be created, the
+    /// configuration cannot be serialized, or the file cannot be written.
     pub async fn save(&self) -> Result<()> {
         let config_path = Self::config_file_path()?;
 
@@ -135,6 +149,10 @@ impl SafetyConfig {
     }
 
     /// Get the path to the safety configuration file
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the config directory path cannot be resolved.
     pub fn config_file_path() -> Result<PathBuf> {
         let config_dir = crate::config::Config::config_dir_path()?;
         Ok(config_dir.join("safety.toml"))
@@ -170,6 +188,11 @@ impl SafetyConfig {
     }
 
     /// Set a configuration value
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the key is unknown or the value cannot be parsed
+    /// into the expected type.
     pub fn set(&mut self, key: &str, value: &str) -> Result<()> {
         match key {
             key if key.starts_with("bypass.") => self.set_bypass_config(key, value),

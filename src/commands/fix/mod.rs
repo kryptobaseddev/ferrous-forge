@@ -20,6 +20,11 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 /// Execute the fix command
+///
+/// # Errors
+///
+/// Returns an error if the fix process encounters an I/O error or a
+/// violation cannot be applied.
 pub async fn execute(
     path: Option<PathBuf>,
     only: Option<String>,
@@ -31,6 +36,11 @@ pub async fn execute(
 }
 
 /// Execute the fix command with optional AI analysis
+///
+/// # Errors
+///
+/// Returns an error if the fix process encounters an I/O error or a
+/// violation cannot be applied.
 pub async fn execute_with_ai(
     path: Option<PathBuf>,
     only: Option<String>,

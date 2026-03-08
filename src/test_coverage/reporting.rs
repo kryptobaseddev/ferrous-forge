@@ -7,6 +7,11 @@ use std::path::Path;
 
 impl CoverageAnalyzer {
     /// Validate coverage meets minimum thresholds
+    ///
+    /// # Errors
+    ///
+    /// Returns a validation error if any coverage metric falls below its
+    /// configured minimum threshold and `fail_on_low_coverage` is enabled.
     pub fn validate_coverage(&self, report: &CoverageReport) -> Result<()> {
         let mut violations = Vec::new();
 
@@ -163,6 +168,11 @@ impl CoverageAnalyzer {
     }
 
     /// Check coverage for a project
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the coverage run fails or coverage is below
+    /// the configured minimum thresholds.
     pub async fn check_project_coverage(&self, project_path: &Path) -> Result<()> {
         println!("🧪 Checking test coverage...");
 

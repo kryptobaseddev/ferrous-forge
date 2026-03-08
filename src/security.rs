@@ -88,6 +88,11 @@ impl AuditReport {
 }
 
 /// Run security audit on a project
+///
+/// # Errors
+///
+/// Returns an error if `cargo-audit` cannot be installed, the audit command
+/// fails to execute, or the output cannot be parsed.
 pub async fn run_security_audit(project_path: &Path) -> Result<AuditReport> {
     // Ensure cargo-audit is installed
     ensure_cargo_audit_installed().await?;
@@ -222,6 +227,11 @@ fn parse_text_audit_output(output_str: &str) -> Result<AuditReport> {
 }
 
 /// Quick security check (non-blocking)
+///
+/// # Errors
+///
+/// Returns an error if the audit cannot be executed. Audit failures are
+/// treated as passing to avoid blocking the caller.
 pub async fn quick_security_check(project_path: &Path) -> Result<bool> {
     // Check if Cargo.lock exists
     let cargo_lock = project_path.join("Cargo.lock");

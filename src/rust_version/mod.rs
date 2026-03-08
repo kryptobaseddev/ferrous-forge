@@ -75,6 +75,10 @@ pub struct VersionManager {
 
 impl VersionManager {
     /// Create a new version manager
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the HTTP client cannot be constructed.
     pub fn new() -> Result<Self> {
         let github_client = GitHubClient::new(None)?;
         let cache = Arc::new(RwLock::new(cache::Cache::new(Duration::from_secs(3600))));
@@ -86,11 +90,19 @@ impl VersionManager {
     }
 
     /// Check current Rust installation
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `rustc` is not found or its output cannot be parsed.
     pub async fn check_current(&self) -> Result<RustVersion> {
         detector::detect_rust_version()
     }
 
     /// Get latest stable release
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GitHub API request fails or the response cannot be parsed.
     pub async fn get_latest_stable(&self) -> Result<GitHubRelease> {
         // Check cache first
         let cache_key = "latest_stable";
@@ -117,6 +129,11 @@ impl VersionManager {
     }
 
     /// Get update recommendation
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the current version cannot be detected or the latest
+    /// release cannot be fetched from GitHub.
     pub async fn get_recommendation(&self) -> Result<UpdateRecommendation> {
         let current = self.check_current().await?;
         let latest = self.get_latest_stable().await?;
@@ -203,6 +220,10 @@ impl VersionManager {
     }
 
     /// Get multiple recent releases
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GitHub API request fails or the response cannot be parsed.
     pub async fn get_recent_releases(&self, count: usize) -> Result<Vec<GitHubRelease>> {
         self.github_client.get_releases(count).await
     }

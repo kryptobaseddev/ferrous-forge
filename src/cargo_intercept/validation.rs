@@ -8,6 +8,11 @@ use std::path::Path;
 use toml::Value;
 
 /// Run comprehensive pre-publish validation (all violations block)
+///
+/// # Errors
+///
+/// Returns an error if the safety pipeline fails to initialize, run checks,
+/// or if any pre-publish violations are found.
 pub async fn pre_publish_validation(project_path: &Path) -> Result<()> {
     tracing::info!("Running pre-publish validation");
 
@@ -27,6 +32,10 @@ pub async fn pre_publish_validation(project_path: &Path) -> Result<()> {
 }
 
 /// Check only locked settings (edition, rust-version) — used for dev command blocking
+///
+/// # Errors
+///
+/// Returns an error if loading the config or running validation fails.
 pub async fn check_locked_settings(project_path: &Path) -> Result<Vec<Violation>> {
     let config = Config::load_or_default().await?;
     let validator = RustValidator::with_config(project_path.to_path_buf(), config)?;
@@ -49,6 +58,10 @@ pub async fn check_locked_settings(project_path: &Path) -> Result<Vec<Violation>
 
 /// Check only style violations (file size, function size, underscore bandaid)
 /// Used for dev command warnings (non-blocking)
+///
+/// # Errors
+///
+/// Returns an error if loading the config or running validation fails.
 pub async fn check_style_violations(project_path: &Path) -> Result<Vec<Violation>> {
     let config = Config::load_or_default().await?;
     let validator = RustValidator::with_config(project_path.to_path_buf(), config)?;
@@ -72,6 +85,10 @@ pub async fn check_style_violations(project_path: &Path) -> Result<Vec<Violation
 }
 
 /// Enforce dogfooding by checking Ferrous Forge usage
+///
+/// # Errors
+///
+/// Returns an error if the project has not been initialized with Ferrous Forge.
 pub async fn enforce_dogfooding(project_path: &Path) -> Result<()> {
     tracing::info!("Checking dogfooding compliance");
 
@@ -94,6 +111,11 @@ pub async fn enforce_dogfooding(project_path: &Path) -> Result<()> {
 }
 
 /// Check version consistency across project files
+///
+/// # Errors
+///
+/// Returns an error if `Cargo.toml` is missing, cannot be parsed,
+/// or contains an invalid semantic version.
 pub fn version_consistency_check(project_path: &Path) -> Result<()> {
     tracing::info!("Checking version consistency");
 

@@ -26,6 +26,11 @@ impl ParallelValidator {
     }
 
     /// Validate multiple files in parallel
+    ///
+    /// # Errors
+    ///
+    /// This method is infallible in practice; individual file validation
+    /// errors are logged and the file is skipped.
     pub async fn validate_files(&self, files: Vec<PathBuf>) -> Result<Vec<Violation>> {
         info!(
             "Validating {} files in parallel (threads: {})",
@@ -105,6 +110,10 @@ pub struct ParallelSafetyRunner {
 
 impl ParallelSafetyRunner {
     /// Create a new parallel safety runner
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the thread pool cannot be created.
     pub fn new(thread_count: usize) -> Result<Self> {
         let pool = if thread_count > 0 {
             rayon::ThreadPoolBuilder::new()

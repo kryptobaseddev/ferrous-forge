@@ -83,6 +83,11 @@ impl TemplateRegistry {
     }
 
     /// Register a custom template
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Validation`] if the name conflicts with a built-in template
+    /// or the path does not exist.
     pub fn register_custom(&mut self, name: String, path: PathBuf) -> Result<()> {
         if self.builtin.contains_key(&name) {
             return Err(Error::validation(format!(

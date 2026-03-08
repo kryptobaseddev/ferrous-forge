@@ -1,11 +1,15 @@
 {
-  "rust-analyzer.checkOnSave.command": "clippy",
-  "rust-analyzer.checkOnSave.extraArgs": [
+  "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.check.extraArgs": [
     "--",
-    "-W", "clippy::missing_docs_in_private_items",
+    "-W", "clippy::missing_errors_doc",
+    "-W", "clippy::missing_panics_doc",
+    "-W", "clippy::empty_docs",
+    "-W", "clippy::doc_markdown",
     "-W", "rustdoc::broken_intra_doc_links",
     "-W", "rustdoc::missing_crate_level_docs"
   ],
+  "rust-analyzer.diagnostics.styleLints.enable": true,
   "editor.formatOnSave": true,
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
