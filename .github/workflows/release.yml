@@ -67,8 +67,19 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
+      - name: Get OIDC token for crates.io
+        uses: actions/github-script@v7
+        id: oidc
+        with:
+          script: |
+            const token = await core.getIDToken('https://crates.io');
+            core.setSecret(token);
+            core.setOutput('token', token);
+
       - name: Publish to crates.io
         run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.oidc.outputs.token }}
 
   # Build Release Binaries
   build:
@@ -85,10 +96,6 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             name: ferrous-forge-linux-x86_64-musl
-          # Disabled due to OpenSSL cross-compilation issues:
-          # - os: ubuntu-latest
-          #   target: aarch64-unknown-linux-gnu
-          #   name: ferrous-forge-linux-aarch64
 
           # macOS targets
           - os: macos-latest
@@ -161,7 +168,8 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [validate-release, publish-crates, build]
+    needs: [validate-release, build]
+    if: always() && needs.validate-release.result == 'success' && needs.build.result == 'success'
     permissions:
       contents: write
     steps:
