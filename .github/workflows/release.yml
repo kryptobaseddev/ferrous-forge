@@ -73,19 +73,12 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Get OIDC token for crates.io
-        uses: actions/github-script@v7
-        id: oidc
-        with:
-          script: |
-            const token = await core.getIDToken('https://crates.io');
-            core.setSecret(token);
-            core.setOutput('token', token);
+      - name: Authenticate with crates.io
+        id: crates-io-auth
+        uses: rust-lang/crates-io-auth-action@v1
 
       - name: Publish to crates.io
-        run: cargo publish
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: cargo publish --token ${{ steps.crates-io-auth.outputs.token }}
 
   # Build Release Binaries
   build:

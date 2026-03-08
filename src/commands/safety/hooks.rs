@@ -163,7 +163,7 @@ fn install_hook(hook_path: &Path, content: &str) -> Result<()> {
 }
 
 /// Set executable permissions on Unix systems
-fn set_executable_permissions(path: &Path) -> Result<()> {
+fn set_executable_permissions(#[allow(unused)] path: &Path) -> Result<()> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
