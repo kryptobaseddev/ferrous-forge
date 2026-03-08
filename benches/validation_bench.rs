@@ -37,7 +37,7 @@ serde = "1.0"
         b.iter(|| {
             rt.block_on(async {
                 let mut violations = Vec::new();
-                validate_cargo_toml(black_box(&cargo_toml), &mut violations)
+                validate_cargo_toml(black_box(&cargo_toml), &mut violations, "2024", "1.88")
                     .await
                     .expect("Failed to validate");
                 violations
@@ -81,7 +81,7 @@ mod tests {
             rt.block_on(async {
                 let mut violations = Vec::new();
                 let patterns = ValidationPatterns::new().expect("Failed to create patterns");
-                validate_rust_file(black_box(&rust_file), &mut violations, &patterns)
+                validate_rust_file(black_box(&rust_file), &mut violations, &patterns, 300, 50)
                     .await
                     .expect("Failed to validate");
                 violations

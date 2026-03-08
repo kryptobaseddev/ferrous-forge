@@ -83,17 +83,17 @@ pub fn empty_semantic_analysis() -> SemanticAnalysis {
 
 fn trace_data_flow(lines: &[&str], line_idx: usize) -> Vec<String> {
     let mut flow = Vec::new();
-    if line_idx < lines.len() {
-        if let Some(var_name) = extract_variable_name(lines[line_idx]) {
-            let usage = analyze_variable_usage(lines);
-            if let Some(uses) = usage.get(&var_name) {
-                for use_line in uses {
-                    flow.push(format!(
-                        "Line {}: Variable '{}' used",
-                        use_line + 1,
-                        var_name
-                    ));
-                }
+    if line_idx < lines.len()
+        && let Some(var_name) = extract_variable_name(lines[line_idx])
+    {
+        let usage = analyze_variable_usage(lines);
+        if let Some(uses) = usage.get(&var_name) {
+            for use_line in uses {
+                flow.push(format!(
+                    "Line {}: Variable '{}' used",
+                    use_line + 1,
+                    var_name
+                ));
             }
         }
     }

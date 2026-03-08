@@ -72,6 +72,7 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.rust }}
           
       - name: Install cargo-nextest
+        shell: bash
         env:
           RUST_VERSION: ${{ matrix.rust }}
         run: |

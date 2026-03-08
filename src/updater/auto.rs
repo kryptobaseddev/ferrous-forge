@@ -19,10 +19,10 @@ pub async fn check_auto_update() -> Result<()> {
     let channel = config.update_channel.parse::<UpdateChannel>()?;
     let manager = UpdateManager::new(channel)?;
 
-    if let Some(update_info) = manager.check_for_updates().await? {
-        if manager.prompt_for_update(&update_info).await? {
-            manager.perform_update(&update_info).await?;
-        }
+    if let Some(update_info) = manager.check_for_updates().await?
+        && manager.prompt_for_update(&update_info).await?
+    {
+        manager.perform_update(&update_info).await?;
     }
 
     Ok(())

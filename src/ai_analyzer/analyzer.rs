@@ -241,13 +241,13 @@ impl AIAnalyzer {
                         .starts_with('.')
                 {
                     visit_dir(&path, content, count, max)?;
-                } else if path.extension().is_some_and(|ext| ext == "rs") {
-                    if let Ok(file_content) = fs::read_to_string(&path) {
-                        content.push_str(&file_content);
-                        *count += 1;
-                        if *count >= max {
-                            break;
-                        }
+                } else if path.extension().is_some_and(|ext| ext == "rs")
+                    && let Ok(file_content) = fs::read_to_string(&path)
+                {
+                    content.push_str(&file_content);
+                    *count += 1;
+                    if *count >= max {
+                        break;
                     }
                 }
             }

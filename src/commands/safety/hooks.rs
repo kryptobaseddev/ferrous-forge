@@ -89,8 +89,7 @@ pub fn install_cargo_interception(force: bool) -> Result<()> {
         return Ok(());
     }
 
-    // Read wrapper script from templates
-    let wrapper_content = include_str!("../../../templates/cargo-publish-wrapper.sh");
+    let wrapper_content = crate::cargo_intercept::wrapper::get_publish_wrapper_content();
 
     fs::write(&wrapper_path, wrapper_content)?;
     set_executable_permissions(&wrapper_path)?;

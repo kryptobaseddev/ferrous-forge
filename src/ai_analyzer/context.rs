@@ -65,21 +65,22 @@ fn extract_function_info(
     line_number: usize,
 ) -> (Option<String>, Option<String>, Option<String>) {
     for i in (0..line_number).rev() {
-        if let Some(line) = lines.get(i) {
-            if line.contains("fn ") && !line.trim().starts_with("//") {
-                let signature = line.trim().to_string();
-                let name = signature
-                    .split("fn ")
-                    .nth(1)
-                    .and_then(|s| s.split('(').next())
-                    .map(|s| s.trim().to_string());
-                let return_type = if signature.contains("->") {
-                    signature.split("->").nth(1).map(|s| s.trim().to_string())
-                } else {
-                    None
-                };
-                return (name, Some(signature), return_type);
-            }
+        if let Some(line) = lines.get(i)
+            && line.contains("fn ")
+            && !line.trim().starts_with("//")
+        {
+            let signature = line.trim().to_string();
+            let name = signature
+                .split("fn ")
+                .nth(1)
+                .and_then(|s| s.split('(').next())
+                .map(|s| s.trim().to_string());
+            let return_type = if signature.contains("->") {
+                signature.split("->").nth(1).map(|s| s.trim().to_string())
+            } else {
+                None
+            };
+            return (name, Some(signature), return_type);
         }
     }
     (None, None, None)

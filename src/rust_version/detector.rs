@@ -116,12 +116,11 @@ fn detect_channel(version_str: &str) -> Channel {
 /// Detect the host triple
 fn detect_host() -> String {
     // Try to get from rustc
-    if let Ok(output) = Command::new("rustc").arg("--print").arg("host").output() {
-        if output.status.success() {
-            if let Ok(host) = str::from_utf8(&output.stdout) {
-                return host.trim().to_string();
-            }
-        }
+    if let Ok(output) = Command::new("rustc").arg("--print").arg("host").output()
+        && output.status.success()
+        && let Ok(host) = str::from_utf8(&output.stdout)
+    {
+        return host.trim().to_string();
     }
 
     // Fallback to a generic target string

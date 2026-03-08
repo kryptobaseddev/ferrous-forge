@@ -275,10 +275,10 @@ impl RustValidator {
         }
 
         if path.is_file() {
-            if let Some(ext) = path.extension() {
-                if ext == "rs" {
-                    rust_files.push(path.to_path_buf());
-                }
+            if let Some(ext) = path.extension()
+                && ext == "rs"
+            {
+                rust_files.push(path.to_path_buf());
             }
         } else if path.is_dir() {
             let entries = std::fs::read_dir(path)?;

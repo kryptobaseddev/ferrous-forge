@@ -109,10 +109,10 @@ impl VersionManager {
 
         {
             let cache = self.cache.read().await;
-            if let Some(cached_bytes) = cache.get(&cache_key.to_string()) {
-                if let Ok(release) = serde_json::from_slice::<GitHubRelease>(&cached_bytes) {
-                    return Ok(release);
-                }
+            if let Some(cached_bytes) = cache.get(&cache_key.to_string())
+                && let Ok(release) = serde_json::from_slice::<GitHubRelease>(&cached_bytes)
+            {
+                return Ok(release);
             }
         }
 

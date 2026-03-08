@@ -1,4 +1,4 @@
-//! Tests for the RustValidator
+//! Tests for the `RustValidator`
 
 use crate::validation::rust_validator::*;
 use crate::validation::violation::*;

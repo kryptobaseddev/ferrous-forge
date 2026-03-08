@@ -23,17 +23,17 @@ pub fn filter_violations(
             let violation_type_str = format!("{:?}", v.violation_type).to_uppercase();
 
             // Apply only filter
-            if let Some(only) = only_types {
-                if !only.contains(&violation_type_str) {
-                    return false;
-                }
+            if let Some(only) = only_types
+                && !only.contains(&violation_type_str)
+            {
+                return false;
             }
 
             // Apply skip filter
-            if let Some(skip) = skip_types {
-                if skip.contains(&violation_type_str) {
-                    return false;
-                }
+            if let Some(skip) = skip_types
+                && skip.contains(&violation_type_str)
+            {
+                return false;
             }
 
             true

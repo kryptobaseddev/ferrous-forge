@@ -106,14 +106,12 @@ fn find_missing_docs(output: &std::process::Output) -> Result<Vec<String>> {
 
     // Parse JSON messages for missing docs warnings
     for line in stdout.lines() {
-        if line.contains("missing_docs") {
-            if let Ok(json) = serde_json::from_str::<serde_json::Value>(line) {
-                if let Some(message) = json["message"]["rendered"].as_str() {
-                    if let Some(item_match) = extract_item_name(message) {
-                        missing.push(item_match);
-                    }
-                }
-            }
+        if line.contains("missing_docs")
+            && let Ok(json) = serde_json::from_str::<serde_json::Value>(line)
+            && let Some(message) = json["message"]["rendered"].as_str()
+            && let Some(item_match) = extract_item_name(message)
+        {
+            missing.push(item_match);
         }
     }
 
@@ -192,10 +190,10 @@ fn extract_item_name(message: &str) -> Option<String> {
     // Try to extract the item name from messages like:
     // "missing documentation for a struct"
     // "missing documentation for function `foo`"
-    if let Some(start) = message.find('`') {
-        if let Some(end) = message[start + 1..].find('`') {
-            return Some(message[start + 1..start + 1 + end].to_string());
-        }
+    if let Some(start) = message.find('`')
+        && let Some(end) = message[start + 1..].find('`')
+    {
+        return Some(message[start + 1..start + 1 + end].to_string());
     }
 
     // Fallback: extract type after "for"

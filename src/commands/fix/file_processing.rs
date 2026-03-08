@@ -101,11 +101,11 @@ fn apply_fixes_to_lines(lines: &mut [String], violations: &[Violation]) -> usize
             let original_line = &lines[line_index];
 
             // For now, use a simple fix approach
-            if let Some(fixed_line) = try_simple_fix(original_line, &violation) {
-                if fixed_line != *original_line {
-                    lines[line_index] = fixed_line;
-                    fixed_count += 1;
-                }
+            if let Some(fixed_line) = try_simple_fix(original_line, &violation)
+                && fixed_line != *original_line
+            {
+                lines[line_index] = fixed_line;
+                fixed_count += 1;
             }
         }
     }

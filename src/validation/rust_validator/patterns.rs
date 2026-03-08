@@ -64,10 +64,10 @@ pub fn is_in_string_literal(line: &str, pattern: &str) -> bool {
         let mut pos = 0;
 
         // Check if we're in a comment
-        if let Some(comment_pos) = line.find("//") {
-            if pattern_pos >= comment_pos {
-                continue; // This occurrence is in a comment, check next
-            }
+        if let Some(comment_pos) = line.find("//")
+            && pattern_pos >= comment_pos
+        {
+            continue; // This occurrence is in a comment, check next
         }
 
         for c in line.chars() {

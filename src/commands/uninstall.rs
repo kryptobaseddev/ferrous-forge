@@ -112,15 +112,14 @@ async fn remove_shell_integration() -> Result<()> {
 
     for shell_file in &[".bashrc", ".zshrc", ".profile"] {
         let shell_path = home_dir.join(shell_file);
-        if shell_path.exists() {
-            if let Ok(contents) = tokio::fs::read_to_string(&shell_path).await {
-                if contents.contains("Ferrous Forge") {
-                    // Remove Ferrous Forge section
-                    let new_contents = remove_ferrous_forge_section(&contents);
-                    tokio::fs::write(&shell_path, new_contents).await?;
-                    println!("  ✅ Removed shell integration from {}", shell_file);
-                }
-            }
+        if shell_path.exists()
+            && let Ok(contents) = tokio::fs::read_to_string(&shell_path).await
+            && contents.contains("Ferrous Forge")
+        {
+            // Remove Ferrous Forge section
+            let new_contents = remove_ferrous_forge_section(&contents);
+            tokio::fs::write(&shell_path, new_contents).await?;
+            println!("  ✅ Removed shell integration from {}", shell_file);
         }
     }
 

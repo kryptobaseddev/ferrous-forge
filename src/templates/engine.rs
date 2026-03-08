@@ -39,16 +39,16 @@ impl TemplateEngine {
     /// Returns [`Error::Validation`] if the value does not match the variable's pattern.
     pub fn set_variable(&mut self, name: String, value: String) -> Result<()> {
         // Validate against pattern if specified
-        if let Some(var_def) = self.manifest.variables.iter().find(|v| v.name == name) {
-            if let Some(pattern) = &var_def.pattern {
-                let regex = Regex::new(pattern)
-                    .map_err(|e| Error::validation(format!("Invalid regex pattern: {}", e)))?;
-                if !regex.is_match(&value) {
-                    return Err(Error::validation(format!(
-                        "Value '{}' does not match pattern for {}",
-                        value, name
-                    )));
-                }
+        if let Some(var_def) = self.manifest.variables.iter().find(|v| v.name == name)
+            && let Some(pattern) = &var_def.pattern
+        {
+            let regex = Regex::new(pattern)
+                .map_err(|e| Error::validation(format!("Invalid regex pattern: {}", e)))?;
+            if !regex.is_match(&value) {
+                return Err(Error::validation(format!(
+                    "Value '{}' does not match pattern for {}",
+                    value, name
+                )));
             }
         }
 
@@ -161,10 +161,10 @@ impl TemplateEngine {
         // Build a complete variable map with defaults
         let mut vars = self.variables.clone();
         for var_def in &self.manifest.variables {
-            if !vars.contains_key(&var_def.name) {
-                if let Some(default) = &var_def.default {
-                    vars.insert(var_def.name.clone(), default.clone());
-                }
+            if !vars.contains_key(&var_def.name)
+                && let Some(default) = &var_def.default
+            {
+                vars.insert(var_def.name.clone(), default.clone());
             }
         }
 
@@ -177,13 +177,13 @@ impl TemplateEngine {
         // Check for unsubstituted variables
         let unsubstituted = Regex::new(r"\{\{[^}]+\}\}")
             .map_err(|e| Error::validation(format!("Regex error: {}", e)))?;
-        if unsubstituted.is_match(&result) {
-            if let Some(m) = unsubstituted.find(&result) {
-                return Err(Error::validation(format!(
-                    "Unsubstituted variable found: {}",
-                    m.as_str()
-                )));
-            }
+        if unsubstituted.is_match(&result)
+            && let Some(m) = unsubstituted.find(&result)
+        {
+            return Err(Error::validation(format!(
+                "Unsubstituted variable found: {}",
+                m.as_str()
+            )));
         }
 
         Ok(result)

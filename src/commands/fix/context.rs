@@ -18,14 +18,13 @@ pub fn analyze_file_context(content: &str) -> FileContext {
 
     for (i, line) in lines.iter().enumerate() {
         let trimmed = line.trim_start();
-        if trimmed.starts_with("fn ")
+        if (trimmed.starts_with("fn ")
             || trimmed.starts_with("pub fn ")
             || trimmed.starts_with("async fn ")
-            || trimmed.starts_with("pub async fn ")
+            || trimmed.starts_with("pub async fn "))
+            && let Some(sig) = parse_function_signature_multiline(&lines, i)
         {
-            if let Some(sig) = parse_function_signature_multiline(&lines, i) {
-                function_signatures.push(sig);
-            }
+            function_signatures.push(sig);
         }
     }
 

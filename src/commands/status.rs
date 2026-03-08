@@ -112,13 +112,12 @@ async fn check_shell_integration() {
     let mut found = false;
     for shell_file in &[".bashrc", ".zshrc", ".profile"] {
         let shell_path = home_dir.join(shell_file);
-        if shell_path.exists() {
-            if let Ok(contents) = tokio::fs::read_to_string(&shell_path).await {
-                if contents.contains("Ferrous Forge") {
-                    found = true;
-                    break;
-                }
-            }
+        if shell_path.exists()
+            && let Ok(contents) = tokio::fs::read_to_string(&shell_path).await
+            && contents.contains("Ferrous Forge")
+        {
+            found = true;
+            break;
         }
     }
 
