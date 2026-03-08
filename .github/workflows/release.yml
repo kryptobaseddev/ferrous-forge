@@ -25,6 +25,12 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Install cargo-audit (pre-built binary)
+        run: cargo binstall cargo-audit --no-confirm
+
       - name: Build release binary
         run: cargo build --release
 
