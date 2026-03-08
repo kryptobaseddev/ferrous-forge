@@ -1,3 +1,10 @@
 target/
 project-docs/
 /templates/
+
+# Local tooling configs
+.cleo/
+.serena/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
