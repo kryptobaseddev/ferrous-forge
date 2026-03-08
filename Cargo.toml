@@ -48,6 +48,7 @@ toml = "0.8"
 # Async runtime and networking
 tokio = { version = "1.40", features = ["full"] }
 reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+bytes = "1.11.1"  # Pin to fix RUSTSEC-2026-0007
 
 # Performance optimizations
 rayon = "1.10"
