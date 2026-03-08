@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["display_git_hooks_status","display_safety_configuration","display_status_header"]};

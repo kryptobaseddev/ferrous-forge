@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["calculate_branch_coverage","calculate_function_coverage_percentage","parse_tarpaulin_json","process_file_coverage"],"struct":["FunctionStats","TarpaulinFile","TarpaulinOutput"]};

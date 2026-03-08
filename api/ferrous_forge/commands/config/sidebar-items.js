@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["execute"]};
+window.SIDEBAR_ITEMS = {"fn":["execute","migrate_config","show_sources"]};

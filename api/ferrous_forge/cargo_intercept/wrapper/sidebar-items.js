@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_publish_wrapper","get_publish_wrapper_content","install_cargo_intercept"]};

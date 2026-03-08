@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["has_locked_violations","intercept_dev_command","intercept_publish_command"],"mod":["validation","wrapper"],"struct":["CargoInterceptor"]};

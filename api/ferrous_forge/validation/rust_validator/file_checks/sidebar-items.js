@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["validate_cargo_toml","validate_rust_file"]};
+window.SIDEBAR_ITEMS = {"fn":["validate_cargo_toml","validate_cargo_toml_full","validate_rust_file"]};

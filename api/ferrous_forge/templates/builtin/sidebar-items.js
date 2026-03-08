@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["cli_template","library_template","web_service_template"]};
+window.SIDEBAR_ITEMS = {"mod":["cli_template","embedded_template","library_template","plugin_template","wasm_template","web_service_template","workspace_template"]};
