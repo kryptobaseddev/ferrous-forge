@@ -93,6 +93,7 @@ jobs:
     name: Security Audit
     runs-on: ubuntu-latest
     permissions:
+      checks: write
       contents: read
       security-events: write
     steps:
