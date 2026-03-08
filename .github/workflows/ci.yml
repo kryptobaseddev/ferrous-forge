@@ -72,7 +72,14 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.rust }}
           
       - name: Install cargo-nextest
-        run: cargo install cargo-nextest --locked
+        env:
+          RUST_VERSION: ${{ matrix.rust }}
+        run: |
+          if [ "$RUST_VERSION" = "1.88" ]; then
+            cargo install cargo-nextest@0.9.114 --locked
+          else
+            cargo install cargo-nextest --locked
+          fi
         
       - name: Run tests
         run: cargo nextest run --all-features || cargo test --all-features
