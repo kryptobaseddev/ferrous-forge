@@ -1,8 +1,12 @@
 //! Validate command implementation
 
+/// AI-friendly compliance report generation.
 pub mod ai_report;
+/// Validation check execution and result collection.
 pub mod checks;
+/// Markdown report formatting for validation results.
 pub mod markdown;
+/// Shared utilities for the validate command.
 pub mod utils;
 
 use ai_report::generate_ai_report;

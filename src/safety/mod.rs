@@ -8,12 +8,18 @@ use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
+/// Bypass mechanisms for skipping safety checks.
 pub mod bypass;
+/// Individual safety check implementations.
 pub mod checks;
+/// Safety pipeline configuration and thresholds.
 pub mod config;
+/// Pipeline execution engine and check orchestration.
 pub mod execution;
 // pub mod installer;  // TODO: Implement installer
+/// Core safety pipeline logic and stage management.
 pub mod pipeline;
+/// Check result reporting and aggregation.
 pub mod report;
 
 pub use config::SafetyConfig;

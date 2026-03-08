@@ -168,15 +168,49 @@ fn count_items_in_file(content: &str) -> Result<(usize, usize)> {
     let pub_item_re = Regex::new(r"^\s*pub\s+(fn|struct|enum|trait|type|const|static|mod)\s+")
         .map_err(|e| Error::validation(format!("Failed to compile regex: {}", e)))?;
 
+    // Track whether we're inside a raw string literal
+    let mut in_raw_string = false;
+
     for (i, line) in lines.iter().enumerate() {
+        // Simple raw string tracking: toggle on r#" and "#
+        if !in_raw_string && line.contains("r#\"") {
+            in_raw_string = true;
+            // If this same line also closes the raw string, we're not in one
+            if line.contains("\"#")
+                && line.rfind("\"#").unwrap_or(0) > line.find("r#\"").unwrap_or(0)
+            {
+                in_raw_string = false;
+            }
+            continue;
+        }
+        if in_raw_string {
+            if line.contains("\"#") {
+                in_raw_string = false;
+            }
+            continue;
+        }
+
         if pub_item_re.is_match(line) {
             total += 1;
 
-            // Check if there's documentation above this line
-            if i > 0
-                && (lines[i - 1].trim().starts_with("///")
-                    || lines[i - 1].trim().starts_with("//!"))
-            {
+            // Look backward past attributes, blank lines, and regular comments
+            // to find doc comments (/// or //!)
+            let mut has_docs = false;
+            for j in (i.saturating_sub(10)..i).rev() {
+                let prev = lines[j].trim();
+                if prev.starts_with("///") || prev.starts_with("//!") {
+                    has_docs = true;
+                    break;
+                } else if prev.starts_with("#[") || prev.is_empty() || prev.starts_with("//") {
+                    // Skip attributes, blank lines, and regular comments
+                    continue;
+                } else {
+                    // Hit actual code — no doc comment found
+                    break;
+                }
+            }
+
+            if has_docs {
                 documented += 1;
             }
         }

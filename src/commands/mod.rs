@@ -220,15 +220,27 @@ pub enum SafetyCommand {
     },
 }
 
+/// Configuration management command handlers.
 pub mod config;
+/// Edition management command handlers.
 pub mod edition;
+/// Automatic code violation fix command handlers.
 pub mod fix;
+/// Project and system initialization command handlers.
 pub mod init;
+/// Version rollback command handlers.
 pub mod rollback;
+/// Rust version management command handlers.
 pub mod rust;
+/// Safety pipeline command handlers.
 pub mod safety;
+/// Installation status display command handlers.
 pub mod status;
+/// Project template command handlers.
 pub mod template;
+/// Uninstall command handlers.
 pub mod uninstall;
+/// Self-update command handlers.
 pub mod update;
+/// Project validation command handlers.
 pub mod validate;

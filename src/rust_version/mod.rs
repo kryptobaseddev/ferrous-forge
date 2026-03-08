@@ -10,8 +10,11 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::RwLock;
 
+/// Version information caching with TTL support.
 pub mod cache;
+/// Installed Rust version detection.
 pub mod detector;
+/// GitHub API client for fetching Rust releases.
 pub mod github;
 
 pub use detector::RustVersion;

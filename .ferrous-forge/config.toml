@@ -3,7 +3,7 @@
 
 [validation]
 max_file_lines = 300
-max_function_lines = 110
+max_function_lines = 100
 required_edition = "2024"
 required_rust_version = "1.88"
 ban_underscore_bandaid = true

@@ -2,6 +2,9 @@
 
 use super::types::{FileContext, FunctionSignature};
 
+const OPEN_BRACE: char = '{';
+const CLOSE_BRACE: char = '}';
+
 /// Analyze a file's content to understand its context
 #[allow(dead_code)]
 pub fn analyze_file_context(content: &str) -> FileContext {
@@ -63,7 +66,7 @@ fn collect_signature_lines(lines: &[&str], start_idx: usize) -> Option<(String, 
     let mut signature_lines = vec![lines[start_idx].to_string()];
 
     // Collect lines until we find the opening brace
-    while brace_line < lines.len() && !lines[brace_line].contains('{') {
+    while brace_line < lines.len() && !lines[brace_line].contains(OPEN_BRACE) {
         if brace_line > start_idx {
             signature_lines.push(lines[brace_line].to_string());
         }
@@ -97,6 +100,17 @@ fn check_return_types(full_signature: &str) -> (bool, bool) {
     (returns_result, returns_option)
 }
 
+/// Count brace deltas for a single character
+fn count_brace(ch: char) -> (usize, usize) {
+    if ch == OPEN_BRACE {
+        (1, 0)
+    } else if ch == CLOSE_BRACE {
+        (0, 1)
+    } else {
+        (0, 0)
+    }
+}
+
 /// Find the end of the function (closing brace at the same indentation level)
 fn find_function_end(lines: &[&str], brace_line: usize, start_idx: usize) -> usize {
     let indent = lines[start_idx].len() - lines[start_idx].trim_start().len();
@@ -108,14 +122,12 @@ fn find_function_end(lines: &[&str], brace_line: usize, start_idx: usize) -> usi
         let line_indent = line.len() - line.trim_start().len();
 
         for ch in line.chars() {
-            if ch == '{' {
-                brace_count += 1;
-            } else if ch == '}' {
-                brace_count -= 1;
-                // Check if this is the closing brace at the same indentation
-                if brace_count == 0 && line_indent == indent {
-                    break;
-                }
+            let (opens, closes) = count_brace(ch);
+            brace_count += opens;
+            brace_count -= closes;
+            // Check if this is the closing brace at the same indentation
+            if brace_count == 0 && line_indent == indent {
+                break;
             }
         }
         if brace_count == 0 {

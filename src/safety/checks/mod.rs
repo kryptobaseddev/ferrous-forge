@@ -8,16 +8,27 @@ use std::path::Path;
 
 use super::report::CheckResult;
 
+/// Dependency vulnerability auditing via `cargo audit`.
 pub mod audit;
+/// Build verification check.
 pub mod build;
+/// Clippy lint analysis check.
 pub mod clippy;
+/// Documentation generation and coverage check.
 pub mod doc;
+/// Code formatting verification via `rustfmt`.
 pub mod format;
+/// License compliance validation.
 pub mod license;
+/// Publish readiness verification for crates.io.
 pub mod publish;
+/// Semver compatibility check for public API changes.
 pub mod semver;
+/// Ferrous Forge coding standards enforcement.
 pub mod standards;
+/// Test suite execution and result validation.
 pub mod test;
+/// Test runner infrastructure for safety checks.
 pub mod test_runner;
 
 /// Trait for implementing safety checks

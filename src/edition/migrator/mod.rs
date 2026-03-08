@@ -4,6 +4,7 @@ mod backup;
 mod cargo_ops;
 mod code_migration;
 mod testing;
+/// Data types for migration options, results, and steps.
 pub mod types;
 
 use crate::Result;

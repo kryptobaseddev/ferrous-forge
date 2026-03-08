@@ -11,7 +11,9 @@
 //!   enforced
 //! - `FERROUS_FORGE_FORCE_BYPASS=true` → absolute override with visible "BYPASSED" warning
 
+/// Validation logic for intercepted cargo commands.
 pub mod validation;
+/// Cargo command wrapper for transparent interception.
 pub mod wrapper;
 
 use crate::Result;

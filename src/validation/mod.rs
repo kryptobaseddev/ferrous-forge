@@ -1,6 +1,8 @@
 //! Rust code validation engine
 
+/// Rust source code and Cargo.toml validator.
 pub mod rust_validator;
+/// Violation types, severity levels, and diagnostics.
 pub mod violation;
 
 #[cfg(test)]

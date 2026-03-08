@@ -1,6 +1,8 @@
 //! Core Rust validation - modularized structure
 
+/// Individual file validation checks for Rust source and Cargo.toml.
 pub mod file_checks;
+/// Regex-based validation patterns for code style enforcement.
 pub mod patterns;
 
 use crate::config::Config;

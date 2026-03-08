@@ -8,7 +8,9 @@ use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use tokio::fs;
 
+/// Edition compatibility analysis and detection.
 pub mod analyzer;
+/// Edition migration assistance and execution.
 pub mod migrator;
 
 pub use analyzer::EditionAnalyzer;

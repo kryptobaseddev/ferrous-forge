@@ -1,6 +1,8 @@
 //! Rust version management commands
 
+/// Terminal output formatting for version information.
 pub mod display;
+/// Helper utilities for Rust version commands.
 pub mod utils;
 
 use crate::Result;

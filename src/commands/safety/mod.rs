@@ -1,6 +1,8 @@
 //! Safety pipeline CLI commands
 
+/// Git hook installation and management for safety checks.
 pub mod hooks;
+/// Safety pipeline status display.
 pub mod status;
 
 use crate::Result;

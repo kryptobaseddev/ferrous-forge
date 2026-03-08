@@ -6,7 +6,9 @@
 //! - Lazy file parsing
 //! - Memory pooling
 
+/// Caching strategies for validation results.
 pub mod cache;
+/// Parallel execution of validation checks.
 pub mod parallel;
 
 use std::sync::Arc;

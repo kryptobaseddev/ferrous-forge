@@ -5,7 +5,9 @@
 //! 2. User: ~/.config/ferrous-forge/config.toml  
 //! 3. Project: ./.ferrous-forge/config.toml
 
+/// Configuration level definitions (system, user, project).
 pub mod levels;
+/// Partial configuration for merging across hierarchy levels.
 pub mod partial;
 
 pub use levels::ConfigLevel;
