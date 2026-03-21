@@ -24,4 +24,4 @@ pub mod types;
 pub use hierarchy::{ConfigLevel, HierarchicalConfig};
 pub use locking::{ConfigValidator, HierarchicalLockManager, LockEntry, LockedConfig, audit_log};
 pub use sharing::{ImportOptions, ImportReport, SharedConfig, import_shared_config};
-pub use types::{Config, CustomRule};
+pub use types::{Config, CustomRule, ValidationConfig};

@@ -29,6 +29,8 @@ pub struct Config {
     pub require_documentation: bool,
     /// Custom validation rules
     pub custom_rules: Vec<CustomRule>,
+    /// Validation settings
+    pub validation: ValidationConfig,
 }
 
 /// Custom validation rule
@@ -42,6 +44,40 @@ pub struct CustomRule {
     pub message: String,
     /// Whether this rule is enabled
     pub enabled: bool,
+}
+
+/// Validation configuration settings
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ValidationConfig {
+    /// Whether to check for version consistency (SSoT)
+    pub check_version_consistency: Option<bool>,
+    /// Paths to exclude from version checking
+    pub version_check_exclusions: Option<Vec<String>>,
+    /// Whether to enforce Keep a Changelog format
+    pub enforce_keep_a_changelog: Option<bool>,
+    /// Whether to require changelog entry for current version
+    pub require_changelog_entry: Option<bool>,
+    /// Whether to validate changelog when creating git tags
+    pub check_changelog_on_tag: Option<bool>,
+    /// Required sections in changelog (e.g., ["Added", "Changed", "Fixed"])
+    pub changelog_required_sections: Option<Vec<String>>,
+}
+
+impl Default for ValidationConfig {
+    fn default() -> Self {
+        Self {
+            check_version_consistency: Some(true),
+            version_check_exclusions: None,
+            enforce_keep_a_changelog: Some(true),
+            require_changelog_entry: Some(true),
+            check_changelog_on_tag: Some(true),
+            changelog_required_sections: Some(vec![
+                "Added".to_string(),
+                "Changed".to_string(),
+                "Fixed".to_string(),
+            ]),
+        }
+    }
 }
 
 /// # Examples
@@ -72,6 +108,7 @@ impl Default for Config {
             ban_underscore_bandaid: true,
             require_documentation: true,
             custom_rules: vec![],
+            validation: ValidationConfig::default(),
         }
     }
 }

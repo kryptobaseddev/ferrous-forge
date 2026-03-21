@@ -65,7 +65,10 @@ fn infer_expected_type(violation_type: &ViolationType) -> Option<String> {
         | ViolationType::OldRustVersion
         | ViolationType::LockedSetting
         | ViolationType::MissingModuleDoc
-        | ViolationType::MissingDocConfig => None,
+        | ViolationType::MissingDocConfig
+        | ViolationType::HardcodedVersion
+        | ViolationType::MissingChangelogEntry
+        | ViolationType::InvalidChangelogFormat => None,
     }
 }
 
