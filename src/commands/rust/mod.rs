@@ -742,7 +742,7 @@ pub async fn handle_release_notes(version: String, detailed: bool) -> Result<()>
 ///
 /// # Errors
 ///
-/// Returns an error if the security check fails or if fail_on_issues is true
+/// Returns an error if the security check fails or if `fail_on_issues` is true
 /// and issues are found.
 pub async fn handle_security(fail_on_issues: bool) -> Result<()> {
     use crate::rust_version::SecurityChecker;
@@ -765,9 +765,7 @@ pub async fn handle_security(fail_on_issues: bool) -> Result<()> {
     SecurityChecker::display_results(&result);
 
     if fail_on_issues && !result.is_secure {
-        return Err(Error::validation(
-            "Security issues found. Update required.",
-        ));
+        return Err(Error::validation("Security issues found. Update required."));
     }
 
     Ok(())

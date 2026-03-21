@@ -4,12 +4,12 @@
 //! @task T018
 //! @epic T014
 
-use crate::Result;
 use crate::commands::ConfigCommand;
 use crate::config::{
     Config, ConfigValidator, HierarchicalConfig, HierarchicalLockManager, ImportOptions,
     SharedConfig, audit_log, import_shared_config,
 };
+use crate::{Error, Result};
 use console::style;
 
 /// Execute the config command with subcommand
@@ -514,6 +514,3 @@ async fn handle_import(
 
     Ok(())
 }
-
-// Re-export Error for use in this module
-use crate::Error;
