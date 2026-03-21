@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["hierarchy","io","operations","types"]};
+window.SIDEBAR_ITEMS = {"mod":["hierarchy","io","locking","operations","sharing","types"]};

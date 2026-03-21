@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["handle_check","handle_list","handle_recommend"],"mod":["display","utils"]};
+window.SIDEBAR_ITEMS = {"fn":["enforce_version_requirements","handle_check","handle_check_updates","handle_install_toolchain","handle_list","handle_recommend","handle_release_notes","handle_releases","handle_security","handle_switch","handle_uninstall_toolchain","handle_update"],"mod":["display","utils"]};

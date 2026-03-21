@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["display_install_header","display_install_success","install_cargo_interception","install_pre_commit_hook","install_pre_push_hook","validate_git_repo_and_create_hooks_dir"]};
+window.SIDEBAR_ITEMS = {"fn":["check_hooks_status","display_install_header","display_install_success","get_hook_status_display","install_cargo_interception","install_pre_commit_hook","install_pre_push_hook","uninstall_hooks","validate_git_repo_and_create_hooks_dir"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["install_git_hooks","uninstall_git_hooks"]};
+window.SIDEBAR_ITEMS = {"fn":["check_hooks_status","install_git_hooks","uninstall_git_hooks"]};

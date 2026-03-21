@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_CACHE_TTL"],"struct":["CacheEntry","CacheStats","FileCache"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["builtin","engine","manifest","registry"]};
+window.SIDEBAR_ITEMS = {"mod":["builtin","engine","manifest","registry","repository","validation"]};

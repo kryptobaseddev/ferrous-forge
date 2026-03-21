@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["handle_check","handle_install","handle_status","test_individual_checks"],"mod":["hooks","status"]};
+window.SIDEBAR_ITEMS = {"fn":["handle_check","handle_check_bypass","handle_install","handle_status","handle_uninstall","test_individual_checks"],"mod":["bypass_cmd","config_cmd","hooks","report_cmd","stats_cmd","status"]};

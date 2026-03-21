@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["quick_security_check"],"struct":["SecurityCheckResult","SecurityChecker","SecurityIssue"]};

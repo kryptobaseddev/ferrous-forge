@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Severity"],"fn":["get_security_summary","has_critical_security_issues","is_version_affected","parse_release_notes"],"struct":["BreakingChange","ParsedRelease","SecurityAdvisory"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["validate_before_install","validate_template","validate_template_detailed"],"struct":["ValidationResult"]};

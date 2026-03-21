@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ToolchainChannel"],"struct":["RustupManager","ToolchainInfo","UpdateResult","VersionCheckResult","VersionRequirements"]};

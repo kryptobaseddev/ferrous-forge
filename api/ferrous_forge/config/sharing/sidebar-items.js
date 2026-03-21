@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["import_shared_config"],"struct":["ImportOptions","ImportReport","LockConflict","LockExport","SharedConfig"],"trait":["HierarchicalConfigExt","HierarchicalLockManagerExt","PartialConfigExt"]};

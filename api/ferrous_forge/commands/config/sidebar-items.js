@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["execute","migrate_config","show_sources"]};
+window.SIDEBAR_ITEMS = {"fn":["execute_with_subcommand","migrate_config","show_help","show_sources"]};

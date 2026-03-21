@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["github"],"struct":["CachedTemplate","TemplateIndex","TemplateRepository"]};
