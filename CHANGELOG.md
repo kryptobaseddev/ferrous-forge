@@ -5,6 +5,91 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2025-03-21
+
+### Epic T014: Aggressive Enforcement System — COMPLETE
+
+All 10 tasks of the Aggressive Enforcement System epic are now implemented.
+
+#### Added
+
+- **T015: Config Locking System** — Lock critical configuration values with hierarchical support
+  - `ferrous-forge config lock <key> --reason="..."` command
+  - `ferrous-forge config unlock <key> --reason="..."` command
+  - Full audit trail of all lock/unlock operations
+  - Lock validation before config changes
+  - `ferrous-forge config lock-status` and `lock-audit` commands
+
+- **T016: Cargo Publish Interception** — Block publishing of non-compliant code
+  - Validation runs before `cargo publish`
+  - Blocks publish if validation fails
+  - Emergency bypass with `ferrous-forge safety bypass --stage=publish`
+
+- **T017: Mandatory Safety Pipeline Hooks** — Blocking git hooks by default
+  - Pre-commit hooks block commits with violations
+  - Pre-push hooks block pushes with test failures
+  - Hooks installed automatically on `ferrous-forge init --project`
+  - Bypass checking before blocking
+
+- **T018: Hierarchical Configuration with Sharing** — System → User → Project levels
+  - Config export/import for team sharing
+  - `ferrous-forge config export` and `import` commands
+  - Git-friendly TOML format
+
+- **T019: Complete Safety Pipeline CLI** — Full safety management interface
+  - `ferrous-forge safety bypass` with mandatory `--reason`
+  - `ferrous-forge safety audit` — view bypass audit log
+  - `ferrous-forge safety report` — view safety reports
+  - `ferrous-forge safety stats` — display safety statistics
+  - `ferrous-forge safety config` — manage safety configuration
+
+- **T020: Rustup Integration & Toolchain Management** — Complete toolchain control
+  - `ferrous-forge rust check` — check version and updates
+  - `ferrous-forge rust list` — list recent releases
+  - `ferrous-forge rust update` — update toolchains
+  - `ferrous-forge rust install-toolchain <channel>` — install specific toolchain
+  - `ferrous-forge rust switch <channel>` — switch default toolchain
+  - `ferrous-forge rust uninstall-toolchain <channel>` — remove toolchain
+  - GitHub API integration for release tracking
+  - Security advisory checking
+
+- **T021: Template Repository System** — Fetch and manage templates
+  - `ferrous-forge template fetch <repo>` — fetch from GitHub
+  - Local template caching
+  - Template validation before installation
+
+- **T022: VS Code Extension** — Real-time validation in IDE
+  - Real-time diagnostics as you type
+  - Inline error highlighting
+  - Quick fixes via code actions
+  - Status bar integration
+
+- **T023: Package Manager Distribution** — Easy installation
+  - Homebrew formula (macOS/Linux)
+  - AUR PKGBUILD (Arch Linux)
+  - Nix derivation
+  - Chocolatey package (Windows)
+
+- **T024: GitHub API Integration** — Release tracking and security
+  - Fetch Rust releases from GitHub API
+  - Parse release notes for security updates
+  - Local caching with TTL
+  - Offline mode support
+
+#### Documentation
+
+- Added VISION.md — Core vision and philosophy
+- Added ROADMAP.md — Implementation roadmap
+- Added FEATURES.md — Detailed feature status
+- Added CODE_OF_CONDUCT.md — Community standards
+- Added SECURITY.md — Security policy and reporting
+- Added CONTRIBUTORS.md — Recognition file
+- Added DOGFOODING.md — Self-validation policy
+- Added REPOSITORY_STRUCTURE.md — File organization guide
+- Added GitHub issue/PR templates
+- Added dependabot configuration
+- Consolidated and cleaned up old planning documents
+
 ## [Unreleased] — Ferrous Forge Redesign (v1.7.0)
 
 ### Fixed (Phase 1 — Bug Fixes)
@@ -555,3 +640,10 @@ ferrous-forge edition migrate 2024
 - CVE numbers assigned for security vulnerabilities
 - Security advisories published on GitHub
 - Automated dependency vulnerability scanning
+
+---
+
+## Version Comparison
+
+[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.7.6...v1.8.0
