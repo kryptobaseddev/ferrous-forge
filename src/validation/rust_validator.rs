@@ -99,6 +99,21 @@ impl RustValidator {
             .await?;
         }
 
+        // Check version consistency (SSoT)
+        if self
+            .config
+            .validation
+            .check_version_consistency
+            .unwrap_or(true)
+        {
+            let version_validator = crate::validation::VersionConsistencyValidator::new(
+                self.project_root.clone(),
+                self.config.clone(),
+            )?;
+            let version_result = version_validator.validate().await?;
+            violations.extend(version_result.violations);
+        }
+
         Ok(violations)
     }
 

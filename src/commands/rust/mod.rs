@@ -72,7 +72,7 @@ pub async fn handle_check(verbose: bool, enforce: bool) -> Result<()> {
                 "{}",
                 style("   Update Rust or adjust locked version requirements.").dim()
             );
-            return Err(crate::Error::validation(format!(
+            return Err(Error::validation(format!(
                 "Current Rust version {} does not meet locked requirements ({})",
                 check.current,
                 check.requirements.description()
@@ -191,7 +191,7 @@ pub async fn handle_update(dry_run: bool, yes: bool, self_update: bool) -> Resul
     let rustup = RustupManager::new();
 
     if !rustup.is_available() {
-        return Err(crate::Error::rust_not_found(
+        return Err(Error::rust_not_found(
             "rustup not found. Please install rustup from https://rustup.rs",
         ));
     }
@@ -326,7 +326,7 @@ pub async fn handle_install_toolchain(channel: String, set_default: bool) -> Res
     let rustup = RustupManager::new();
 
     if !rustup.is_available() {
-        return Err(crate::Error::rust_not_found(
+        return Err(Error::rust_not_found(
             "rustup not found. Please install rustup from https://rustup.rs",
         ));
     }
@@ -377,7 +377,7 @@ pub async fn handle_uninstall_toolchain(channel: String) -> Result<()> {
     let rustup = RustupManager::new();
 
     if !rustup.is_available() {
-        return Err(crate::Error::rust_not_found(
+        return Err(Error::rust_not_found(
             "rustup not found. Please install rustup from https://rustup.rs",
         ));
     }
@@ -428,7 +428,7 @@ pub async fn handle_switch(channel: String) -> Result<()> {
     let rustup = RustupManager::new();
 
     if !rustup.is_available() {
-        return Err(crate::Error::rust_not_found(
+        return Err(Error::rust_not_found(
             "rustup not found. Please install rustup from https://rustup.rs",
         ));
     }
@@ -495,7 +495,7 @@ pub async fn enforce_version_requirements() -> Result<()> {
         println!("   2. Adjust locked requirements: ferrous-forge config unlock rust-version");
         println!();
 
-        return Err(crate::Error::validation(format!(
+        return Err(Error::validation(format!(
             "Current Rust version {} does not meet locked requirements ({})",
             check.current,
             check.requirements.description()
@@ -765,7 +765,7 @@ pub async fn handle_security(fail_on_issues: bool) -> Result<()> {
     SecurityChecker::display_results(&result);
 
     if fail_on_issues && !result.is_secure {
-        return Err(crate::Error::validation(
+        return Err(Error::validation(
             "Security issues found. Update required.",
         ));
     }

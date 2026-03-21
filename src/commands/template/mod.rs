@@ -291,7 +291,7 @@ async fn install_template(name: &str, _as_name: Option<&str>) -> Result<()> {
             for error in &validation.errors {
                 println!("  • {}", error);
             }
-            return Err(crate::Error::template(
+            return Err(Error::template(
                 "Template validation failed - cannot install",
             ));
         }
@@ -367,7 +367,7 @@ async fn update_templates(template: Option<&str>, check: bool) -> Result<()> {
                 );
             }
         } else {
-            return Err(crate::Error::template(format!(
+            return Err(Error::template(format!(
                 "Template '{}' not found in cache",
                 name
             )));
@@ -440,7 +440,7 @@ async fn create_template_from_project(
 
     // Validate project exists
     if !project.exists() {
-        return Err(crate::Error::template(format!(
+        return Err(Error::template(format!(
             "Project path does not exist: {}",
             project.display()
         )));
@@ -449,7 +449,7 @@ async fn create_template_from_project(
     // Check for Cargo.toml
     let cargo_toml = project.join("Cargo.toml");
     if !cargo_toml.exists() {
-        return Err(crate::Error::template(
+        return Err(Error::template(
             "No Cargo.toml found - is this a Rust project?",
         ));
     }
@@ -492,7 +492,7 @@ async fn remove_template(name: &str, yes: bool) -> Result<()> {
     let mut repository = TemplateRepository::new()?;
 
     if !repository.is_cached(name) {
-        return Err(crate::Error::template(format!(
+        return Err(Error::template(format!(
             "Template '{}' not found in cache",
             name
         )));
@@ -508,7 +508,7 @@ async fn remove_template(name: &str, yes: bool) -> Result<()> {
             .with_prompt("Are you sure?")
             .default(false)
             .interact()
-            .map_err(|e| crate::Error::template(format!("Failed to get confirmation: {e}")))?;
+            .map_err(|e| Error::template(format!("Failed to get confirmation: {e}")))?;
 
         if !confirm {
             println!("Cancelled.");
@@ -573,7 +573,7 @@ async fn show_template_info_extended(template: &str, show_cache: bool) -> Result
         if registry.get_builtin(template).is_some() {
             show_template_info(template).await?;
         } else {
-            return Err(crate::Error::template(format!(
+            return Err(Error::template(format!(
                 "Template '{}' not found",
                 template
             )));

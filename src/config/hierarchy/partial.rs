@@ -1,7 +1,7 @@
 //! Partial configuration for hierarchical merging
 
 use super::ConfigLevel;
-use crate::config::{Config, CustomRule};
+use crate::config::{Config, CustomRule, ValidationConfig};
 use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use tokio::fs;
@@ -143,6 +143,7 @@ impl PartialConfig {
                 .require_documentation
                 .unwrap_or(default.require_documentation),
             custom_rules: self.custom_rules.unwrap_or(default.custom_rules),
+            validation: ValidationConfig::default(),
         }
     }
 }

@@ -5,6 +5,34 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2025-03-21
+
+### Added
+
+- **Version Consistency Validation** — Enforces Single Source of Truth for versions
+  - Detects hardcoded version strings in source code
+  - Supports both SemVer (1.2.3) and CalVer (2025.03.21) formats
+  - Suggests using `env!("CARGO_PKG_VERSION")` instead of hardcoded values
+  - Configurable exclusions for legitimate version usage
+
+- **Changelog Validation** — Enforces Keep a Changelog format
+  - Validates CHANGELOG.md follows Keep a Changelog structure
+  - Requires version entry before creating git tags
+  - Checks for required sections (Added, Changed, Fixed)
+  - Blocks tagging if changelog is missing or incomplete
+
+- **New Violation Types**
+  - `HardcodedVersion` — Version hardcoded instead of using env macro
+  - `MissingChangelogEntry` — Version not documented in changelog
+  - `InvalidChangelogFormat` — Changelog doesn't follow Keep a Changelog
+
+- **Configuration Options**
+  - `check_version_consistency` — Enable version SSoT checking
+  - `enforce_keep_a_changelog` — Require Keep a Changelog format
+  - `require_changelog_entry` — Require entry for current version
+  - `check_changelog_on_tag` — Validate when creating git tags
+  - `changelog_required_sections` — Customizable required sections
+
 ## [1.8.0] - 2025-03-21
 
 ### Epic T014: Aggressive Enforcement System — COMPLETE
