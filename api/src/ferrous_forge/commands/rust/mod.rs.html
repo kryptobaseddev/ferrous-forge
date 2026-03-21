@@ -72,7 +72,7 @@
 <a href=#72 id=72 data-nosnippet>72</a>                <span class="string">"{}"</span>,
 <a href=#73 id=73 data-nosnippet>73</a>                style(<span class="string">"   Update Rust or adjust locked version requirements."</span>).dim()
 <a href=#74 id=74 data-nosnippet>74</a>            );
-<a href=#75 id=75 data-nosnippet>75</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::validation(<span class="macro">format!</span>(
+<a href=#75 id=75 data-nosnippet>75</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::validation(<span class="macro">format!</span>(
 <a href=#76 id=76 data-nosnippet>76</a>                <span class="string">"Current Rust version {} does not meet locked requirements ({})"</span>,
 <a href=#77 id=77 data-nosnippet>77</a>                check.current,
 <a href=#78 id=78 data-nosnippet>78</a>                check.requirements.description()
@@ -191,7 +191,7 @@
 <a href=#191 id=191 data-nosnippet>191</a>    <span class="kw">let </span>rustup = RustupManager::new();
 <a href=#192 id=192 data-nosnippet>192</a>
 <a href=#193 id=193 data-nosnippet>193</a>    <span class="kw">if </span>!rustup.is_available() {
-<a href=#194 id=194 data-nosnippet>194</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::rust_not_found(
+<a href=#194 id=194 data-nosnippet>194</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::rust_not_found(
 <a href=#195 id=195 data-nosnippet>195</a>            <span class="string">"rustup not found. Please install rustup from https://rustup.rs"</span>,
 <a href=#196 id=196 data-nosnippet>196</a>        ));
 <a href=#197 id=197 data-nosnippet>197</a>    }
@@ -326,7 +326,7 @@
 <a href=#326 id=326 data-nosnippet>326</a>    <span class="kw">let </span>rustup = RustupManager::new();
 <a href=#327 id=327 data-nosnippet>327</a>
 <a href=#328 id=328 data-nosnippet>328</a>    <span class="kw">if </span>!rustup.is_available() {
-<a href=#329 id=329 data-nosnippet>329</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::rust_not_found(
+<a href=#329 id=329 data-nosnippet>329</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::rust_not_found(
 <a href=#330 id=330 data-nosnippet>330</a>            <span class="string">"rustup not found. Please install rustup from https://rustup.rs"</span>,
 <a href=#331 id=331 data-nosnippet>331</a>        ));
 <a href=#332 id=332 data-nosnippet>332</a>    }
@@ -377,7 +377,7 @@
 <a href=#377 id=377 data-nosnippet>377</a>    <span class="kw">let </span>rustup = RustupManager::new();
 <a href=#378 id=378 data-nosnippet>378</a>
 <a href=#379 id=379 data-nosnippet>379</a>    <span class="kw">if </span>!rustup.is_available() {
-<a href=#380 id=380 data-nosnippet>380</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::rust_not_found(
+<a href=#380 id=380 data-nosnippet>380</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::rust_not_found(
 <a href=#381 id=381 data-nosnippet>381</a>            <span class="string">"rustup not found. Please install rustup from https://rustup.rs"</span>,
 <a href=#382 id=382 data-nosnippet>382</a>        ));
 <a href=#383 id=383 data-nosnippet>383</a>    }
@@ -428,7 +428,7 @@
 <a href=#428 id=428 data-nosnippet>428</a>    <span class="kw">let </span>rustup = RustupManager::new();
 <a href=#429 id=429 data-nosnippet>429</a>
 <a href=#430 id=430 data-nosnippet>430</a>    <span class="kw">if </span>!rustup.is_available() {
-<a href=#431 id=431 data-nosnippet>431</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::rust_not_found(
+<a href=#431 id=431 data-nosnippet>431</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::rust_not_found(
 <a href=#432 id=432 data-nosnippet>432</a>            <span class="string">"rustup not found. Please install rustup from https://rustup.rs"</span>,
 <a href=#433 id=433 data-nosnippet>433</a>        ));
 <a href=#434 id=434 data-nosnippet>434</a>    }
@@ -495,7 +495,7 @@
 <a href=#495 id=495 data-nosnippet>495</a>        <span class="macro">println!</span>(<span class="string">"   2. Adjust locked requirements: ferrous-forge config unlock rust-version"</span>);
 <a href=#496 id=496 data-nosnippet>496</a>        <span class="macro">println!</span>();
 <a href=#497 id=497 data-nosnippet>497</a>
-<a href=#498 id=498 data-nosnippet>498</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::validation(<span class="macro">format!</span>(
+<a href=#498 id=498 data-nosnippet>498</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::validation(<span class="macro">format!</span>(
 <a href=#499 id=499 data-nosnippet>499</a>            <span class="string">"Current Rust version {} does not meet locked requirements ({})"</span>,
 <a href=#500 id=500 data-nosnippet>500</a>            check.current,
 <a href=#501 id=501 data-nosnippet>501</a>            check.requirements.description()
@@ -765,7 +765,7 @@
 <a href=#765 id=765 data-nosnippet>765</a>    SecurityChecker::display_results(<span class="kw-2">&amp;</span>result);
 <a href=#766 id=766 data-nosnippet>766</a>
 <a href=#767 id=767 data-nosnippet>767</a>    <span class="kw">if </span>fail_on_issues &amp;&amp; !result.is_secure {
-<a href=#768 id=768 data-nosnippet>768</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::validation(
+<a href=#768 id=768 data-nosnippet>768</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::validation(
 <a href=#769 id=769 data-nosnippet>769</a>            <span class="string">"Security issues found. Update required."</span>,
 <a href=#770 id=770 data-nosnippet>770</a>        ));
 <a href=#771 id=771 data-nosnippet>771</a>    }

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Config","CustomRule"]};
+window.SIDEBAR_ITEMS = {"struct":["Config","CustomRule","ValidationConfig"]};

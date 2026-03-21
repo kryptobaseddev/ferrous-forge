@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["rust_validator","violation"]};
+window.SIDEBAR_ITEMS = {"mod":["rust_validator","version_consistency","violation"]};

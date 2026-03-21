@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/config/hierarchy/partial.rs`."><title>partial.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-77263533.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ferrous_forge" data-themes="" data-resource-suffix="" data-rustdoc-version="1.94.0 (4a4ef493e 2026-03-02)" data-channel="1.94.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-c38705f0.js" ><script src="../../../../static.files/storage-e2aeef58.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-7bab91a1.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-ffcac47a.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">ferrous_forge/config/hierarchy/</div>partial.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Partial configuration for hierarchical merging
 <a href=#2 id=2 data-nosnippet>2</a>
 <a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use </span><span class="kw">super</span>::ConfigLevel;
-<a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span><span class="kw">crate</span>::config::{Config, CustomRule};
+<a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span><span class="kw">crate</span>::config::{Config, CustomRule, ValidationConfig};
 <a href=#5 id=5 data-nosnippet>5</a><span class="kw">use </span>crate::{Error, <span class="prelude-ty">Result</span>};
 <a href=#6 id=6 data-nosnippet>6</a><span class="kw">use </span>serde::{Deserialize, Serialize};
 <a href=#7 id=7 data-nosnippet>7</a><span class="kw">use </span>tokio::fs;
@@ -143,44 +143,45 @@
 <a href=#143 id=143 data-nosnippet>143</a>                </span>.require_documentation
 <a href=#144 id=144 data-nosnippet>144</a>                .unwrap_or(default.require_documentation),
 <a href=#145 id=145 data-nosnippet>145</a>            custom_rules: <span class="self">self</span>.custom_rules.unwrap_or(default.custom_rules),
-<a href=#146 id=146 data-nosnippet>146</a>        }
-<a href=#147 id=147 data-nosnippet>147</a>    }
-<a href=#148 id=148 data-nosnippet>148</a>}
-<a href=#149 id=149 data-nosnippet>149</a>
-<a href=#150 id=150 data-nosnippet>150</a><span class="attr">#[cfg(test)]
-<a href=#151 id=151 data-nosnippet>151</a></span><span class="kw">mod </span>tests {
-<a href=#152 id=152 data-nosnippet>152</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
-<a href=#153 id=153 data-nosnippet>153</a>
-<a href=#154 id=154 data-nosnippet>154</a>    <span class="attr">#[test]
-<a href=#155 id=155 data-nosnippet>155</a>    </span><span class="kw">fn </span>test_partial_config_merge() {
-<a href=#156 id=156 data-nosnippet>156</a>        <span class="kw">let </span>base = PartialConfig {
-<a href=#157 id=157 data-nosnippet>157</a>            max_file_lines: <span class="prelude-val">Some</span>(<span class="number">300</span>),
-<a href=#158 id=158 data-nosnippet>158</a>            max_function_lines: <span class="prelude-val">Some</span>(<span class="number">50</span>),
-<a href=#159 id=159 data-nosnippet>159</a>            ..Default::default()
-<a href=#160 id=160 data-nosnippet>160</a>        };
-<a href=#161 id=161 data-nosnippet>161</a>
-<a href=#162 id=162 data-nosnippet>162</a>        <span class="kw">let </span>override_config = PartialConfig {
-<a href=#163 id=163 data-nosnippet>163</a>            max_file_lines: <span class="prelude-val">Some</span>(<span class="number">400</span>),
-<a href=#164 id=164 data-nosnippet>164</a>            required_edition: <span class="prelude-val">Some</span>(<span class="string">"2021"</span>.to_string()),
-<a href=#165 id=165 data-nosnippet>165</a>            ..Default::default()
-<a href=#166 id=166 data-nosnippet>166</a>        };
-<a href=#167 id=167 data-nosnippet>167</a>
-<a href=#168 id=168 data-nosnippet>168</a>        <span class="kw">let </span>merged = base.merge(override_config);
-<a href=#169 id=169 data-nosnippet>169</a>        <span class="macro">assert_eq!</span>(merged.max_file_lines, <span class="prelude-val">Some</span>(<span class="number">400</span>));
-<a href=#170 id=170 data-nosnippet>170</a>        <span class="macro">assert_eq!</span>(merged.max_function_lines, <span class="prelude-val">Some</span>(<span class="number">50</span>));
-<a href=#171 id=171 data-nosnippet>171</a>        <span class="macro">assert_eq!</span>(merged.required_edition, <span class="prelude-val">Some</span>(<span class="string">"2021"</span>.to_string()));
-<a href=#172 id=172 data-nosnippet>172</a>    }
-<a href=#173 id=173 data-nosnippet>173</a>
-<a href=#174 id=174 data-nosnippet>174</a>    <span class="attr">#[test]
-<a href=#175 id=175 data-nosnippet>175</a>    </span><span class="kw">fn </span>test_partial_to_full_config() {
-<a href=#176 id=176 data-nosnippet>176</a>        <span class="kw">let </span>partial = PartialConfig {
-<a href=#177 id=177 data-nosnippet>177</a>            max_file_lines: <span class="prelude-val">Some</span>(<span class="number">500</span>),
-<a href=#178 id=178 data-nosnippet>178</a>            ..Default::default()
-<a href=#179 id=179 data-nosnippet>179</a>        };
-<a href=#180 id=180 data-nosnippet>180</a>
-<a href=#181 id=181 data-nosnippet>181</a>        <span class="kw">let </span>full = partial.to_full_config();
-<a href=#182 id=182 data-nosnippet>182</a>        <span class="macro">assert_eq!</span>(full.max_file_lines, <span class="number">500</span>);
-<a href=#183 id=183 data-nosnippet>183</a>        <span class="macro">assert_eq!</span>(full.max_function_lines, <span class="number">50</span>); <span class="comment">// Default value
-<a href=#184 id=184 data-nosnippet>184</a>    </span>}
-<a href=#185 id=185 data-nosnippet>185</a>}
+<a href=#146 id=146 data-nosnippet>146</a>            validation: ValidationConfig::default(),
+<a href=#147 id=147 data-nosnippet>147</a>        }
+<a href=#148 id=148 data-nosnippet>148</a>    }
+<a href=#149 id=149 data-nosnippet>149</a>}
+<a href=#150 id=150 data-nosnippet>150</a>
+<a href=#151 id=151 data-nosnippet>151</a><span class="attr">#[cfg(test)]
+<a href=#152 id=152 data-nosnippet>152</a></span><span class="kw">mod </span>tests {
+<a href=#153 id=153 data-nosnippet>153</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
+<a href=#154 id=154 data-nosnippet>154</a>
+<a href=#155 id=155 data-nosnippet>155</a>    <span class="attr">#[test]
+<a href=#156 id=156 data-nosnippet>156</a>    </span><span class="kw">fn </span>test_partial_config_merge() {
+<a href=#157 id=157 data-nosnippet>157</a>        <span class="kw">let </span>base = PartialConfig {
+<a href=#158 id=158 data-nosnippet>158</a>            max_file_lines: <span class="prelude-val">Some</span>(<span class="number">300</span>),
+<a href=#159 id=159 data-nosnippet>159</a>            max_function_lines: <span class="prelude-val">Some</span>(<span class="number">50</span>),
+<a href=#160 id=160 data-nosnippet>160</a>            ..Default::default()
+<a href=#161 id=161 data-nosnippet>161</a>        };
+<a href=#162 id=162 data-nosnippet>162</a>
+<a href=#163 id=163 data-nosnippet>163</a>        <span class="kw">let </span>override_config = PartialConfig {
+<a href=#164 id=164 data-nosnippet>164</a>            max_file_lines: <span class="prelude-val">Some</span>(<span class="number">400</span>),
+<a href=#165 id=165 data-nosnippet>165</a>            required_edition: <span class="prelude-val">Some</span>(<span class="string">"2021"</span>.to_string()),
+<a href=#166 id=166 data-nosnippet>166</a>            ..Default::default()
+<a href=#167 id=167 data-nosnippet>167</a>        };
+<a href=#168 id=168 data-nosnippet>168</a>
+<a href=#169 id=169 data-nosnippet>169</a>        <span class="kw">let </span>merged = base.merge(override_config);
+<a href=#170 id=170 data-nosnippet>170</a>        <span class="macro">assert_eq!</span>(merged.max_file_lines, <span class="prelude-val">Some</span>(<span class="number">400</span>));
+<a href=#171 id=171 data-nosnippet>171</a>        <span class="macro">assert_eq!</span>(merged.max_function_lines, <span class="prelude-val">Some</span>(<span class="number">50</span>));
+<a href=#172 id=172 data-nosnippet>172</a>        <span class="macro">assert_eq!</span>(merged.required_edition, <span class="prelude-val">Some</span>(<span class="string">"2021"</span>.to_string()));
+<a href=#173 id=173 data-nosnippet>173</a>    }
+<a href=#174 id=174 data-nosnippet>174</a>
+<a href=#175 id=175 data-nosnippet>175</a>    <span class="attr">#[test]
+<a href=#176 id=176 data-nosnippet>176</a>    </span><span class="kw">fn </span>test_partial_to_full_config() {
+<a href=#177 id=177 data-nosnippet>177</a>        <span class="kw">let </span>partial = PartialConfig {
+<a href=#178 id=178 data-nosnippet>178</a>            max_file_lines: <span class="prelude-val">Some</span>(<span class="number">500</span>),
+<a href=#179 id=179 data-nosnippet>179</a>            ..Default::default()
+<a href=#180 id=180 data-nosnippet>180</a>        };
+<a href=#181 id=181 data-nosnippet>181</a>
+<a href=#182 id=182 data-nosnippet>182</a>        <span class="kw">let </span>full = partial.to_full_config();
+<a href=#183 id=183 data-nosnippet>183</a>        <span class="macro">assert_eq!</span>(full.max_file_lines, <span class="number">500</span>);
+<a href=#184 id=184 data-nosnippet>184</a>        <span class="macro">assert_eq!</span>(full.max_function_lines, <span class="number">50</span>); <span class="comment">// Default value
+<a href=#185 id=185 data-nosnippet>185</a>    </span>}
+<a href=#186 id=186 data-nosnippet>186</a>}
 </code></pre></div></section></main></body></html>

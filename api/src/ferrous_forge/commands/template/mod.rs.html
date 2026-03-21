@@ -291,7 +291,7 @@
 <a href=#291 id=291 data-nosnippet>291</a>            <span class="kw">for </span>error <span class="kw">in </span><span class="kw-2">&amp;</span>validation.errors {
 <a href=#292 id=292 data-nosnippet>292</a>                <span class="macro">println!</span>(<span class="string">"  • {}"</span>, error);
 <a href=#293 id=293 data-nosnippet>293</a>            }
-<a href=#294 id=294 data-nosnippet>294</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::template(
+<a href=#294 id=294 data-nosnippet>294</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::template(
 <a href=#295 id=295 data-nosnippet>295</a>                <span class="string">"Template validation failed - cannot install"</span>,
 <a href=#296 id=296 data-nosnippet>296</a>            ));
 <a href=#297 id=297 data-nosnippet>297</a>        }
@@ -367,7 +367,7 @@
 <a href=#367 id=367 data-nosnippet>367</a>                );
 <a href=#368 id=368 data-nosnippet>368</a>            }
 <a href=#369 id=369 data-nosnippet>369</a>        } <span class="kw">else </span>{
-<a href=#370 id=370 data-nosnippet>370</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::template(<span class="macro">format!</span>(
+<a href=#370 id=370 data-nosnippet>370</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::template(<span class="macro">format!</span>(
 <a href=#371 id=371 data-nosnippet>371</a>                <span class="string">"Template '{}' not found in cache"</span>,
 <a href=#372 id=372 data-nosnippet>372</a>                name
 <a href=#373 id=373 data-nosnippet>373</a>            )));
@@ -440,7 +440,7 @@
 <a href=#440 id=440 data-nosnippet>440</a>
 <a href=#441 id=441 data-nosnippet>441</a>    <span class="comment">// Validate project exists
 <a href=#442 id=442 data-nosnippet>442</a>    </span><span class="kw">if </span>!project.exists() {
-<a href=#443 id=443 data-nosnippet>443</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::template(<span class="macro">format!</span>(
+<a href=#443 id=443 data-nosnippet>443</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::template(<span class="macro">format!</span>(
 <a href=#444 id=444 data-nosnippet>444</a>            <span class="string">"Project path does not exist: {}"</span>,
 <a href=#445 id=445 data-nosnippet>445</a>            project.display()
 <a href=#446 id=446 data-nosnippet>446</a>        )));
@@ -449,7 +449,7 @@
 <a href=#449 id=449 data-nosnippet>449</a>    <span class="comment">// Check for Cargo.toml
 <a href=#450 id=450 data-nosnippet>450</a>    </span><span class="kw">let </span>cargo_toml = project.join(<span class="string">"Cargo.toml"</span>);
 <a href=#451 id=451 data-nosnippet>451</a>    <span class="kw">if </span>!cargo_toml.exists() {
-<a href=#452 id=452 data-nosnippet>452</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::template(
+<a href=#452 id=452 data-nosnippet>452</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::template(
 <a href=#453 id=453 data-nosnippet>453</a>            <span class="string">"No Cargo.toml found - is this a Rust project?"</span>,
 <a href=#454 id=454 data-nosnippet>454</a>        ));
 <a href=#455 id=455 data-nosnippet>455</a>    }
@@ -492,7 +492,7 @@
 <a href=#492 id=492 data-nosnippet>492</a>    <span class="kw">let </span><span class="kw-2">mut </span>repository = TemplateRepository::new()<span class="question-mark">?</span>;
 <a href=#493 id=493 data-nosnippet>493</a>
 <a href=#494 id=494 data-nosnippet>494</a>    <span class="kw">if </span>!repository.is_cached(name) {
-<a href=#495 id=495 data-nosnippet>495</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::template(<span class="macro">format!</span>(
+<a href=#495 id=495 data-nosnippet>495</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::template(<span class="macro">format!</span>(
 <a href=#496 id=496 data-nosnippet>496</a>            <span class="string">"Template '{}' not found in cache"</span>,
 <a href=#497 id=497 data-nosnippet>497</a>            name
 <a href=#498 id=498 data-nosnippet>498</a>        )));
@@ -508,7 +508,7 @@
 <a href=#508 id=508 data-nosnippet>508</a>            .with_prompt(<span class="string">"Are you sure?"</span>)
 <a href=#509 id=509 data-nosnippet>509</a>            .default(<span class="bool-val">false</span>)
 <a href=#510 id=510 data-nosnippet>510</a>            .interact()
-<a href=#511 id=511 data-nosnippet>511</a>            .map_err(|e| <span class="kw">crate</span>::Error::template(<span class="macro">format!</span>(<span class="string">"Failed to get confirmation: {e}"</span>)))<span class="question-mark">?</span>;
+<a href=#511 id=511 data-nosnippet>511</a>            .map_err(|e| Error::template(<span class="macro">format!</span>(<span class="string">"Failed to get confirmation: {e}"</span>)))<span class="question-mark">?</span>;
 <a href=#512 id=512 data-nosnippet>512</a>
 <a href=#513 id=513 data-nosnippet>513</a>        <span class="kw">if </span>!confirm {
 <a href=#514 id=514 data-nosnippet>514</a>            <span class="macro">println!</span>(<span class="string">"Cancelled."</span>);
@@ -573,7 +573,7 @@
 <a href=#573 id=573 data-nosnippet>573</a>        <span class="kw">if </span>registry.get_builtin(template).is_some() {
 <a href=#574 id=574 data-nosnippet>574</a>            show_template_info(template).<span class="kw">await</span><span class="question-mark">?</span>;
 <a href=#575 id=575 data-nosnippet>575</a>        } <span class="kw">else </span>{
-<a href=#576 id=576 data-nosnippet>576</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::template(<span class="macro">format!</span>(
+<a href=#576 id=576 data-nosnippet>576</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::template(<span class="macro">format!</span>(
 <a href=#577 id=577 data-nosnippet>577</a>                <span class="string">"Template '{}' not found"</span>,
 <a href=#578 id=578 data-nosnippet>578</a>                template
 <a href=#579 id=579 data-nosnippet>579</a>            )));

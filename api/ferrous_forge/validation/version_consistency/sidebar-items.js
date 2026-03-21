@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["VersionFormat"],"struct":["ChangelogRequirements","ChangelogStatus","VersionConsistencyValidator","VersionValidationResult"]};
