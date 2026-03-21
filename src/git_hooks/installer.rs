@@ -1,11 +1,17 @@
-//! Git hooks installation and removal logic
+//! Git hooks installation and removal logic for mandatory safety pipeline
+//!
+//! @task T017
+//! @epic T014
 
 use super::scripts::{COMMIT_MSG_HOOK, PRE_COMMIT_HOOK, PRE_PUSH_HOOK};
 use crate::{Error, Result};
 use std::path::Path;
 use tokio::fs;
 
-/// Install git hooks for a project
+/// Install mandatory blocking git hooks for a project
+///
+/// These hooks BLOCK commits/pushes when safety checks fail.
+/// Bypass is available via: ferrous-forge safety bypass --stage=...
 ///
 /// # Errors
 ///
@@ -28,28 +34,25 @@ pub async fn install_git_hooks(project_path: &Path) -> Result<()> {
             .map_err(|e| Error::process(format!("Failed to create hooks directory: {}", e)))?;
     }
 
-    println!("📎 Installing git hooks...");
+    println!("🔒 Installing mandatory safety hooks...");
 
-    // Install pre-commit hook
+    // Install pre-commit hook (blocking)
     install_hook(&hooks_dir, "pre-commit", PRE_COMMIT_HOOK).await?;
-    println!("  ✅ Installed pre-commit hook");
+    println!("  ✅ Installed blocking pre-commit hook");
 
-    // Install pre-push hook
+    // Install pre-push hook (blocking)
     install_hook(&hooks_dir, "pre-push", PRE_PUSH_HOOK).await?;
-    println!("  ✅ Installed pre-push hook");
+    println!("  ✅ Installed blocking pre-push hook");
 
-    // Install commit-msg hook
+    // Install commit-msg hook (non-blocking, format check)
     install_hook(&hooks_dir, "commit-msg", COMMIT_MSG_HOOK).await?;
     println!("  ✅ Installed commit-msg hook");
 
-    println!("🎉 Git hooks installed successfully!");
     println!();
-    println!("Hooks will now run automatically:");
-    println!("  • pre-commit: Validates code before each commit");
-    println!("  • pre-push: Runs tests and full validation before push");
-    println!("  • commit-msg: Ensures conventional commit format");
+    println!("🛡️  Mandatory safety hooks installed!");
     println!();
-    println!("To bypass hooks temporarily, use: git commit --no-verify");
+    println!("These hooks will BLOCK commits/pushes that fail checks.");
+    println!("To bypass temporarily: ferrous-forge safety bypass --stage=...");
 
     Ok(())
 }
@@ -65,21 +68,26 @@ async fn install_hook(hooks_dir: &Path, name: &str, content: &str) -> Result<()>
             .map_err(|e| Error::process(format!("Failed to read existing hook: {}", e)))?;
 
         if existing.contains("Ferrous Forge") {
-            // Our hook is already installed
-            return Ok(());
+            // Our hook is already installed - check if it's the new blocking version
+            if existing.contains("🛡️  FERROUS FORGE BLOCKED") {
+                // Already has the blocking version
+                return Ok(());
+            }
+            // Has old version, needs upgrade
+            println!("  🔄 Upgrading {} hook to blocking version", name);
+        } else {
+            // Backup existing hook
+            let backup_path = hooks_dir.join(format!("{}.backup", name));
+            fs::rename(&hook_path, &backup_path)
+                .await
+                .map_err(|e| Error::process(format!("Failed to backup existing hook: {}", e)))?;
+
+            println!(
+                "  ⚠️  Backed up existing {} hook to {}",
+                name,
+                backup_path.display()
+            );
         }
-
-        // Backup existing hook
-        let backup_path = hooks_dir.join(format!("{}.backup", name));
-        fs::rename(&hook_path, &backup_path)
-            .await
-            .map_err(|e| Error::process(format!("Failed to backup existing hook: {}", e)))?;
-
-        println!(
-            "  ⚠️  Backed up existing {} hook to {}",
-            name,
-            backup_path.display()
-        );
     }
 
     // Write hook content
@@ -117,7 +125,7 @@ pub async fn uninstall_git_hooks(project_path: &Path) -> Result<()> {
 
     let hooks_dir = git_dir.join("hooks");
 
-    println!("🗑️  Removing git hooks...");
+    println!("🗑️  Removing safety hooks...");
 
     // Remove our hooks
     for hook_name in &["pre-commit", "pre-push", "commit-msg"] {
@@ -143,6 +151,29 @@ pub async fn uninstall_git_hooks(project_path: &Path) -> Result<()> {
         }
     }
 
-    println!("🎉 Git hooks removed successfully!");
+    println!("🎉 Safety hooks removed successfully!");
     Ok(())
+}
+
+/// Check if mandatory safety hooks are installed
+///
+/// Returns a tuple of (`pre_commit_installed`, `pre_push_installed`)
+pub fn check_hooks_status(project_path: &Path) -> (bool, bool) {
+    let hooks_dir = project_path.join(".git").join("hooks");
+
+    let pre_commit_installed =
+        if let Ok(content) = std::fs::read_to_string(hooks_dir.join("pre-commit")) {
+            content.contains("Ferrous Forge") && content.contains("🛡️  FERROUS FORGE BLOCKED")
+        } else {
+            false
+        };
+
+    let pre_push_installed =
+        if let Ok(content) = std::fs::read_to_string(hooks_dir.join("pre-push")) {
+            content.contains("Ferrous Forge") && content.contains("🛡️  FERROUS FORGE BLOCKED")
+        } else {
+            false
+        };
+
+    (pre_commit_installed, pre_push_installed)
 }

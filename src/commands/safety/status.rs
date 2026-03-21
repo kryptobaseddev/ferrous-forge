@@ -1,4 +1,7 @@
 //! Safety status display functions
+//!
+//! @task T017
+//! @epic T014
 
 use std::path::Path;
 
@@ -27,6 +30,14 @@ fn display_safety_config_found(config: &crate::safety::SafetyConfig) {
     println!(
         "   Strict mode: {}",
         if config.strict_mode { "Yes" } else { "No" }
+    );
+    println!(
+        "   Blocking: {}",
+        if config.strict_mode {
+            "🛡️  MANDATORY (blocks on failure)"
+        } else {
+            "⚠️  Warning only"
+        }
     );
 
     display_stage_configuration(config);
@@ -75,6 +86,9 @@ fn display_bypass_configuration(config: &crate::safety::SafetyConfig) {
     if config.bypass.enabled {
         println!("   Max per day: {}", config.bypass.max_bypasses_per_day);
         println!("   Requires reason: {}", config.bypass.require_reason);
+        println!("\n   To bypass: ferrous-forge safety bypass --stage=STAGE --reason=\"...\"");
+    } else {
+        println!("\n   ⚠️  Bypass is disabled - no way to skip safety checks!");
     }
 }
 
@@ -90,25 +104,56 @@ pub fn display_git_hooks_status() {
     if git_dir.exists() {
         println!("\n🪝 Git Hooks:");
 
-        let pre_commit_hook = git_dir.join("hooks/pre-commit");
-        let pre_push_hook = git_dir.join("hooks/pre-push");
+        let hooks_dir = git_dir.join("hooks");
+        let pre_commit_hook = hooks_dir.join("pre-commit");
+        let pre_push_hook = hooks_dir.join("pre-push");
 
-        println!(
-            "   Pre-commit: {}",
-            if pre_commit_hook.exists() {
-                "✅ Installed"
+        let pre_commit_status = if pre_commit_hook.exists() {
+            if let Ok(content) = std::fs::read_to_string(&pre_commit_hook) {
+                if content.contains("🛡️  FERROUS FORGE BLOCKED") {
+                    "✅ Installed (blocking)"
+                } else if content.contains("Ferrous Forge") {
+                    "⚠️  Installed (non-blocking)"
+                } else {
+                    "⚠️  Installed (third-party)"
+                }
             } else {
-                "❌ Not installed"
+                "⚠️  Installed (cannot read)"
             }
-        );
-        println!(
-            "   Pre-push: {}",
-            if pre_push_hook.exists() {
-                "✅ Installed"
+        } else {
+            "❌ Not installed"
+        };
+
+        let pre_push_status = if pre_push_hook.exists() {
+            if let Ok(content) = std::fs::read_to_string(&pre_push_hook) {
+                if content.contains("🛡️  FERROUS FORGE BLOCKED") {
+                    "✅ Installed (blocking)"
+                } else if content.contains("Ferrous Forge") {
+                    "⚠️  Installed (non-blocking)"
+                } else {
+                    "⚠️  Installed (third-party)"
+                }
             } else {
-                "❌ Not installed"
+                "⚠️  Installed (cannot read)"
             }
-        );
+        } else {
+            "❌ Not installed"
+        };
+
+        println!("   Pre-commit: {}", pre_commit_status);
+        println!("   Pre-push: {}", pre_push_status);
+
+        // Show summary
+        if pre_commit_status.contains("blocking") && pre_push_status.contains("blocking") {
+            println!("\n🛡️  Mandatory blocking is ACTIVE");
+            println!("   Commits and pushes will be BLOCKED if checks fail");
+        } else if pre_commit_hook.exists() || pre_push_hook.exists() {
+            println!("\n⚠️  Partial installation detected");
+            println!("   Run: ferrous-forge safety install --force");
+        } else {
+            println!("\n⚠️  Safety hooks are NOT installed");
+            println!("   Run: ferrous-forge safety install");
+        }
     } else {
         println!("\n🪝 Git Hooks: Not a git repository");
     }

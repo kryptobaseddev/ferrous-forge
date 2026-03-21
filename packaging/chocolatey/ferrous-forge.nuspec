@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @task T023 -->
+<!-- @epic T014 -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>ferrous-forge</id>
+    <version>1.7.6</version>
+    <packageSourceUrl>https://github.com/kryptobaseddev/ferrous-forge/tree/main/packaging/chocolatey</packageSourceUrl>
+    <owners>FerrousForge</owners>
+    <title>Ferrous Forge</title>
+    <authors>Ferrous Forge Contributors</authors>
+    <projectUrl>https://ferrous-forge.dev</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/kryptobaseddev/ferrous-forge/main/assets/logo.png</iconUrl>
+    <copyright>2025 Ferrous Forge Contributors</copyright>
+    <licenseUrl>https://github.com/kryptobaseddev/ferrous-forge/blob/main/LICENSE-MIT</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/kryptobaseddev/ferrous-forge</projectSourceUrl>
+    <docsUrl>https://docs.rs/ferrous-forge</docsUrl>
+    <bugTrackerUrl>https://github.com/kryptobaseddev/ferrous-forge/issues</bugTrackerUrl>
+    <tags>rust development standards linter cargo clippy</tags>
+    <summary>System-wide Rust development standards enforcer</summary>
+    <description><![CDATA[
+# Ferrous Forge
+
+**The Type-Safe Rust Development Standards Enforcer**
+
+Ferrous Forge is a system-wide Rust development standards enforcer that automatically applies professional-grade coding standards to your Rust projects.
+
+## Features
+
+- **Rust Version Management** — Check and recommend Rust version updates
+- **Edition Management** — Enforce Rust Edition 2024 compliance
+- **Safety Pipeline** — Pre-commit and pre-push validation hooks
+- **Standards Enforcement** — Clippy, formatting, security audits
+- **Zero Configuration** — Works immediately after installation
+
+## Quick Start
+
+```powershell
+# Install via Chocolatey
+choco install ferrous-forge
+
+# Initialize system-wide standards
+ferrous-forge init
+
+# Check your Rust version
+ferrous-forge rust check
+```
+
+## Usage
+
+Once installed, Ferrous Forge integrates with your cargo commands to enforce standards automatically.
+
+For more information, visit: https://ferrous-forge.dev
+]]></description>
+    <releaseNotes>https://github.com/kryptobaseddev/ferrous-forge/blob/main/CHANGELOG.md</releaseNotes>
+    <dependencies>
+      <dependency id="rust" version="1.88.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

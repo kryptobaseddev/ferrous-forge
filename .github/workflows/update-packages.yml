@@ -1,0 +1,221 @@
+# @task T023
+# @epic T014
+# This workflow updates package manager formulas on release
+name: Update Package Managers
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to update (e.g., 1.7.6)'
+        required: true
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Calculate SHA256 checksums from release artifacts
+  get-checksums:
+    name: Get Release Checksums
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      linux_x86_64_sha: ${{ steps.checksums.outputs.linux_x86_64 }}
+      macos_x86_64_sha: ${{ steps.checksums.outputs.macos_x86_64 }}
+      macos_aarch64_sha: ${{ steps.checksums.outputs.macos_aarch64 }}
+      windows_x86_64_sha: ${{ steps.checksums.outputs.windows_x86_64 }}
+    steps:
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download release artifacts
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Linux x86_64
+          curl -sL "https://github.com/kryptobaseddev/ferrous-forge/releases/download/v$VERSION/ferrous-forge-linux-x86_64.tar.gz" -o linux_x86_64.tar.gz
+          
+          # macOS x86_64
+          curl -sL "https://github.com/kryptobaseddev/ferrous-forge/releases/download/v$VERSION/ferrous-forge-macos-x86_64.tar.gz" -o macos_x86_64.tar.gz
+          
+          # macOS aarch64
+          curl -sL "https://github.com/kryptobaseddev/ferrous-forge/releases/download/v$VERSION/ferrous-forge-macos-aarch64.tar.gz" -o macos_aarch64.tar.gz
+          
+          # Windows x86_64
+          curl -sL "https://github.com/kryptobaseddev/ferrous-forge/releases/download/v$VERSION/ferrous-forge-windows-x86_64.zip" -o windows_x86_64.zip
+
+      - name: Calculate checksums
+        id: checksums
+        run: |
+          echo "linux_x86_64=$(sha256sum linux_x86_64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "macos_x86_64=$(sha256sum macos_x86_64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "macos_aarch64=$(sha256sum macos_aarch64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "windows_x86_64=$(sha256sum windows_x86_64.zip | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+  # Update Homebrew formula
+  update-homebrew:
+    name: Update Homebrew Formula
+    runs-on: ubuntu-latest
+    needs: get-checksums
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update Homebrew formula
+        run: |
+          VERSION="${{ needs.get-checksums.outputs.version }}"
+          LINUX_SHA="${{ needs.get-checksums.outputs.linux_x86_64_sha }}"
+          MACOS_X86_SHA="${{ needs.get-checksums.outputs.macos_x86_64_sha }}"
+          MACOS_ARM_SHA="${{ needs.get-checksums.outputs.macos_aarch64_sha }}"
+          
+          sed -i "s/version \".*\"/version \"$VERSION\"/" packaging/homebrew/ferrous-forge.rb
+          sed -i "s/PLACEHOLDER_SHA256_LINUX_X86_64/$LINUX_SHA/" packaging/homebrew/ferrous-forge.rb
+          sed -i "s/PLACEHOLDER_SHA256_MACOS_X86_64/$MACOS_X86_SHA/" packaging/homebrew/ferrous-forge.rb
+          sed -i "s/PLACEHOLDER_SHA256_MACOS_AARCH64/$MACOS_ARM_SHA/" packaging/homebrew/ferrous-forge.rb
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update Homebrew formula to v${{ needs.get-checksums.outputs.version }}"
+          title: "chore: update Homebrew formula to v${{ needs.get-checksums.outputs.version }}"
+          body: |
+            Automated update of Homebrew formula for Ferrous Forge v${{ needs.get-checksums.outputs.version }}.
+            
+            - Updated version: ${{ needs.get-checksums.outputs.version }}
+            - Updated SHA256 checksums for all platforms
+          branch: update-homebrew-formula
+          delete-branch: true
+
+  # Update AUR package
+  update-aur:
+    name: Update AUR Package
+    runs-on: ubuntu-latest
+    needs: get-checksums
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update AUR PKGBUILD
+        run: |
+          VERSION="${{ needs.get-checksums.outputs.version }}"
+          LINUX_SHA="${{ needs.get-checksums.outputs.linux_x86_64_sha }}"
+          
+          sed -i "s/pkgver=.*/pkgver=$VERSION/" packaging/aur/PKGBUILD
+          
+          # Update .SRCINFO as well
+          sed -i "s/pkgver = .*/pkgver = $VERSION/" packaging/aur/.SRCINFO
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update AUR package to v${{ needs.get-checksums.outputs.version }}"
+          title: "chore: update AUR package to v${{ needs.get-checksums.outputs.version }}"
+          body: |
+            Automated update of AUR package for Ferrous Forge v${{ needs.get-checksums.outputs.version }}.
+            
+            - Updated pkgver: ${{ needs.get-checksums.outputs.version }}
+          branch: update-aur-package
+          delete-branch: true
+
+  # Update Chocolatey package
+  update-chocolatey:
+    name: Update Chocolatey Package
+    runs-on: ubuntu-latest
+    needs: get-checksums
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update Chocolatey package
+        run: |
+          VERSION="${{ needs.get-checksums.outputs.version }}"
+          WINDOWS_SHA="${{ needs.get-checksums.outputs.windows_x86_64_sha }}"
+          
+          sed -i "s/<version>.*<\/version>/<version>$VERSION<\/version>/" packaging/chocolatey/ferrous-forge.nuspec
+          sed -i "s/\$version = '.*'/\$version = '$VERSION'/" packaging/chocolatey/tools/chocolateyinstall.ps1
+          sed -i "s/PLACEHOLDER_CHECKSUM/$WINDOWS_SHA/" packaging/chocolatey/tools/chocolateyinstall.ps1
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update Chocolatey package to v${{ needs.get-checksums.outputs.version }}"
+          title: "chore: update Chocolatey package to v${{ needs.get-checksums.outputs.version }}"
+          body: |
+            Automated update of Chocolatey package for Ferrous Forge v${{ needs.get-checksums.outputs.version }}.
+            
+            - Updated version: ${{ needs.get-checksums.outputs.version }}
+            - Updated SHA256 checksum for Windows x86_64
+          branch: update-chocolatey-package
+          delete-branch: true
+
+  # Update Nix package (placeholder - requires manual hash calculation)
+  update-nix:
+    name: Update Nix Package
+    runs-on: ubuntu-latest
+    needs: get-checksums
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update Nix derivation
+        run: |
+          VERSION="${{ needs.get-checksums.outputs.version }}"
+          
+          sed -i "s/version = \".*\"/version = \"$VERSION\"/" packaging/nix/default.nix
+          sed -i "s/version = \".*\"/version = \"$VERSION\"/" packaging/nix/flake.nix
+          
+          # Note: cargoHash must be updated manually after first build attempt
+          echo "::warning::Nix cargoHash must be updated manually after first failed build attempt"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update Nix package to v${{ needs.get-checksums.outputs.version }}"
+          title: "chore: update Nix package to v${{ needs.get-checksums.outputs.version }}"
+          body: |
+            Automated update of Nix package for Ferrous Forge v${{ needs.get-checksums.outputs.version }}.
+            
+            - Updated version: ${{ needs.get-checksums.outputs.version }}
+            
+            **Note:** The `cargoHash` in `packaging/nix/default.nix` must be updated manually.
+            Run `nix-prefetch-url --unpack https://github.com/kryptobaseddev/ferrous-forge/archive/v${{ needs.get-checksums.outputs.version }}.tar.gz` to get the new hash.
+          branch: update-nix-package
+          delete-branch: true
+
+  # Create summary comment on release
+  summary:
+    name: Create Summary
+    runs-on: ubuntu-latest
+    needs: [get-checksums, update-homebrew, update-aur, update-chocolatey, update-nix]
+    if: always()
+    steps:
+      - name: Create summary
+        run: |
+          echo "## Package Manager Updates" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Version: **${{ needs.get-checksums.outputs.version }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Checksums" >> $GITHUB_STEP_SUMMARY
+          echo "- Linux x86_64: \`${{ needs.get-checksums.outputs.linux_x86_64_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- macOS x86_64: \`${{ needs.get-checksums.outputs.macos_x86_64_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- macOS aarch64: \`${{ needs.get-checksums.outputs.macos_aarch64_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Windows x86_64: \`${{ needs.get-checksums.outputs.windows_x86_64_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Update Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Homebrew: ${{ needs.update-homebrew.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- AUR: ${{ needs.update-aur.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Chocolatey: ${{ needs.update-chocolatey.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Nix: ${{ needs.update-nix.result }}" >> $GITHUB_STEP_SUMMARY

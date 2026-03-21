@@ -1,0 +1,50 @@
+# Maintainer: Ferrous Forge Contributors <ferrous-forge@googlegroups.com>
+# @task T023
+# @epic T014
+pkgname=ferrous-forge
+pkgver=1.7.6
+pkgrel=1
+pkgdesc="System-wide Rust development standards enforcer"
+arch=('x86_64' 'aarch64')
+url="https://ferrous-forge.dev"
+license=('MIT' 'Apache')
+depends=('rust' 'cargo')
+makedepends=('rust' 'cargo')
+optdepends=('git: For git hook integration')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/kryptobaseddev/ferrous-forge/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$pkgname-$pkgver"
+    export CARGO_TARGET_DIR="target"
+    cargo build --frozen --release
+}
+
+check() {
+    cd "$pkgname-$pkgver"
+    cargo test --frozen --release
+}
+
+package() {
+    cd "$pkgname-$pkgver"
+    
+    # Install binary
+    install -Dm755 "target/release/ferrous-forge" "$pkgdir/usr/bin/ferrous-forge"
+    
+    # Install documentation
+    install -Dm644 "README.md" "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 "CHANGELOG.md" "$pkgdir/usr/share/doc/$pkgname/CHANGELOG.md"
+    
+    # Install licenses
+    install -Dm644 "LICENSE-MIT" "$pkgdir/usr/share/licenses/$pkgname/LICENSE-MIT"
+    install -Dm644 "LICENSE-APACHE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE-APACHE"
+    
+    # Install shell completions (if available in future releases)
+    # install -Dm644 "completions/ferrous-forge.bash" "$pkgdir/usr/share/bash-completion/completions/ferrous-forge"
+    # install -Dm644 "completions/ferrous-forge.fish" "$pkgdir/usr/share/fish/vendor_completions.d/ferrous-forge.fish"
+    # install -Dm644 "completions/_ferrous-forge" "$pkgdir/usr/share/zsh/site-functions/_ferrous-forge"
+}
+
+# Optional: AUR specific metadata
+# Maintainer note: Update .SRCINFO after modifying PKGBUILD
+# makepkg --printsrcinfo > .SRCINFO

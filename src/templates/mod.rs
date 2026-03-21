@@ -2,6 +2,9 @@
 //!
 //! This module provides a complete template system for creating new Rust projects
 //! that are pre-configured to comply with Ferrous Forge standards.
+//!
+//! @task T021
+//! @epic T014
 
 /// Built-in project template definitions.
 pub mod builtin;
@@ -11,8 +14,13 @@ pub mod engine;
 pub mod manifest;
 /// Template discovery and registration.
 pub mod registry;
+/// Template repository management for community templates.
+pub mod repository;
+/// Template validation.
+pub mod validation;
 
 pub use engine::{TemplateEngine, TemplateVariable};
 pub use manifest::{TemplateFile, TemplateKind, TemplateManifest};
 pub use registry::BuiltinTemplate;
 pub use registry::TemplateRegistry;
+pub use repository::{CachedTemplate, TemplateIndex, TemplateRepository};

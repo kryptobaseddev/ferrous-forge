@@ -4,10 +4,16 @@ use crate::{Error, Result};
 use std::path::Path;
 
 /// Get the cargo publish wrapper script content
+///
+/// @task T016
+/// @epic T014
 pub fn get_publish_wrapper_content() -> &'static str {
     r#"#!/bin/bash
 # Ferrous Forge cargo publish wrapper
 # This script intercepts cargo publish commands to run validation
+#
+# @task T016
+# @epic T014
 
 set -euo pipefail
 
@@ -45,10 +51,26 @@ done
 if [[ "$is_publish" == "true" ]]; then
     echo -e "${BLUE}🦀 Ferrous Forge: Intercepting cargo publish${NC}"
 
-    # Check for bypass environment variable
-    if [[ "${FERROUS_FORGE_BYPASS:-}" == "true" ]]; then
-        echo -e "${YELLOW}⚠️ FERROUS_FORGE_BYPASS enabled - skipping validation${NC}"
+    # Check for force bypass environment variable (absolute override)
+    if [[ "${FERROUS_FORGE_FORCE_BYPASS:-}" == "true" ]]; then
+        echo -e "${YELLOW}⚠️  FERROUS FORGE FORCE BYPASSED — FERROUS_FORGE_FORCE_BYPASS=true${NC}"
+        echo -e "${YELLOW}   All validation skipped. This should NEVER happen in production.${NC}"
         exec "$ORIGINAL_CARGO" "$@"
+    fi
+
+    # Check for active bypass via ferrous-forge CLI
+    if command -v ferrous-forge >/dev/null 2>&1; then
+        # Check if there's an active bypass for the publish stage
+        if ferrous-forge safety check --stage publish 2>/dev/null | grep -q "BYPASSED"; then
+            echo -e "${YELLOW}⚠️  Safety checks bypassed - proceeding with publish${NC}"
+            exec "$ORIGINAL_CARGO" "$@"
+        fi
+    fi
+
+    # Check for bypass environment variable (legacy support)
+    if [[ "${FERROUS_FORGE_BYPASS:-}" == "true" ]]; then
+        echo -e "${YELLOW}⚠️  FERROUS_FORGE_BYPASS enabled - skipping style checks${NC}"
+        echo -e "${YELLOW}   (locked settings like edition/version are still enforced)${NC}"
     fi
 
     # Check if ferrous-forge is available
@@ -60,13 +82,20 @@ if [[ "$is_publish" == "true" ]]; then
 
     echo -e "${BLUE}🔍 Running Ferrous Forge validation...${NC}"
 
-    # Run validation
-    if ferrous-forge validate .; then
+    # Run validation with appropriate flags
+    VALIDATE_ARGS="."
+    if [[ "${FERROUS_FORGE_BYPASS:-}" == "true" ]]; then
+        VALIDATE_ARGS=". --locked-only"
+    fi
+
+    # shellcheck disable=SC2086
+    if ferrous-forge validate $VALIDATE_ARGS; then
         echo -e "${GREEN}✅ Validation passed, proceeding with publish${NC}"
     else
-        echo -e "${RED}❌ Publish blocked: Ferrous Forge validation failed${NC}" >&2
-        echo -e "${YELLOW}Fix validation errors before publishing${NC}" >&2
-        echo -e "${YELLOW}To bypass in emergencies: FERROUS_FORGE_BYPASS=true cargo publish${NC}" >&2
+        echo -e "${RED}🛡️ Ferrous Forge validation failed - publish blocked!${NC}" >&2
+        echo -e "${YELLOW}Run 'ferrous-forge validate' to see issues${NC}" >&2
+        echo -e "${YELLOW}To bypass with audit logging:${NC}" >&2
+        echo -e "${YELLOW}   ferrous-forge safety bypass --stage=publish --reason='Emergency security patch'${NC}" >&2
         exit 1
     fi
 

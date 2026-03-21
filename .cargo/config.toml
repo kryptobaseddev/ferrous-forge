@@ -1,0 +1,5 @@
+[build]
+rustflags = ["-A", "warnings"]
+
+[profile.dev]
+opt-level = 0

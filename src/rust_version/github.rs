@@ -167,6 +167,38 @@ impl GitHubClient {
         Ok(releases.into_iter().filter(|r| !r.prerelease).collect())
     }
 
+    /// Get a specific release by tag name
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GitHub API request fails, the response status
+    /// indicates an error (including 404 if not found), or the response JSON
+    /// cannot be parsed.
+    pub async fn get_release_by_tag(&self, tag: &str) -> Result<GitHubRelease> {
+        let url = format!(
+            "{}/repos/{}/{}/releases/tags/{}",
+            GITHUB_API_BASE, RUST_REPO_OWNER, RUST_REPO_NAME, tag
+        );
+
+        let response = self.make_github_request(&url).await?;
+
+        if response.status() == 404 {
+            return Err(Error::network(format!("Release '{}' not found", tag)));
+        }
+
+        self.check_response_status(&response)?;
+
+        let mut release: GitHubRelease = response
+            .json()
+            .await
+            .map_err(|e| Error::parse(format!("Failed to parse release JSON: {}", e)))?;
+
+        // Parse version from tag
+        release.version = self.parse_version_from_tag(&release.tag_name)?;
+
+        Ok(release)
+    }
+
     /// Parse semantic version from tag name
     fn parse_version_from_tag(&self, tag: &str) -> Result<Version> {
         let version_str = tag.strip_prefix('v').unwrap_or(tag);

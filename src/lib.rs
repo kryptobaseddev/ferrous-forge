@@ -5,6 +5,9 @@
 //! Ferrous Forge is a comprehensive system-wide tool that automatically enforces
 //! professional Rust development standards across all projects on your machine.
 //!
+//! @task T016
+//! @epic T014
+//!
 //! ## Features
 //!
 //! - Zero underscore bandaid coding enforcement

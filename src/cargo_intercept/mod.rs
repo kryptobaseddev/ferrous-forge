@@ -10,6 +10,9 @@
 //! - `FERROUS_FORGE_BYPASS=true` → skips style checks; edition/version still
 //!   enforced
 //! - `FERROUS_FORGE_FORCE_BYPASS=true` → absolute override with visible "BYPASSED" warning
+//!
+//! @task T016
+//! @epic T014
 
 /// Validation logic for intercepted cargo commands.
 pub mod validation;

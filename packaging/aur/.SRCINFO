@@ -1,0 +1,17 @@
+pkgbase = ferrous-forge
+	pkgdesc = System-wide Rust development standards enforcer
+	pkgver = 1.7.6
+	pkgrel = 1
+	url = https://ferrous-forge.dev
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	license = Apache
+	makedepends = rust
+	makedepends = cargo
+	depends = rust
+	depends = cargo
+	optdepends = git: For git hook integration
+	source = ferrous-forge-1.7.6.tar.gz::https://github.com/kryptobaseddev/ferrous-forge/archive/refs/tags/v1.7.6.tar.gz
+
+pkgname = ferrous-forge

@@ -1,0 +1,27 @@
+# Ferrous Forge - Locked Configuration
+# This file contains configuration values that are LOCKED and cannot be changed
+# without explicit unlock with justification.
+#
+# To modify a locked value, use:
+#   ferrous-forge config unlock <key> --reason="..."
+#
+# @task T015
+# @epic T014
+
+version = "1.0.0"
+
+[locks]
+
+[locks.required_edition]
+value = "2024"
+locked_at = "2026-03-20T18:08:00Z"
+locked_by = "system"
+reason = "Project requires Rust 2024 edition for async traits and other features"
+level = "Project"
+
+[locks.required_rust_version]
+value = "1.88"
+locked_at = "2026-03-20T18:08:00Z"
+locked_by = "system"
+reason = "Minimum supported Rust version for this project"
+level = "Project"

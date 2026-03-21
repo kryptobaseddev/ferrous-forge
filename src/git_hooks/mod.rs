@@ -2,8 +2,11 @@
 //!
 //! This module provides functionality to install and manage git hooks
 //! for automatic validation on commits.
+//!
+//! @task T017
+//! @epic T014
 
 mod installer;
 mod scripts;
 
-pub use installer::{install_git_hooks, uninstall_git_hooks};
+pub use installer::{check_hooks_status, install_git_hooks, uninstall_git_hooks};

@@ -24,7 +24,7 @@ pub async fn pre_publish_validation(project_path: &Path) -> Result<()> {
     if !results.passed {
         tracing::error!("Pre-publish validation failed");
         return Err(Error::validation(
-            "Pre-publish validation failed - fix errors before publishing",
+            "🛡️ Ferrous Forge validation failed - publish blocked! Run 'ferrous-forge validate' to see issues",
         ));
     }
 

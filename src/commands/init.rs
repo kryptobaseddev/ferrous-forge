@@ -65,6 +65,9 @@ pub async fn execute_project() -> Result<()> {
     write_ferrous_config(&project_path).await?;
     create_docs_scaffold(&project_path).await?;
     write_ci_workflow(&project_path).await?;
+
+    // Install mandatory safety hooks automatically (T017)
+    println!("\n🔒 Installing mandatory safety hooks...");
     install_project_git_hooks(&project_path).await?;
 
     println!();

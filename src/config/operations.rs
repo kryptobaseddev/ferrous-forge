@@ -33,7 +33,8 @@ impl Config {
     ///
     /// # Errors
     ///
-    /// Returns an error if the key is unknown or the value is invalid for the key's type.
+    /// Returns an error if the key is unknown, the value is invalid for the key's type,
+    /// or the key is locked and the value differs from the locked value.
     pub fn set(&mut self, key: &str, value: &str) -> Result<()> {
         match key {
             "update_channel" => self.set_update_channel(value)?,
@@ -47,6 +48,22 @@ impl Config {
             _ => return Err(Error::config(format!("Unknown configuration key: {}", key))),
         }
         Ok(())
+    }
+
+    /// Set a configuration value by key with lock validation
+    ///
+    /// This is an async version that checks against locked values before setting.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the key is unknown, the value is invalid, or the key is locked.
+    pub async fn set_with_lock_check(&mut self, key: &str, value: &str) -> Result<()> {
+        // Check for locks first
+        use crate::config::locking::ConfigValidator;
+        ConfigValidator::validate_change(key, value).await?;
+
+        // If validation passes, set the value
+        self.set(key, value)
     }
 
     /// List all configuration keys and values

@@ -1,12 +1,24 @@
 //! Safety pipeline CLI commands
+//!
+//! @task T017
+//! @epic T014
 
+/// Bypass command implementation for emergency safety check bypassing.
+pub mod bypass_cmd;
+/// Safety configuration command implementation.
+pub mod config_cmd;
 /// Git hook installation and management for safety checks.
 pub mod hooks;
-/// Safety pipeline status display.
+/// Safety report command implementation.
+pub mod report_cmd;
+/// Safety stats command implementation.
+pub mod stats_cmd;
+/// Safety status display command implementation.
 pub mod status;
 
 use crate::Result;
-use crate::safety::{PipelineStage, SafetyPipeline};
+use crate::commands::SafetyBypassStage;
+use crate::safety::{PipelineStage, SafetyPipeline, bypass::BypassManager, config::BypassConfig};
 use console::style;
 use std::path::Path;
 
@@ -92,4 +104,52 @@ pub async fn handle_status() -> Result<()> {
 /// Returns an error if any safety check fails to execute.
 pub async fn test_individual_checks(project_path: &Path) -> Result<()> {
     crate::safety::checks::test_runner::test_safety_checks(project_path).await
+}
+
+/// Handle check-bypass command (used by git hooks)
+///
+/// Returns silently if no bypass is active, or prints "active" and exits 0 if bypass exists.
+///
+/// # Errors
+///
+/// Returns an error if the bypass check fails to execute.
+pub async fn handle_check_bypass(stage: SafetyBypassStage) -> Result<()> {
+    let pipeline_stage = stage.to_pipeline_stage();
+
+    // Load bypass configuration
+    let config = BypassConfig::load_or_default().await?;
+
+    if !config.enabled {
+        // Bypass system is disabled, so no bypass possible
+        std::process::exit(1);
+    }
+
+    let manager = BypassManager::new(&config)?;
+
+    match manager.check_active_bypass(pipeline_stage).await? {
+        Some(_) => {
+            // Bypass is active
+            println!("active");
+            Ok(())
+        }
+        None => {
+            // No active bypass
+            std::process::exit(1);
+        }
+    }
+}
+
+/// Handle uninstall command
+///
+/// # Errors
+///
+/// Returns an error if hooks cannot be removed.
+pub async fn handle_uninstall(project_path: &Path, confirm: bool) -> Result<()> {
+    if !confirm {
+        println!("⚠️  This will remove all Ferrous Forge safety hooks.");
+        println!("   Run with --confirm to proceed.");
+        return Ok(());
+    }
+
+    hooks::uninstall_hooks(project_path)
 }

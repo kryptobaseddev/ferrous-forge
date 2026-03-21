@@ -21,11 +21,11 @@ use tracing::info;
 /// Hierarchical configuration manager
 pub struct HierarchicalConfig {
     /// System-level configuration
-    system: Option<PartialConfig>,
+    pub system: Option<PartialConfig>,
     /// User-level configuration
-    user: Option<PartialConfig>,
+    pub user: Option<PartialConfig>,
     /// Project-level configuration
-    project: Option<PartialConfig>,
+    pub project: Option<PartialConfig>,
 }
 
 impl HierarchicalConfig {

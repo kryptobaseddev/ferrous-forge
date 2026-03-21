@@ -57,6 +57,36 @@ pub struct BypassConfig {
     pub max_bypasses_per_day: u32,
 }
 
+impl Default for BypassConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            require_reason: true,
+            require_confirmation: true,
+            log_bypasses: true,
+            max_bypasses_per_day: 3,
+        }
+    }
+}
+
+impl BypassConfig {
+    /// Load bypass configuration or return defaults
+    ///
+    /// This function falls back to defaults on error and does not itself
+    /// return errors.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error only if the serialization fails (unlikely with defaults).
+    pub async fn load_or_default() -> Result<Self> {
+        // Get the safety config and extract the bypass config from it
+        match SafetyConfig::load().await {
+            Ok(config) => Ok(config.bypass),
+            Err(_) => Ok(Self::default()),
+        }
+    }
+}
+
 impl Default for SafetyConfig {
     fn default() -> Self {
         Self {
@@ -83,7 +113,7 @@ impl Default for SafetyConfig {
                 continue_on_warning: false,
             },
             bypass: BypassConfig {
-                enabled: false, // Disabled by default for security
+                enabled: true, // Enabled by default - blocking is mandatory, bypass requires reason
                 require_reason: true,
                 require_confirmation: true,
                 log_bypasses: true,

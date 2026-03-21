@@ -1,10 +1,11 @@
 //! Configuration level definitions
 
 use crate::{Error, Result};
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 /// Configuration level in the hierarchy
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum ConfigLevel {
     /// System-wide configuration
     System,

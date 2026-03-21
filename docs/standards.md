@@ -180,9 +180,9 @@ expect_used = "deny"    # Required
 
 ## Testing Standards
 
-### Test Coverage Requirements (Planned)
-- **Minimum coverage**: 80% for libraries
-- **Minimum coverage**: 60% for binaries
+### Test Coverage
+- **Recommended**: 80% for libraries
+- **Recommended**: 60% for binaries
 - **Required**: Unit tests for all public functions
 - **Required**: Integration tests for main functionality
 
@@ -196,7 +196,7 @@ tests/
 
 ## Security Standards
 
-### Dependency Security (Planned)
+### Dependency Security
 - Automatic scanning with `cargo audit`
 - No known vulnerabilities in dependencies
 - Regular dependency updates
@@ -220,12 +220,13 @@ codegen-units = 1
 
 ## Version Control Standards
 
-### Git Hooks (Planned)
-Pre-commit hooks will validate:
+### Git Hooks
+Pre-commit hooks validate:
 1. Code formatting (`cargo fmt`)
 2. Linting (`cargo clippy`)
-3. Tests passing (`cargo test`)
-4. Documentation building (`cargo doc`)
+3. Ferrous Forge standards
+
+Install hooks with: `ferrous-forge safety install`
 
 ### Commit Message Format
 Recommended format:

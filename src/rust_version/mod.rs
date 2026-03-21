@@ -2,6 +2,9 @@
 //!
 //! This module provides functionality to detect installed Rust versions,
 //! check for updates from GitHub releases, and provide recommendations.
+//!
+//! @task T024
+//! @epic T014
 
 use crate::Result;
 use semver::Version;
@@ -14,11 +17,20 @@ use tokio::sync::RwLock;
 pub mod cache;
 /// Installed Rust version detection.
 pub mod detector;
+/// File-based cache for offline support.
+pub mod file_cache;
 /// GitHub API client for fetching Rust releases.
 pub mod github;
+/// Release notes parser for security/breaking changes.
+pub mod parser;
+/// Rustup integration for toolchain management.
+pub mod rustup;
+/// Security advisory checker.
+pub mod security;
 
 pub use detector::RustVersion;
 pub use github::{GitHubClient, GitHubRelease};
+pub use security::{SecurityCheckResult, SecurityChecker};
 
 /// Rust release channel
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -70,10 +82,22 @@ pub enum UpdateRecommendation {
     SecurityUpdate(UpdateInfo),
 }
 
+/// Release notes with parsed details
+#[derive(Debug, Clone)]
+pub struct ReleaseNotes {
+    /// Version string
+    pub version: String,
+    /// Full release notes
+    pub full_notes: String,
+    /// Parsed details
+    pub parsed: parser::ParsedRelease,
+}
+
 /// Version manager for checking and recommending updates
 pub struct VersionManager {
     github_client: GitHubClient,
     cache: Arc<RwLock<cache::Cache<String, Vec<u8>>>>,
+    file_cache: file_cache::FileCache,
 }
 
 impl VersionManager {
@@ -85,10 +109,12 @@ impl VersionManager {
     pub fn new() -> Result<Self> {
         let github_client = GitHubClient::new(None)?;
         let cache = Arc::new(RwLock::new(cache::Cache::new(Duration::from_secs(3600))));
+        let file_cache = file_cache::FileCache::default()?;
 
         Ok(Self {
             github_client,
             cache,
+            file_cache,
         })
     }
 
@@ -107,9 +133,17 @@ impl VersionManager {
     ///
     /// Returns an error if the GitHub API request fails or the response cannot be parsed.
     pub async fn get_latest_stable(&self) -> Result<GitHubRelease> {
-        // Check cache first
+        // Check file cache first for offline support
         let cache_key = "latest_stable";
 
+        if let Some(entry) = self.file_cache.get(cache_key) {
+            if let Ok(release) = serde_json::from_slice::<GitHubRelease>(&entry.data) {
+                tracing::debug!("Using cached latest stable release");
+                return Ok(release);
+            }
+        }
+
+        // Check in-memory cache
         {
             let cache = self.cache.read().await;
             if let Some(cached_bytes) = cache.get(&cache_key.to_string())
@@ -122,10 +156,11 @@ impl VersionManager {
         // Fetch from GitHub
         let release = self.github_client.get_latest_release().await?;
 
-        // Cache the result
+        // Cache in both in-memory and file cache
         if let Ok(bytes) = serde_json::to_vec(&release) {
             let mut cache = self.cache.write().await;
-            cache.insert(cache_key.to_string(), bytes);
+            cache.insert(cache_key.to_string(), bytes.clone());
+            let _ = self.file_cache.set(cache_key, bytes, "application/json");
         }
 
         Ok(release)
@@ -156,8 +191,11 @@ impl VersionManager {
         current: &RustVersion,
         latest: &GitHubRelease,
     ) -> Result<UpdateRecommendation> {
-        if self.is_security_update(latest) {
-            Ok(self.create_security_update(current, latest))
+        // Parse release notes for security advisories
+        let parsed = parser::parse_release_notes(&latest.tag_name, &latest.body);
+
+        if !parsed.security_advisories.is_empty() {
+            Ok(self.create_security_update(current, latest, &parsed))
         } else if self.is_major_update(current, latest) {
             Ok(self.create_major_update(current, latest))
         } else {
@@ -166,6 +204,7 @@ impl VersionManager {
     }
 
     /// Check if the release contains security-related updates
+    #[allow(dead_code)]
     fn is_security_update(&self, release: &GitHubRelease) -> bool {
         let body_lower = release.body.to_lowercase();
         let name_lower = release.name.to_lowercase();
@@ -182,12 +221,32 @@ impl VersionManager {
         &self,
         current: &RustVersion,
         latest: &GitHubRelease,
+        parsed: &parser::ParsedRelease,
     ) -> UpdateRecommendation {
+        let security_summary = if !parsed.security_advisories.is_empty() {
+            Some(
+                parsed
+                    .security_advisories
+                    .iter()
+                    .map(|a| {
+                        if let Some(ref id) = a.id {
+                            format!("{}: {}", id, a.description)
+                        } else {
+                            a.description.clone()
+                        }
+                    })
+                    .collect::<Vec<_>>()
+                    .join("; "),
+            )
+        } else {
+            Some(self.extract_security_details(&latest.body))
+        };
+
         let info = UpdateInfo {
             current: current.version.clone(),
             latest: latest.version.clone(),
             release_url: latest.html_url.clone(),
-            security_details: Some(self.extract_security_details(&latest.body)),
+            security_details: security_summary,
         };
         UpdateRecommendation::SecurityUpdate(info)
     }
@@ -228,7 +287,87 @@ impl VersionManager {
     ///
     /// Returns an error if the GitHub API request fails or the response cannot be parsed.
     pub async fn get_recent_releases(&self, count: usize) -> Result<Vec<GitHubRelease>> {
-        self.github_client.get_releases(count).await
+        // Check file cache first
+        let cache_key = format!("recent_releases_{}", count);
+
+        if let Some(entry) = self.file_cache.get(&cache_key) {
+            if let Ok(releases) = serde_json::from_slice::<Vec<GitHubRelease>>(&entry.data) {
+                tracing::debug!("Using cached releases");
+                return Ok(releases);
+            }
+        }
+
+        // Fetch from GitHub
+        let releases = self.github_client.get_releases(count).await?;
+
+        // Cache the result
+        if let Ok(data) = serde_json::to_vec(&releases) {
+            let _ = self.file_cache.set(&cache_key, data, "application/json");
+        }
+
+        Ok(releases)
+    }
+
+    /// Get release notes for a specific version
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the release cannot be found or fetched.
+    pub async fn get_release_notes(&self, version: &str) -> Result<ReleaseNotes> {
+        // Check file cache first
+        let cache_key = format!("release_notes_{}", version);
+
+        if let Some(entry) = self.file_cache.get(&cache_key) {
+            if let Ok(release) = serde_json::from_slice::<GitHubRelease>(&entry.data) {
+                let parsed = parser::parse_release_notes(&release.tag_name, &release.body);
+                return Ok(ReleaseNotes {
+                    version: release.tag_name,
+                    full_notes: release.body,
+                    parsed,
+                });
+            }
+        }
+
+        // Fetch from GitHub
+        let release = self.github_client.get_release_by_tag(version).await?;
+
+        // Cache the result
+        if let Ok(data) = serde_json::to_vec(&release) {
+            let _ = self.file_cache.set(&cache_key, data, "application/json");
+        }
+
+        let parsed = parser::parse_release_notes(&release.tag_name, &release.body);
+        Ok(ReleaseNotes {
+            version: release.tag_name,
+            full_notes: release.body,
+            parsed,
+        })
+    }
+
+    /// Check for updates (returns true if updates available)
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the check fails.
+    pub async fn check_updates(&self) -> Result<(bool, Option<Version>)> {
+        let current = self.check_current().await?;
+        let latest = self.get_latest_stable().await?;
+
+        if latest.version > current.version {
+            Ok((true, Some(latest.version)))
+        } else {
+            Ok((false, None))
+        }
+    }
+
+    /// Check if offline mode should be used
+    pub fn is_offline_mode(&self) -> bool {
+        self.file_cache.should_use_offline()
+    }
+
+    /// Get cache statistics
+    pub fn cache_stats(&self) -> file_cache::CacheStats {
+        self.file_cache.stats()
     }
 
     fn extract_security_details(&self, body: &str) -> String {

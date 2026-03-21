@@ -1,0 +1,201 @@
+{
+  "name": "ferrous-forge-vscode",
+  "displayName": "Ferrous Forge",
+  "description": "Real-time validation, inline diagnostics, and quick fixes for Ferrous Forge standards",
+  "version": "1.7.6",
+  "publisher": "ferrous-forge",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kryptobaseddev/ferrous-forge.git",
+    "directory": "editors/vscode"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Formatters",
+    "Debuggers"
+  ],
+  "keywords": [
+    "rust",
+    "ferrous-forge",
+    "validation",
+    "linting",
+    "standards"
+  ],
+  "activationEvents": [
+    "onLanguage:rust",
+    "workspaceContains:**/Cargo.toml"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "rust",
+        "extensions": [
+          ".rs"
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "Ferrous Forge",
+      "properties": {
+        "ferrousForge.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Ferrous Forge validation"
+        },
+        "ferrousForge.validateOnType": {
+          "type": "boolean",
+          "default": true,
+          "description": "Validate files as you type (debounced)"
+        },
+        "ferrousForge.validateOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Validate files on save"
+        },
+        "ferrousForge.validateOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Validate files when opened"
+        },
+        "ferrousForge.debounceDelay": {
+          "type": "number",
+          "default": 500,
+          "minimum": 100,
+          "maximum": 5000,
+          "description": "Debounce delay in milliseconds for validation while typing"
+        },
+        "ferrousForge.executablePath": {
+          "type": "string",
+          "default": "ferrous-forge",
+          "description": "Path to the ferrous-forge executable"
+        },
+        "ferrousForge.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show validation status in the status bar"
+        },
+        "ferrousForge.diagnosticSeverity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "information",
+            "hint"
+          ],
+          "default": "error",
+          "description": "Default diagnostic severity for Ferrous Forge violations"
+        },
+        "ferrousForge.enableQuickFixes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable quick fixes for common violations"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "ferrousForge.validate",
+        "title": "Validate Project",
+        "category": "Ferrous Forge"
+      },
+      {
+        "command": "ferrousForge.validateFile",
+        "title": "Validate Current File",
+        "category": "Ferrous Forge"
+      },
+      {
+        "command": "ferrousForge.fix",
+        "title": "Fix All Violations",
+        "category": "Ferrous Forge"
+      },
+      {
+        "command": "ferrousForge.showOutput",
+        "title": "Show Output Channel",
+        "category": "Ferrous Forge"
+      },
+      {
+        "command": "ferrousForge.reloadConfig",
+        "title": "Reload Configuration",
+        "category": "Ferrous Forge"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "ferrousForge.validate",
+          "when": "ferrousForge.enabled"
+        },
+        {
+          "command": "ferrousForge.validateFile",
+          "when": "ferrousForge.enabled && editorLangId == rust"
+        },
+        {
+          "command": "ferrousForge.fix",
+          "when": "ferrousForge.enabled"
+        },
+        {
+          "command": "ferrousForge.showOutput",
+          "when": "ferrousForge.enabled"
+        },
+        {
+          "command": "ferrousForge.reloadConfig",
+          "when": "ferrousForge.enabled"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ferrousForge.validate",
+          "when": "explorerResourceIsFolder && ferrousForge.enabled",
+          "group": "9_ferrousForge@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "ferrousForge.validateFile",
+          "when": "editorLangId == rust && ferrousForge.enabled",
+          "group": "9_ferrousForge@1"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "ferrousForge.validate",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "ferrousForge.enabled"
+      },
+      {
+        "command": "ferrousForge.validateFile",
+        "key": "ctrl+shift+alt+v",
+        "mac": "cmd+shift+alt+v",
+        "when": "ferrousForge.enabled && editorLangId == rust"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "pretest": "npm run compile && npm run lint",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5"
+  }
+}

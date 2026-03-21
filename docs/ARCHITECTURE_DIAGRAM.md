@@ -1,5 +1,7 @@
 # Ferrous Forge Architecture Diagrams
 
+> **Note:** Architecture diagrams show current implementation (solid lines) and planned/future components (dashed lines).
+
 ## High-Level Flow
 
 ```mermaid
@@ -57,14 +59,18 @@ graph LR
     AutoFix --> AIAnalyzer
     AIAnalyzer --> AST
     AIAnalyzer --> Semantic
-    Semantic --> Confidence
+    AIAnalyzer --> Confidence
     Confidence --> Analysis
     Confidence --> Instructions
     
-    Instructions --> Orchestrator
-    Orchestrator --> LLM
-    LLM --> Fixed
+    Instructions -.-> Orchestrator
+    Orchestrator -.-> LLM
+    LLM -.-> Fixed
 ```
+
+**Legend:**
+- Solid lines (—): Currently implemented
+- Dashed lines (-.-): Planned/Future (v2.0+)
 
 ## Detailed Component Interaction
 
@@ -108,10 +114,7 @@ sequenceDiagram
     Fixer->>Orchestrator: generate_instructions()
     Orchestrator-->>User: Orchestrator Instructions (MD)
     
-    Note over User,Orchestrator: Manual or automated AI fixing
-    User->>Orchestrator: Use instructions
-    Orchestrator->>Orchestrator: Apply intelligent fixes
-    Orchestrator-->>User: Fixed code
+    Note over User,Orchestrator: Manual AI fixing (future: automated)
 ```
 
 ## Data Flow
@@ -226,25 +229,58 @@ graph LR
     Normalize --> Output[Confidence: 0.0-1.0]
 ```
 
-## File System Structure
+## Source Code Structure
 
 ```
 ferrous-forge/
 ├── src/
-│   ├── validation.rs         # Core validation engine
-│   ├── ai_analyzer.rs        # AI-powered analysis
-│   └── commands/
-│       ├── validate.rs       # Validate command + AI report
-│       └── fix.rs            # Fix command (2-layer system)
+│   ├── validation/
+│   │   ├── mod.rs                  # Validation module exports
+│   │   ├── violation.rs            # Violation struct and types
+│   │   └── rust_validator/
+│   │       ├── mod.rs              # RustValidator implementation
+│   │       └── file_checks/
+│   │           ├── mod.rs          # File validation coordinator
+│   │           ├── size_validation.rs    # File/function size checks
+│   │           ├── pattern_validation.rs # Pattern detection
+│   │           ├── cargo_validation.rs   # Cargo.toml checks
+│   │           └── doc_validation.rs     # Documentation checks
+│   │
+│   ├── ai_analyzer/
+│   │   ├── mod.rs                  # AI analyzer exports
+│   │   ├── analyzer.rs             # AIAnalyzer implementation
+│   │   ├── context.rs              # Code context extraction
+│   │   ├── semantic.rs             # Semantic analysis
+│   │   ├── strategies.rs           # Fix strategies
+│   │   └── types.rs                # AI analysis types
+│   │
+│   ├── commands/
+│   │   ├── validate/               # Validate command
+│   │   │   ├── mod.rs
+│   │   │   ├── ai_report.rs        # AI report generation
+│   │   │   └── checks.rs           # Validation checks
+│   │   │
+│   │   ├── fix/                    # Fix command
+│   │   │   ├── mod.rs
+│   │   │   ├── execution.rs        # Fix execution
+│   │   │   ├── file_processing.rs  # File-level fixes
+│   │   │   ├── strategies.rs       # Fix strategies
+│   │   │   ├── context.rs          # Context extraction
+│   │   │   ├── types.rs            # Fix types
+│   │   │   └── utils.rs            # Fix utilities
+│   │   │
+│   │   └── ... (other commands)
+│   │
+│   └── ... (other modules)
 │
-├── .ferrous-forge/
-│   ├── reports/              # AI compliance reports
+├── .ferrous-forge/                 # Project-specific files
+│   ├── reports/                    # AI compliance reports
 │   │   ├── ai_compliance_*.json
 │   │   ├── ai_compliance_*.md
-│   │   ├── latest_ai_report.json
-│   │   └── latest_ai_report.md
+│   │   ├── latest_ai_report.json (symlink)
+│   │   └── latest_ai_report.md (symlink)
 │   │
-│   └── ai-analysis/          # AI analysis outputs
+│   └── ai-analysis/                # AI analysis outputs
 │       ├── ai_analysis_*.json
 │       └── orchestrator_instructions_*.md
 │
@@ -252,3 +288,60 @@ ferrous-forge/
     ├── VIOLATION_FIX_FLOW.md
     └── ARCHITECTURE_DIAGRAM.md
 ```
+
+## Module Dependencies
+
+```mermaid
+graph TB
+    subgraph "Commands"
+        ValidateCmd[validate]
+        FixCmd[fix]
+        SafetyCmd[safety]
+        OtherCmd[...]
+    end
+    
+    subgraph "Core Modules"
+        Validation[validation]
+        AIAnalyzer[ai_analyzer]
+        Config[config]
+        Templates[templates]
+    end
+    
+    subgraph "External"
+        Syn[syn crate]
+        Clippy[clippy]
+        Cargo[cargo]
+    end
+    
+    ValidateCmd --> Validation
+    ValidateCmd --> AIAnalyzer
+    
+    FixCmd --> Validation
+    FixCmd --> AIAnalyzer
+    
+    SafetyCmd --> Validation
+    
+    AIAnalyzer --> Syn
+    Validation --> Clippy
+    Validation --> Cargo
+```
+
+## Implementation Status
+
+### ✅ Implemented
+- **Validation Engine**: Full violation detection with 12 violation types
+- **AI Report Generation**: JSON and Markdown compliance reports
+- **Layer 1 Auto-Fix**: Conservative fixes with safety checks
+- **Layer 2 AI Analysis**: AST parsing, semantic analysis, confidence scoring
+- **Orchestrator Instructions**: Generates instruction files for LLMs
+
+### 🚧 Planned (v2.0+)
+- **AI Orchestrator Integration**: Direct LLM integration for automated fixes
+- **Real-time API**: WebSocket support for live validation
+- **IDE Extensions**: VS Code, IntelliJ plugins
+- **Web Dashboard**: Web-based metrics and collaboration
+
+---
+
+**Last Updated:** 2025-03-20
+**Version:** 1.7.6

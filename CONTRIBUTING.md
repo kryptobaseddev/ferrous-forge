@@ -4,11 +4,7 @@ Thank you for your interest in contributing to Ferrous Forge! This document prov
 
 ## Code of Conduct
 
-By participating in this project, you agree to abide by our code of conduct:
-- Be respectful and inclusive
-- Welcome newcomers and help them get started
-- Focus on constructive criticism
-- Accept feedback gracefully
+This project and everyone participating in it is governed by the [Ferrous Forge Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [kryptobaseddev@gmail.com].
 
 ## How to Contribute
 

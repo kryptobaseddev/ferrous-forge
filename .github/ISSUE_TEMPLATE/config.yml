@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question
+    url: https://github.com/kryptobaseddev/ferrous-forge/discussions
+    about: Please ask questions in Discussions
+  - name: Documentation
+    url: https://docs.rs/ferrous-forge
+    about: Check the documentation before opening an issue
