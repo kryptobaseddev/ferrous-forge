@@ -89,7 +89,7 @@ tempfile = "3.10"
 assert_cmd = "2.0"
 predicates = "3.1"
 rstest = "0.22"
-proptest = "1.5"
+proptest = "1.10"
 insta = "1.40"
 criterion = "0.5"
 # Note: Dogfooding via external binary, not as dependency to avoid conflicts
