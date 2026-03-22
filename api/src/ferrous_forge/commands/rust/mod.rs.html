@@ -742,7 +742,7 @@
 <a href=#742 id=742 data-nosnippet>742</a>///
 <a href=#743 id=743 data-nosnippet>743</a>/// # Errors
 <a href=#744 id=744 data-nosnippet>744</a>///
-<a href=#745 id=745 data-nosnippet>745</a>/// Returns an error if the security check fails or if fail_on_issues is true
+<a href=#745 id=745 data-nosnippet>745</a>/// Returns an error if the security check fails or if `fail_on_issues` is true
 <a href=#746 id=746 data-nosnippet>746</a>/// and issues are found.
 <a href=#747 id=747 data-nosnippet>747</a></span><span class="kw">pub async fn </span>handle_security(fail_on_issues: bool) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
 <a href=#748 id=748 data-nosnippet>748</a>    <span class="kw">use </span><span class="kw">crate</span>::rust_version::SecurityChecker;
@@ -765,11 +765,9 @@
 <a href=#765 id=765 data-nosnippet>765</a>    SecurityChecker::display_results(<span class="kw-2">&amp;</span>result);
 <a href=#766 id=766 data-nosnippet>766</a>
 <a href=#767 id=767 data-nosnippet>767</a>    <span class="kw">if </span>fail_on_issues &amp;&amp; !result.is_secure {
-<a href=#768 id=768 data-nosnippet>768</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::validation(
-<a href=#769 id=769 data-nosnippet>769</a>            <span class="string">"Security issues found. Update required."</span>,
-<a href=#770 id=770 data-nosnippet>770</a>        ));
-<a href=#771 id=771 data-nosnippet>771</a>    }
-<a href=#772 id=772 data-nosnippet>772</a>
-<a href=#773 id=773 data-nosnippet>773</a>    <span class="prelude-val">Ok</span>(())
-<a href=#774 id=774 data-nosnippet>774</a>}
+<a href=#768 id=768 data-nosnippet>768</a>        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::validation(<span class="string">"Security issues found. Update required."</span>));
+<a href=#769 id=769 data-nosnippet>769</a>    }
+<a href=#770 id=770 data-nosnippet>770</a>
+<a href=#771 id=771 data-nosnippet>771</a>    <span class="prelude-val">Ok</span>(())
+<a href=#772 id=772 data-nosnippet>772</a>}
 </code></pre></div></section></main></body></html>
