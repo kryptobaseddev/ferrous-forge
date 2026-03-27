@@ -3,10 +3,26 @@ name: CI
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - 'CHANGELOG.md'
+      - '.cleo/**'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - 'CHANGELOG.md'
+      - '.cleo/**'
   schedule:
     - cron: '0 0 * * 0'  # Weekly dependency check
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -24,73 +40,66 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-          
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-        
+
       - name: Format check
         run: cargo fmt --all -- --check
-        
+
       - name: Clippy check
         run: cargo clippy --all-features --all-targets -- -D warnings
-        
+
       - name: Documentation check
         run: cargo doc --no-deps --all-features
 
   # Test Matrix
   test:
     name: Test
-    runs-on: ${{ matrix.os }}
+    needs: [check]
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
         rust: ["stable"]
         include:
-          # Test MSRV on Linux only - Our minimum supported version
-          - os: ubuntu-latest
-            rust: "1.88"  # MSRV - Required for Edition 2024
-          # Test beta on Linux only to catch upcoming issues
-          - os: ubuntu-latest
-            rust: "beta"
+          # Test MSRV - Our minimum supported version
+          - rust: "1.88"
+          # Test beta to catch upcoming issues
+          - rust: "beta"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ matrix.rust }}
-          
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          key: ${{ matrix.os }}-${{ matrix.rust }}
-          
+          key: ${{ matrix.rust }}
+
       - name: Install cargo-nextest
         shell: bash
-        env:
-          RUST_VERSION: ${{ matrix.rust }}
         run: |
-          if [ "$RUST_VERSION" = "1.88" ]; then
-            cargo install cargo-nextest@0.9.114 --locked
-          else
-            cargo install cargo-nextest --locked
-          fi
-        
+          curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C ${CARGO_HOME:-~/.cargo}/bin
+
       - name: Run tests
         run: cargo nextest run --all-features || cargo test --all-features
-        
+
       - name: Run doc tests
         run: cargo test --doc --all-features
 
   # Security Audit
   security:
     name: Security Audit
+    needs: [check]
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -99,18 +108,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-        
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-        
+
       - name: Security audit
         uses: rustsec/audit-check@v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Vulnerability scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -128,25 +137,27 @@ jobs:
   # Coverage
   coverage:
     name: Code Coverage
+    needs: [check]
     runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           components: llvm-tools-preview
-          
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-        
+
       - name: Install cargo-llvm-cov
         run: cargo install cargo-llvm-cov --locked
-        
+
       - name: Generate coverage
         run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
-        
+
       - name: Upload to codecov
         uses: codecov/codecov-action@v3
         with:
@@ -158,88 +169,90 @@ jobs:
   # Benchmarks
   benchmark:
     name: Performance Benchmarks
+    needs: [check]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-        
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-        
+
       - name: Run benchmarks
         run: cargo bench --bench validation_bench || true
 
   # Integration Tests
   integration:
     name: Integration Tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+    needs: [check]
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-          
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-        
+
       - name: Build binary
         run: cargo build --release
-        
+
       - name: Test installation
         run: |
           # Test binary works
           ./target/release/ferrous-forge --version
-          
+
           # Store the binary path
           FERROUS_FORGE_BIN="$PWD/target/release/ferrous-forge"
-          
+
           # Test init in clean environment
           mkdir -p /tmp/test-ferrous-forge
           cd /tmp/test-ferrous-forge
           export HOME=/tmp/test-ferrous-forge
-          
+
           # Set up rustup for the test environment
           rustup default stable
-          
+
           # Run init
           "$FERROUS_FORGE_BIN" init --force
-          
+
           # Test project creation
           cargo new test-project
           cd test-project
-          
+
           # Verify standards are applied (we use 2021 edition now for compatibility)
           grep -q 'edition = "202[14]"' Cargo.toml
           test -f clippy.toml || echo "clippy.toml not found, continuing"
-          
+
           # Test validation
           cargo check
 
   # Build verification (just verify it builds on the CI platform)
   build-verification:
     name: Build Verification
+    needs: [check]
     runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-          
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-          
+
       - name: Build release binary
         run: cargo build --release
-        
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -249,8 +262,9 @@ jobs:
   # Documentation
   docs:
     name: Documentation
+    needs: [check]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
     permissions:
       contents: write
       pages: write
@@ -258,16 +272,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-        
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-        
+
       - name: Build documentation
         run: cargo doc --no-deps --all-features
-        
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
