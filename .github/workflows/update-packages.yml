@@ -68,7 +68,7 @@ jobs:
     needs: get-checksums
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Update Homebrew formula
         run: |
@@ -103,7 +103,7 @@ jobs:
     needs: get-checksums
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Update AUR PKGBUILD
         run: |
@@ -135,7 +135,7 @@ jobs:
     needs: get-checksums
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Update Chocolatey package
         run: |
@@ -167,7 +167,7 @@ jobs:
     needs: get-checksums
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Update Nix derivation
         run: |
