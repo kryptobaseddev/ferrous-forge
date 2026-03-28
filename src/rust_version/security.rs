@@ -82,7 +82,7 @@ impl SecurityChecker {
     /// Returns an error if the version manager or cache cannot be initialized.
     pub fn new() -> Result<Self> {
         let version_manager = VersionManager::new()?;
-        let cache = FileCache::default()?;
+        let cache = FileCache::create_default()?;
 
         Ok(Self {
             version_manager,
@@ -256,7 +256,7 @@ impl SecurityChecker {
             println!();
             println!("{}", style("   Security Issues:").bold());
 
-            for (_i, issue) in result.issues.iter().take(5).enumerate() {
+            for issue in result.issues.iter().take(5) {
                 let sev_icon = match issue.severity {
                     crate::rust_version::parser::Severity::Critical => "🔴",
                     crate::rust_version::parser::Severity::High => "🟠",
@@ -293,9 +293,8 @@ impl SecurityChecker {
             println!();
             if let Some(ref recommended) = result.recommended_version {
                 println!(
-                    "{} {}",
-                    style("🔧 Recommended Action:").bold(),
-                    "Update to the latest version"
+                    "{} Update to the latest version",
+                    style("🔧 Recommended Action:").bold()
                 );
                 println!(
                     "   Latest secure version: {}",

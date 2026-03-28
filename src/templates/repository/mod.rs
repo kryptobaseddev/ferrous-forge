@@ -121,12 +121,20 @@ impl TemplateRepository {
     }
 
     /// Add a template to the cache
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the cache index cannot be saved.
     pub fn add_to_cache(&mut self, template: CachedTemplate) -> Result<()> {
         self.index.templates.insert(template.name.clone(), template);
         self.save_index()
     }
 
     /// Remove a template from cache
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the cached directory or index cannot be updated.
     pub fn remove_from_cache(&mut self, name: &str) -> Result<()> {
         if let Some(template) = self.index.templates.remove(name) {
             // Remove the cached directory

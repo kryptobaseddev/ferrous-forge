@@ -53,18 +53,20 @@ pub struct BreakingChange {
 }
 
 /// Severity level for security issues
+///
+/// Variants are ordered so that `Critical > High > Medium > Low > Unknown`.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Severity {
-    /// Critical - immediate action required
-    Critical,
-    /// High - should update soon
-    High,
-    /// Medium - update when convenient
-    Medium,
-    /// Low - informational
-    Low,
     /// Unknown severity
     Unknown,
+    /// Low - informational
+    Low,
+    /// Medium - update when convenient
+    Medium,
+    /// High - should update soon
+    High,
+    /// Critical - immediate action required
+    Critical,
 }
 
 impl std::fmt::Display for Severity {
@@ -89,7 +91,7 @@ fn security_keywords() -> &'static [Regex] {
                 .unwrap_or_else(|_| panic!("Invalid regex pattern for security")),
             Regex::new(r"(?i)vulnerability")
                 .unwrap_or_else(|_| panic!("Invalid regex pattern for vulnerability")),
-            Regex::new(r"CVE-\d{4}-\d+")
+            Regex::new(r"(?i)CVE-\d{4}-\d+")
                 .unwrap_or_else(|_| panic!("Invalid regex pattern for CVE")),
             Regex::new(r"(?i)exploit")
                 .unwrap_or_else(|_| panic!("Invalid regex pattern for exploit")),
@@ -198,16 +200,16 @@ pub fn parse_release_notes(version: &str, notes: &str) -> ParsedRelease {
         }
 
         // Parse based on current section or content
-        if is_security_related(trimmed) {
-            if let Some(advisory) = parse_security_advisory(trimmed) {
-                parsed.security_advisories.push(advisory);
-            }
+        if is_security_related(trimmed)
+            && let Some(advisory) = parse_security_advisory(trimmed)
+        {
+            parsed.security_advisories.push(advisory);
         }
 
-        if is_breaking_change(trimmed) {
-            if let Some(change) = parse_breaking_change(trimmed) {
-                parsed.breaking_changes.push(change);
-            }
+        if is_breaking_change(trimmed)
+            && let Some(change) = parse_breaking_change(trimmed)
+        {
+            parsed.breaking_changes.push(change);
         }
 
         // Categorize by section if detected

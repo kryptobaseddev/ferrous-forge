@@ -30,7 +30,7 @@ pub enum ViolationType {
     MissingModuleDoc,
     /// Cargo.toml is missing [lints.rustdoc] configuration
     MissingDocConfig,
-    /// Hardcoded version string found (should use env!("CARGO_PKG_VERSION"))
+    /// Hardcoded version string found (should use `env!("CARGO_PKG_VERSION")`)
     HardcodedVersion,
     /// Missing changelog entry for current version
     MissingChangelogEntry,

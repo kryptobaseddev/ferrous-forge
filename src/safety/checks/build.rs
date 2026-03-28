@@ -35,9 +35,11 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let mut result = CheckResult::new(CheckType::Build);
 
     // Run cargo build --release
+    // Disable the Ferrous Forge cargo wrapper to avoid recursive validation
     let output = Command::new("cargo")
         .current_dir(project_path)
-        .args(&["build", "--release"])
+        .env("FERROUS_FORGE_ENABLED", "0")
+        .args(["build", "--release"])
         .output()?;
 
     result.set_duration(start.elapsed());

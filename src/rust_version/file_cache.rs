@@ -50,7 +50,7 @@ impl FileCache {
     /// # Errors
     ///
     /// Returns an error if the cache directory cannot be determined or created.
-    pub fn default() -> Result<Self> {
+    pub fn create_default() -> Result<Self> {
         let cache_dir = dirs::cache_dir()
             .ok_or_else(|| Error::config("Could not determine cache directory"))?
             .join("ferrous-forge")
@@ -126,10 +126,10 @@ impl FileCache {
         };
 
         for entry in entries.flatten() {
-            if let Ok(cache_entry) = self.read_entry(&entry.path()) {
-                if !self.is_expired(&cache_entry) {
-                    return true;
-                }
+            if let Ok(cache_entry) = self.read_entry(&entry.path())
+                && !self.is_expired(&cache_entry)
+            {
+                return true;
             }
         }
 

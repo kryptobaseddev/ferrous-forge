@@ -382,12 +382,11 @@ async fn load_all_reports() -> Result<Vec<SafetyReport>> {
 
     while let Ok(Some(entry)) = entries.next_entry().await {
         let path = entry.path();
-        if path.extension().map_or(false, |ext| ext == "json") {
-            if let Ok(contents) = fs::read_to_string(&path).await {
-                if let Ok(report) = serde_json::from_str::<SafetyReport>(&contents) {
-                    reports.push(report);
-                }
-            }
+        if path.extension().is_some_and(|ext| ext == "json")
+            && let Ok(contents) = fs::read_to_string(&path).await
+            && let Ok(report) = serde_json::from_str::<SafetyReport>(&contents)
+        {
+            reports.push(report);
         }
     }
 

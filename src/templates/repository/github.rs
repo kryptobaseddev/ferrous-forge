@@ -68,6 +68,10 @@ struct GitHubTree {
 
 impl GitHubClient {
     /// Create a new GitHub client
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the HTTP client cannot be created.
     pub fn new() -> Result<Self> {
         let client = reqwest::Client::builder()
             .timeout(Duration::from_secs(30))
@@ -88,6 +92,10 @@ impl GitHubClient {
     /// - `gh:owner/repo@ref` - specific ref
     /// - `owner/repo` - without gh: prefix
     /// - `owner/repo@ref` - without gh: prefix
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the input format is invalid.
     pub fn parse_repo_ref(input: &str) -> Result<RepoRef> {
         let input = input.strip_prefix("gh:").unwrap_or(input);
 
@@ -110,6 +118,10 @@ impl GitHubClient {
     }
 
     /// Fetch template from GitHub repository
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GitHub API request fails or the template cannot be fetched.
     pub async fn fetch_template(
         &self,
         repo_ref: &RepoRef,

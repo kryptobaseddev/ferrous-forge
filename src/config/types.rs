@@ -49,7 +49,7 @@ pub struct CustomRule {
 /// Validation configuration settings
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ValidationConfig {
-    /// Whether to check for version consistency (SSoT)
+    /// Whether to check for version consistency (`SSoT`)
     pub check_version_consistency: Option<bool>,
     /// Paths to exclude from version checking
     pub version_check_exclusions: Option<Vec<String>>,

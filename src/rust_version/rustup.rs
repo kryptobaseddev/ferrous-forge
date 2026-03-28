@@ -45,7 +45,7 @@ impl std::fmt::Display for ToolchainChannel {
 }
 
 impl ToolchainChannel {
-    /// Parse a channel string into a ToolchainChannel
+    /// Parse a channel string into a `ToolchainChannel`
     pub fn parse(channel: &str) -> Self {
         match channel.to_lowercase().as_str() {
             "stable" => Self::Stable,
@@ -53,7 +53,7 @@ impl ToolchainChannel {
             "nightly" => Self::Nightly,
             s => {
                 // Check if it looks like a version number
-                if s.chars().next().map_or(false, |c| c.is_ascii_digit()) {
+                if s.chars().next().is_some_and(|c| c.is_ascii_digit()) {
                     Self::Version(s.to_string())
                 } else {
                     Self::Custom(s.to_string())
@@ -101,16 +101,16 @@ impl VersionRequirements {
             return version == exact;
         }
 
-        if let Some(minimum) = &self.minimum {
-            if version < minimum {
-                return false;
-            }
+        if let Some(minimum) = &self.minimum
+            && version < minimum
+        {
+            return false;
         }
 
-        if let Some(maximum) = &self.maximum {
-            if version > maximum {
-                return false;
-            }
+        if let Some(maximum) = &self.maximum
+            && version > maximum
+        {
+            return false;
         }
 
         true

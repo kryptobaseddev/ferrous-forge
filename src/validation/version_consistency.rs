@@ -52,7 +52,7 @@ impl Default for ChangelogRequirements {
 pub struct VersionConsistencyValidator {
     /// Root directory of the project
     project_root: PathBuf,
-    /// Version from Cargo.toml (SSoT)
+    /// Version from Cargo.toml (`SSoT`)
     source_version: String,
     /// Detected version format
     version_format: VersionFormat,
@@ -169,14 +169,17 @@ impl VersionConsistencyValidator {
     /// Detect version format from version string
     fn detect_version_format(version: &str) -> VersionFormat {
         // CalVer typically starts with 4-digit year
-        if Regex::new(r"^\d{4}\.").unwrap().is_match(version) {
+        if Regex::new(r"^\d{4}\.")
+            .ok()
+            .is_some_and(|re| re.is_match(version))
+        {
             VersionFormat::CalVer
         } else {
             VersionFormat::SemVer
         }
     }
 
-    /// Extract version from Cargo.toml (SSoT)
+    /// Extract version from Cargo.toml (`SSoT`)
     fn extract_version_from_cargo(project_root: &Path) -> Result<String> {
         let cargo_path = project_root.join("Cargo.toml");
         let content = std::fs::read_to_string(&cargo_path)
@@ -184,15 +187,15 @@ impl VersionConsistencyValidator {
 
         // Parse version from Cargo.toml
         for line in content.lines() {
-            if let Some(version) = line.trim().strip_prefix("version") {
-                if let Some(eq_idx) = version.find('=') {
-                    let version_str = &version[eq_idx + 1..].trim();
-                    // Remove quotes
-                    let version_clean = version_str.trim_matches('"').trim_matches('\'');
+            if let Some(version) = line.trim().strip_prefix("version")
+                && let Some(eq_idx) = version.find('=')
+            {
+                let version_str = &version[eq_idx + 1..].trim();
+                // Remove quotes
+                let version_clean = version_str.trim_matches('"').trim_matches('\'');
 
-                    if Self::is_valid_version(version_clean) {
-                        return Ok(version_clean.to_string());
-                    }
+                if Self::is_valid_version(version_clean) {
+                    return Ok(version_clean.to_string());
                 }
             }
         }
@@ -202,19 +205,26 @@ impl VersionConsistencyValidator {
         ))
     }
 
-    /// Check if string is valid version (SemVer or CalVer)
+    /// Check if string is valid version (`SemVer` or `CalVer`)
     fn is_valid_version(version: &str) -> bool {
         // SemVer: x.y.z with optional pre-release and build metadata
-        let semver_regex =
-            Regex::new(r"^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$").unwrap();
+        let semver_ok = Regex::new(r"^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$")
+            .ok()
+            .is_some_and(|re| re.is_match(version));
 
         // CalVer: YYYY.MM.DD or YYYY.M.D or YYYY.MM
-        let calver_regex = Regex::new(r"^\d{4}(?:\.\d{1,2}){1,2}(?:-[a-zA-Z0-9.-]+)?$").unwrap();
+        let calver_ok = Regex::new(r"^\d{4}(?:\.\d{1,2}){1,2}(?:-[a-zA-Z0-9.-]+)?$")
+            .ok()
+            .is_some_and(|re| re.is_match(version));
 
-        semver_regex.is_match(version) || calver_regex.is_match(version)
+        semver_ok || calver_ok
     }
 
     /// Validate version consistency across the codebase
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the project files cannot be read or analyzed.
     pub async fn validate(&self) -> Result<VersionValidationResult> {
         let mut violations = Vec::new();
 
@@ -262,9 +272,11 @@ impl VersionConsistencyValidator {
         }
 
         // Check if we're creating a tag (via git hook or CI)
-        if self.is_tagging_scenario().await? && self.changelog_requirements.check_on_tag {
-            if !changelog_status.version_documented {
-                violations.push(Violation {
+        if self.is_tagging_scenario().await?
+            && self.changelog_requirements.check_on_tag
+            && !changelog_status.version_documented
+        {
+            violations.push(Violation {
                     violation_type: ViolationType::MissingChangelogEntry,
                     file: self.project_root.join("CHANGELOG.md"),
                     line: 1,
@@ -274,7 +286,6 @@ impl VersionConsistencyValidator {
                     ),
                     severity: Severity::Error,
                 });
-            }
         }
 
         Ok(VersionValidationResult {
@@ -298,7 +309,7 @@ impl VersionConsistencyValidator {
                 continue;
             }
 
-            if path.extension().map_or(false, |ext| ext == "rs") {
+            if path.extension().is_some_and(|ext| ext == "rs") {
                 self.check_file(path, violations).await?;
             }
         }
@@ -319,18 +330,19 @@ impl VersionConsistencyValidator {
             }
 
             // Check for hardcoded version
-            if let Some(captures) = self.version_regex.captures(line) {
-                if let Some(version_match) = captures.get(1) {
-                    let found_version = version_match.as_str();
+            if let Some(captures) = self.version_regex.captures(line)
+                && let Some(version_match) = captures.get(1)
+            {
+                let found_version = version_match.as_str();
 
-                    // If version matches Cargo.toml, check if it's properly sourced
-                    if found_version == self.source_version {
-                        // Allow env! macro and CARGO_PKG_VERSION
-                        if !line.contains("env!(\"CARGO_PKG_VERSION\")")
-                            && !line.contains("CARGO_PKG_VERSION")
-                            && !line.contains("clap::crate_version!")
-                        {
-                            violations.push(Violation {
+                // If version matches Cargo.toml, check if it's properly sourced
+                if found_version == self.source_version {
+                    // Allow env! macro and CARGO_PKG_VERSION
+                    if !line.contains("env!(\"CARGO_PKG_VERSION\")")
+                        && !line.contains("CARGO_PKG_VERSION")
+                        && !line.contains("clap::crate_version!")
+                    {
+                        violations.push(Violation {
                                 violation_type: ViolationType::HardcodedVersion,
                                 file: path.to_path_buf(),
                                 line: line_num + 1,
@@ -340,7 +352,6 @@ impl VersionConsistencyValidator {
                                 ),
                                 severity: Severity::Error,
                             });
-                        }
                     }
                 }
             }
@@ -410,10 +421,10 @@ impl VersionConsistencyValidator {
             .output()
             .await;
 
-        if let Ok(output) = output {
-            if output.status.success() {
-                return Ok(true);
-            }
+        if let Ok(output) = output
+            && output.status.success()
+        {
+            return Ok(true);
         }
 
         Ok(false)

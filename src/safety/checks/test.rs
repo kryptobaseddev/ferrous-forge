@@ -35,9 +35,11 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let mut result = CheckResult::new(CheckType::Test);
 
     // Run cargo test with comprehensive flags
+    // Disable the Ferrous Forge cargo wrapper to avoid recursive validation
     let output = Command::new("cargo")
         .current_dir(project_path)
-        .args(&["test", "--all-targets", "--all-features"])
+        .env("FERROUS_FORGE_ENABLED", "0")
+        .args(["test", "--all-targets", "--all-features"])
         .output()?;
 
     result.set_duration(start.elapsed());

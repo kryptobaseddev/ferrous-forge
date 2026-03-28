@@ -109,7 +109,7 @@ impl VersionManager {
     pub fn new() -> Result<Self> {
         let github_client = GitHubClient::new(None)?;
         let cache = Arc::new(RwLock::new(cache::Cache::new(Duration::from_secs(3600))));
-        let file_cache = file_cache::FileCache::default()?;
+        let file_cache = file_cache::FileCache::create_default()?;
 
         Ok(Self {
             github_client,
@@ -136,11 +136,11 @@ impl VersionManager {
         // Check file cache first for offline support
         let cache_key = "latest_stable";
 
-        if let Some(entry) = self.file_cache.get(cache_key) {
-            if let Ok(release) = serde_json::from_slice::<GitHubRelease>(&entry.data) {
-                tracing::debug!("Using cached latest stable release");
-                return Ok(release);
-            }
+        if let Some(entry) = self.file_cache.get(cache_key)
+            && let Ok(release) = serde_json::from_slice::<GitHubRelease>(&entry.data)
+        {
+            tracing::debug!("Using cached latest stable release");
+            return Ok(release);
         }
 
         // Check in-memory cache
@@ -290,11 +290,11 @@ impl VersionManager {
         // Check file cache first
         let cache_key = format!("recent_releases_{}", count);
 
-        if let Some(entry) = self.file_cache.get(&cache_key) {
-            if let Ok(releases) = serde_json::from_slice::<Vec<GitHubRelease>>(&entry.data) {
-                tracing::debug!("Using cached releases");
-                return Ok(releases);
-            }
+        if let Some(entry) = self.file_cache.get(&cache_key)
+            && let Ok(releases) = serde_json::from_slice::<Vec<GitHubRelease>>(&entry.data)
+        {
+            tracing::debug!("Using cached releases");
+            return Ok(releases);
         }
 
         // Fetch from GitHub
@@ -317,15 +317,15 @@ impl VersionManager {
         // Check file cache first
         let cache_key = format!("release_notes_{}", version);
 
-        if let Some(entry) = self.file_cache.get(&cache_key) {
-            if let Ok(release) = serde_json::from_slice::<GitHubRelease>(&entry.data) {
-                let parsed = parser::parse_release_notes(&release.tag_name, &release.body);
-                return Ok(ReleaseNotes {
-                    version: release.tag_name,
-                    full_notes: release.body,
-                    parsed,
-                });
-            }
+        if let Some(entry) = self.file_cache.get(&cache_key)
+            && let Ok(release) = serde_json::from_slice::<GitHubRelease>(&entry.data)
+        {
+            let parsed = parser::parse_release_notes(&release.tag_name, &release.body);
+            return Ok(ReleaseNotes {
+                version: release.tag_name,
+                full_notes: release.body,
+                parsed,
+            });
         }
 
         // Fetch from GitHub

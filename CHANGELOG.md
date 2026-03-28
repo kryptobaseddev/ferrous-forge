@@ -5,6 +5,24 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - 2026-03-27
+
+### Fixed
+
+- **MISSINGMODULEDOC skips `@generated` files** — Files containing `// @generated` markers are
+  now excluded from the module documentation check, resolving an impossible pre-commit loop where
+  `cargo fmt` strips `//!` docs from generated files (GitHub issue #17)
+- **Severity ordering for security issues** — `Severity` enum now orders correctly
+  (`Critical > High > Medium > Low > Unknown`) instead of reversed discriminant order
+- **Safety check tests no longer fail** — `cargo build` and `cargo test` safety checks now
+  disable the Ferrous Forge cargo wrapper in child processes to prevent recursive validation
+- **39 pre-existing clippy errors resolved** — Fixed `map_or` → `is_some_and`, collapsible `if`,
+  missing `# Errors` doc sections, `unwrap()` in production code, and doc-markdown backtick issues
+
+### Added
+
+- Unit tests for `validate_doc_presence` covering normal, generated, and edge-case scenarios
+
 ## [1.9.0] - 2025-03-21
 
 ### Added
@@ -33,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `check_changelog_on_tag` — Validate when creating git tags
   - `changelog_required_sections` — Customizable required sections
 
-## [1.8.0] - 2025-03-21
+## [1.9.0] - 2025-03-21
 
 ### Epic T014: Aggressive Enforcement System — COMPLETE
 
@@ -168,10 +186,10 @@ All 10 tasks of the Aggressive Enforcement System epic are now implemented.
   with explicit "DO NOT MODIFY" rule appears before any fix list.
 
 ### Improved (Phase 6 — Template Upgrade)
-- **Library template**: `Cargo.toml` includes full `[lints]` block, `rust-version = "1.85.0"`,
+- **Library template**: `Cargo.toml` includes full `[lints]` block, `rust-version = "1.9.1"`,
   generates `rustfmt.toml` and `clippy.toml`, and `lib.rs` has a proper `//!` doc block.
 
-## [1.6.0] - 2026-03-07 🎯 FEATURE-COMPLETE RELEASE
+## [1.9.1] - 2026-03-07 🎯 FEATURE-COMPLETE RELEASE
 
 ### Added
 - **Git Hooks System**: Automatic pre-commit and pre-push hooks installation
@@ -245,7 +263,7 @@ All 10 tasks of the Aggressive Enforcement System epic are now implemented.
 - **Rust Version**: Requires Rust 1.88+
 - **Edition**: Uses Rust 2024 edition
 
-## [1.4.2] - 2025-09-25 🚀 CI/CD FIXES
+## [1.9.1] - 2025-09-25 🚀 CI/CD FIXES
 
 ### Fixed
 - **CI/CD Issues**: Fixed all GitHub Actions failures
@@ -258,7 +276,7 @@ All 10 tasks of the Aggressive Enforcement System epic are now implemented.
 - **CI/CD Pipeline**: 100% green across all jobs
 - **Edition 2024**: Maintained with Rust 1.88 compatibility
 
-## [1.4.1] - 2025-09-25 🔧 CRITICAL BUG FIX & DOGFOODING
+## [1.9.1] - 2025-09-25 🔧 CRITICAL BUG FIX & DOGFOODING
 
 ### Fixed
 - **CLI Bug**: Fixed duplicate short option '-c' conflict in update command
@@ -287,7 +305,7 @@ All 10 tasks of the Aggressive Enforcement System epic are now implemented.
 - Complete feature testing
 - Rust version and edition management commands working
 
-## [1.4.0] - 2025-09-22 🎉 HISTORIC MILESTONE
+## [1.9.1] - 2025-09-22 🎉 HISTORIC MILESTONE
 
 ### 🏆 ZERO VIOLATIONS ACHIEVED - MISSION COMPLETE!
 
@@ -332,7 +350,7 @@ All 10 tasks of the Aggressive Enforcement System epic are now implemented.
 
 **Migration Notes**: This is a feature-complete release with no breaking changes. All existing functionality is preserved and enhanced.
 
-## [1.3.0] - 2025-09-21
+## [1.9.1] - 2025-09-21
 
 ### Added
 - Enhanced Safety Pipeline with git hooks
@@ -343,7 +361,7 @@ All 10 tasks of the Aggressive Enforcement System epic are now implemented.
 - Critical test detection bugs
 - Validation accuracy improvements
 
-## [1.2.5] - 2025-09-19
+## [1.9.1] - 2025-09-19
 
 ### Added
 - Enhanced Safety Pipeline design document for v1.3.0
@@ -368,7 +386,7 @@ All 10 tasks of the Aggressive Enforcement System epic are now implemented.
 - 86 passing tests across all modules
 - Clean crates.io publication process
 
-## [1.2.0] - 2025-09-19
+## [1.9.1] - 2025-09-19
 
 ### Added
 - **Rust Version Management** 🦀
@@ -418,7 +436,7 @@ ferrous-forge edition check
 ferrous-forge edition migrate 2024
 ```
 
-## [1.1.0] - 2025-09-19
+## [1.9.1] - 2025-09-19
 
 ### Added
 - Comprehensive CI/CD setup documentation
@@ -440,7 +458,7 @@ ferrous-forge edition migrate 2024
 - GitHub Actions deprecated artifact upload (v3 → v4)
 - Integration test rustup configuration
 
-## [1.0.1] - 2025-09-19 [DEPRECATED - Use 1.1.0]
+## [1.9.1] - 2025-09-19 [DEPRECATED - Use 1.1.0]
 
 ### Fixed
 - **CI/CD Pipeline Issues**
@@ -477,7 +495,7 @@ ferrous-forge edition migrate 2024
 ### Security
 - Fixed GitHub Actions permissions for security scanning and documentation deployment
 
-## [1.0.0] - 2025-09-17
+## [1.9.1] - 2025-09-17
 
 ### 🎉 Production Release - Feature Complete
 
@@ -524,7 +542,7 @@ ferrous-forge edition migrate 2024
 - All dependencies security-audited
 - Automatic vulnerability scanning integrated
 
-## [0.1.0] - 2024-09-16
+## [1.9.1] - 2024-09-16
 
 ### Added
 - **Core Features**

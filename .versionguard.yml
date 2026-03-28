@@ -1,0 +1,39 @@
+versioning:
+  type: semver
+  semver:
+    allowVPrefix: false
+    allowBuildMetadata: true
+    requirePrerelease: false
+  calver:
+    format: YYYY.MM.PATCH
+    preventFutureDates: true
+manifest:
+  source: Cargo.toml
+sync:
+  files:
+    - README.md
+    - CHANGELOG.md
+  patterns:
+    - regex: (version\s*[=:]\s*["'])(.+?)(["'])
+      template: $1{{version}}$3
+    - regex: (##\s*\[)(.+?)(\])
+      template: $1{{version}}$3
+changelog:
+  enabled: true
+  file: CHANGELOG.md
+  strict: true
+  requireEntry: true
+github:
+  dependabot: false
+git:
+  hooks:
+    pre-commit: false
+    pre-push: false
+    post-tag: false
+  enforceHooks: false
+ignore:
+  - node_modules/**
+  - dist/**
+  - .git/**
+  - "*.lock"
+  - .changeset/**

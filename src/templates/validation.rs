@@ -48,6 +48,10 @@ impl Default for ValidationResult {
 
 /// Validate a template directory and its manifest
 ///
+/// # Errors
+///
+/// Returns an error if the template fails validation checks.
+///
 /// @task T021
 /// @epic T014
 pub async fn validate_template(template_dir: &Path, manifest: &TemplateManifest) -> Result<()> {
@@ -241,6 +245,11 @@ fn is_valid_version(version: &str) -> bool {
 /// Validate template before installation
 ///
 /// This is the main entry point for template validation.
+///
+/// # Errors
+///
+/// Returns an error if the manifest cannot be read or parsed.
+///
 /// @task T021
 /// @epic T014
 pub async fn validate_before_install(template_dir: &Path) -> Result<ValidationResult> {
