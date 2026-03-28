@@ -56,7 +56,30 @@ pub fn validate_doc_presence(
     Ok(())
 }
 
+/// Check that Cargo.toml has a [lints.rustdoc] section configured
+pub fn validate_cargo_doc_config(
+    cargo_file: &Path,
+    content: &str,
+    violations: &mut Vec<Violation>,
+) -> Result<()> {
+    if !content.contains("[lints.rustdoc]") && !content.contains("[lints]") {
+        violations.push(Violation {
+            violation_type: ViolationType::MissingDocConfig,
+            file: cargo_file.to_path_buf(),
+            line: 0,
+            message: "FERROUS FORGE [DOC STANDARD] — Missing rustdoc lint configuration\n  \
+                     Cargo.toml is missing [lints.rustdoc] section.\n  \
+                     Run 'ferrous-forge init --project' to inject the full rustdoc lint block."
+                .to_string(),
+            severity: Severity::Warning,
+        });
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use std::path::PathBuf;
@@ -130,26 +153,4 @@ mod tests {
         let v = run_doc_check("mod.rs", source);
         assert_eq!(v.len(), 1, "partial match should not skip validation");
     }
-}
-
-/// Check that Cargo.toml has a [lints.rustdoc] section configured
-pub fn validate_cargo_doc_config(
-    cargo_file: &Path,
-    content: &str,
-    violations: &mut Vec<Violation>,
-) -> Result<()> {
-    if !content.contains("[lints.rustdoc]") && !content.contains("[lints]") {
-        violations.push(Violation {
-            violation_type: ViolationType::MissingDocConfig,
-            file: cargo_file.to_path_buf(),
-            line: 0,
-            message: "FERROUS FORGE [DOC STANDARD] — Missing rustdoc lint configuration\n  \
-                     Cargo.toml is missing [lints.rustdoc] section.\n  \
-                     Run 'ferrous-forge init --project' to inject the full rustdoc lint block."
-                .to_string(),
-            severity: Severity::Warning,
-        });
-    }
-
-    Ok(())
 }
