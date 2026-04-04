@@ -87,21 +87,25 @@ impl CoverageAnalyzer {
 
         tracing::info!("Running test coverage analysis...");
 
-        let exclude_files_str = self.config.exclude_files.join(",");
         let mut args = vec![
-            "tarpaulin",
-            "--verbose",
-            "--timeout",
-            "120",
-            "--out",
-            "Json",
-            "--exclude-files",
-            &exclude_files_str,
+            "tarpaulin".to_string(),
+            "--verbose".to_string(),
+            "--timeout".to_string(),
+            "120".to_string(),
+            "--out".to_string(),
+            "Json".to_string(),
         ];
+
+        // Each exclude file must be its own --exclude-files argument (tarpaulin doesn't accept comma-separated)
+        for exclude_file in &self.config.exclude_files {
+            args.push("--exclude-files".to_string());
+            args.push(exclude_file.clone());
+        }
 
         // Add exclude directories
         for exclude_dir in &self.config.exclude_dirs {
-            args.extend_from_slice(&["--exclude-files", exclude_dir]);
+            args.push("--exclude-files".to_string());
+            args.push(exclude_dir.clone());
         }
 
         let output = Command::new("cargo")
