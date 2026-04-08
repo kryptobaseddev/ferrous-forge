@@ -179,29 +179,78 @@ impl VersionConsistencyValidator {
         }
     }
 
-    /// Extract version from Cargo.toml (`SSoT`)
+    /// Extract version from Cargo.toml (`SSoT`).
+    ///
+    /// Handles the full set of forms cargo supports:
+    /// - `[package].version = "1.2.3"`
+    /// - `[package].version.workspace = true` (walks up to the workspace root)
+    /// - `[package].version = { workspace = true }` (inline table form)
+    /// - Virtual manifests with `[workspace.package].version`
     fn extract_version_from_cargo(project_root: &Path) -> Result<String> {
         let cargo_path = project_root.join("Cargo.toml");
         let content = std::fs::read_to_string(&cargo_path)
             .map_err(|e| Error::io(format!("Failed to read Cargo.toml: {}", e)))?;
 
-        // Parse version from Cargo.toml
-        for line in content.lines() {
-            if let Some(version) = line.trim().strip_prefix("version")
-                && let Some(eq_idx) = version.find('=')
-            {
-                let version_str = &version[eq_idx + 1..].trim();
-                // Remove quotes
-                let version_clean = version_str.trim_matches('"').trim_matches('\'');
+        let parsed: toml::Value = toml::from_str(&content)
+            .map_err(|e| Error::validation(format!("Failed to parse Cargo.toml: {}", e)))?;
 
-                if Self::is_valid_version(version_clean) {
-                    return Ok(version_clean.to_string());
-                }
+        // 1. [package].version — literal string
+        if let Some(version) = parsed.get("package").and_then(|p| p.get("version")) {
+            if let Some(s) = version.as_str()
+                && Self::is_valid_version(s)
+            {
+                return Ok(s.to_string());
             }
+            // 2. [package].version = { workspace = true } or version.workspace = true
+            let is_inherited = version
+                .as_table()
+                .and_then(|t| t.get("workspace"))
+                .and_then(toml::Value::as_bool)
+                == Some(true);
+            if is_inherited {
+                return Self::resolve_workspace_version(project_root);
+            }
+        }
+
+        // 3. Virtual manifest with [workspace.package].version defined here
+        if let Some(s) = parsed
+            .get("workspace")
+            .and_then(|w| w.get("package"))
+            .and_then(|p| p.get("version"))
+            .and_then(toml::Value::as_str)
+            && Self::is_valid_version(s)
+        {
+            return Ok(s.to_string());
         }
 
         Err(Error::validation(
             "Could not parse version from Cargo.toml".to_string(),
+        ))
+    }
+
+    /// Walk up from `start` looking for a Cargo.toml whose `[workspace.package]`
+    /// table defines a concrete `version`. This resolves workspace inheritance
+    /// for members that declare `version.workspace = true`.
+    fn resolve_workspace_version(start: &Path) -> Result<String> {
+        let mut current: Option<&Path> = Some(start);
+        while let Some(dir) = current {
+            let cargo = dir.join("Cargo.toml");
+            if cargo.exists()
+                && let Ok(content) = std::fs::read_to_string(&cargo)
+                && let Ok(parsed) = toml::from_str::<toml::Value>(&content)
+                && let Some(s) = parsed
+                    .get("workspace")
+                    .and_then(|w| w.get("package"))
+                    .and_then(|p| p.get("version"))
+                    .and_then(toml::Value::as_str)
+                && Self::is_valid_version(s)
+            {
+                return Ok(s.to_string());
+            }
+            current = dir.parent();
+        }
+        Err(Error::validation(
+            "Could not resolve workspace-inherited version: no workspace root with [workspace.package].version found".to_string(),
         ))
     }
 
@@ -553,5 +602,105 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
         let result = validator.validate().await.unwrap();
         assert!(result.changelog_status.follows_keep_a_changelog);
         assert!(result.changelog_status.version_documented);
+    }
+
+    #[tokio::test]
+    async fn test_extract_version_with_workspace_inheritance_dotted() {
+        // Virtual workspace root + a member that uses `version.workspace = true`.
+        // Running the validator against the member directory must walk up to the
+        // workspace root and resolve the version from [workspace.package].
+        let temp_dir = TempDir::new().unwrap();
+        let root = temp_dir.path();
+
+        fs::write(
+            root.join("Cargo.toml"),
+            r#"
+[workspace]
+members = ["child"]
+
+[workspace.package]
+version = "1.2.3"
+edition = "2024"
+"#,
+        )
+        .await
+        .unwrap();
+
+        let child = root.join("child");
+        fs::create_dir_all(&child).await.unwrap();
+        fs::write(
+            child.join("Cargo.toml"),
+            r#"
+[package]
+name = "child"
+version.workspace = true
+edition.workspace = true
+"#,
+        )
+        .await
+        .unwrap();
+
+        let version = VersionConsistencyValidator::extract_version_from_cargo(&child).unwrap();
+        assert_eq!(version, "1.2.3");
+    }
+
+    #[tokio::test]
+    async fn test_extract_version_with_workspace_inheritance_inline() {
+        let temp_dir = TempDir::new().unwrap();
+        let root = temp_dir.path();
+
+        fs::write(
+            root.join("Cargo.toml"),
+            r#"
+[workspace]
+members = ["child"]
+
+[workspace.package]
+version = "2.0.0"
+"#,
+        )
+        .await
+        .unwrap();
+
+        let child = root.join("child");
+        fs::create_dir_all(&child).await.unwrap();
+        fs::write(
+            child.join("Cargo.toml"),
+            r#"
+[package]
+name = "child"
+version = { workspace = true }
+"#,
+        )
+        .await
+        .unwrap();
+
+        let version = VersionConsistencyValidator::extract_version_from_cargo(&child).unwrap();
+        assert_eq!(version, "2.0.0");
+    }
+
+    #[tokio::test]
+    async fn test_extract_version_from_virtual_workspace_root() {
+        // A pure virtual workspace (no [package]) should resolve its own
+        // [workspace.package].version.
+        let temp_dir = TempDir::new().unwrap();
+        let root = temp_dir.path();
+
+        fs::write(
+            root.join("Cargo.toml"),
+            r#"
+[workspace]
+members = ["a", "b"]
+
+[workspace.package]
+version = "0.9.0"
+edition = "2024"
+"#,
+        )
+        .await
+        .unwrap();
+
+        let version = VersionConsistencyValidator::extract_version_from_cargo(root).unwrap();
+        assert_eq!(version, "0.9.0");
     }
 }

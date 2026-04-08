@@ -5,6 +5,39 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.3] - 2026-04-08
+
+### Fixed
+
+- **Workspace inheritance in `Cargo.toml` validation** — Fields declared with
+  `version.workspace = true`, `edition.workspace = true`, `rust-version.workspace = true`,
+  or the inline `= { workspace = true }` form are now recognised as workspace inheritance
+  instead of being misread as a literal `"true"` value. Previously, validating a workspace
+  member would produce a spurious "wrong edition" violation, and `extract_version_from_cargo`
+  would fail with "Could not parse version from Cargo.toml", blocking the entire validation
+  pass (and therefore any `cargo build`/`cargo test` routed through the cargo wrapper).
+- **Virtual workspace manifests** — Pure `[workspace]` manifests without a `[package]`
+  section no longer trigger a "missing edition" violation and correctly resolve the
+  workspace version from `[workspace.package].version`.
+- **Workspace-inherited version resolution** — `VersionConsistencyValidator` now walks up
+  from a member crate to find the workspace root and reads `[workspace.package].version`,
+  so the SSoT version check works for workspace members.
+
+### Changed
+
+- `cargo_validation.rs` and `version_consistency.rs` now use the `toml` crate for parsing
+  rather than line-based scanning, which is inherently robust to TOML forms the line scanner
+  could not represent.
+
+## [1.9.2] - 2026-03-27
+
+### Fixed
+
+- **CI clippy failures** — Resolved `items_after_test_module` and `unwrap_used` lint errors
+  introduced after upgrading to the newer clippy version.
+- **Tarpaulin coverage invocation** — Each `--exclude-files` argument is now passed as a
+  separate tarpaulin flag so coverage excludes are honoured correctly.
+
 ## [1.9.1] - 2026-03-27
 
 ### Fixed
