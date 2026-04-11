@@ -1,6 +1,6 @@
 [package]
 name = "ferrous-forge"
-version = "1.9.3"
+version = "1.9.4"
 edition = "2024"
 rust-version = "1.88"
 authors = ["Ferrous Forge Contributors"]
@@ -39,6 +39,7 @@ dirs = "5.0"
 walkdir = "2.5"
 glob = "0.3"
 tempfile = "3.12"
+fs2 = "0.4"
 
 # Configuration and serialization
 serde = { version = "1.0", features = ["derive"] }

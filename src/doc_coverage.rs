@@ -6,8 +6,7 @@
 use crate::{Error, Result};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
-use std::process::Command;
+use std::path::{Path, PathBuf};
 
 /// Documentation coverage report
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -70,7 +69,7 @@ impl DocCoverage {
 /// Returns [`Error::Process`] if `cargo doc` fails to execute.
 /// Returns [`Error::Io`] if project source files cannot be read.
 pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCoverage> {
-    let output = run_cargo_doc(project_path)?;
+    let output = run_cargo_doc(project_path).await?;
     let missing = find_missing_docs(&output)?;
     let (total, documented) = count_documentation_items(project_path).await?;
 
@@ -85,8 +84,8 @@ pub async fn check_documentation_coverage(project_path: &Path) -> Result<DocCove
 }
 
 /// Run cargo doc and get output
-fn run_cargo_doc(project_path: &Path) -> Result<std::process::Output> {
-    Command::new("cargo")
+async fn run_cargo_doc(project_path: &Path) -> Result<std::process::Output> {
+    tokio::process::Command::new("cargo")
         .args(&[
             "doc",
             "--no-deps",
@@ -95,6 +94,7 @@ fn run_cargo_doc(project_path: &Path) -> Result<std::process::Output> {
         ])
         .current_dir(project_path)
         .output()
+        .await
         .map_err(|e| Error::process(format!("Failed to run cargo doc: {}", e)))
 }
 
@@ -137,20 +137,27 @@ fn calculate_coverage_percent(documented: usize, total: usize) -> f32 {
 
 /// Count documentation items in the project
 async fn count_documentation_items(project_path: &Path) -> Result<(usize, usize)> {
+    let root = project_path.to_path_buf();
+
+    // Collect file paths in a blocking context (WalkDir is synchronous)
+    let paths: Vec<PathBuf> = tokio::task::spawn_blocking(move || {
+        walkdir::WalkDir::new(&root)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| {
+                e.path().extension().is_some_and(|ext| ext == "rs")
+                    && !e.path().to_string_lossy().contains("target")
+            })
+            .map(|e| e.path().to_path_buf())
+            .collect::<Vec<_>>()
+    })
+    .await
+    .map_err(|e| Error::process(format!("Task join error: {}", e)))?;
+
     let mut total = 0;
     let mut documented = 0;
-
-    // Walk through all Rust files
-    let walker = walkdir::WalkDir::new(project_path)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| {
-            e.path().extension().is_some_and(|ext| ext == "rs")
-                && !e.path().to_string_lossy().contains("target")
-        });
-
-    for entry in walker {
-        let content = tokio::fs::read_to_string(entry.path()).await?;
+    for path in paths {
+        let content = tokio::fs::read_to_string(&path).await?;
         let (file_total, file_documented) = count_items_in_file(&content)?;
         total += file_total;
         documented += file_documented;

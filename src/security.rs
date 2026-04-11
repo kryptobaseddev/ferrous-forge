@@ -6,7 +6,6 @@
 use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
-use std::process::Command;
 
 /// Security audit report
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -98,10 +97,11 @@ pub async fn run_security_audit(project_path: &Path) -> Result<AuditReport> {
     ensure_cargo_audit_installed().await?;
 
     // Run cargo audit with JSON output
-    let output = Command::new("cargo")
+    let output = tokio::process::Command::new("cargo")
         .args(&["audit", "--json"])
         .current_dir(project_path)
         .output()
+        .await
         .map_err(|e| Error::process(format!("Failed to run cargo audit: {}", e)))?;
 
     // Parse the output
@@ -110,7 +110,10 @@ pub async fn run_security_audit(project_path: &Path) -> Result<AuditReport> {
 
 /// Ensure cargo-audit is installed
 async fn ensure_cargo_audit_installed() -> Result<()> {
-    let check = Command::new("cargo").args(&["audit", "--version"]).output();
+    let check = tokio::process::Command::new("cargo")
+        .args(&["audit", "--version"])
+        .output()
+        .await;
 
     if check
         .as_ref()
@@ -118,9 +121,10 @@ async fn ensure_cargo_audit_installed() -> Result<()> {
     {
         println!("📦 Installing cargo-audit for security scanning...");
 
-        let install = Command::new("cargo")
+        let install = tokio::process::Command::new("cargo")
             .args(&["install", "cargo-audit", "--locked"])
             .output()
+            .await
             .map_err(|e| Error::process(format!("Failed to install cargo-audit: {}", e)))?;
 
         if !install.status.success() {

@@ -348,19 +348,35 @@ impl VersionConsistencyValidator {
 
     /// Check for hardcoded versions in source files
     async fn check_hardcoded_versions(&self, violations: &mut Vec<Violation>) -> Result<()> {
-        for entry in WalkDir::new(&self.project_root)
-            .into_iter()
-            .filter_map(|e| e.ok())
-        {
-            let path = entry.path();
+        let root = self.project_root.clone();
+        let exclusions = self.exclusions.clone();
 
-            if self.is_excluded(path) {
-                continue;
-            }
+        // Collect file paths in a blocking context to avoid stalling the async
+        // runtime (WalkDir is synchronous and holds directory handles).
+        let rs_paths: Vec<PathBuf> = tokio::task::spawn_blocking(move || {
+            WalkDir::new(&root)
+                .into_iter()
+                .filter_map(|e| e.ok())
+                .filter(|e| {
+                    let p = e.path();
+                    if exclusions.iter().any(|ex| p.starts_with(ex)) {
+                        return false;
+                    }
+                    let s = p.to_string_lossy();
+                    !(s.contains("/tests/")
+                        || s.contains("/test/")
+                        || s.contains("/fixtures/")
+                        || s.contains("/examples/"))
+                        && p.extension().is_some_and(|ext| ext == "rs")
+                })
+                .map(|e| e.path().to_path_buf())
+                .collect()
+        })
+        .await
+        .map_err(|e| Error::process(format!("Task join error: {}", e)))?;
 
-            if path.extension().is_some_and(|ext| ext == "rs") {
-                self.check_file(path, violations).await?;
-            }
+        for path in rs_paths {
+            self.check_file(&path, violations).await?;
         }
         Ok(())
     }
@@ -477,26 +493,6 @@ impl VersionConsistencyValidator {
         }
 
         Ok(false)
-    }
-
-    /// Check if a path is excluded from validation
-    fn is_excluded(&self, path: &Path) -> bool {
-        for exclusion in &self.exclusions {
-            if path.starts_with(exclusion) {
-                return true;
-            }
-        }
-
-        let path_str = path.to_string_lossy();
-        if path_str.contains("/tests/")
-            || path_str.contains("/test/")
-            || path_str.contains("/fixtures/")
-            || path_str.contains("/examples/")
-        {
-            return true;
-        }
-
-        false
     }
 
     /// Create empty result for when validation is disabled

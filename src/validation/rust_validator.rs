@@ -12,7 +12,6 @@ use file_checks::{validate_cargo_toml_full, validate_rust_file};
 use patterns::ValidationPatterns;
 use regex::Regex;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 /// Result from running clippy
 #[derive(Debug, Clone)]
@@ -194,7 +193,7 @@ impl RustValidator {
     ///
     /// Returns an error if the clippy command fails to execute.
     pub async fn run_clippy(&self) -> Result<ClippyResult> {
-        let output = Command::new("cargo")
+        let output = tokio::process::Command::new("cargo")
             .args(&[
                 "clippy",
                 "--all-features",
@@ -214,6 +213,7 @@ impl RustValidator {
             ])
             .current_dir(&self.project_root)
             .output()
+            .await
             .map_err(|e| Error::process(format!("Failed to run clippy: {}", e)))?;
 
         Ok(ClippyResult {
@@ -224,9 +224,10 @@ impl RustValidator {
     }
 
     async fn check_rust_version(&self, violations: &mut Vec<Violation>) -> Result<()> {
-        let output = Command::new("rustc")
+        let output = tokio::process::Command::new("rustc")
             .arg("--version")
             .output()
+            .await
             .map_err(|_| Error::validation("Rust compiler not found"))?;
 
         let version_line = String::from_utf8_lossy(&output.stdout);
@@ -277,74 +278,78 @@ impl RustValidator {
     }
 
     async fn find_rust_files(&self) -> Result<Vec<PathBuf>> {
-        let mut rust_files = Vec::new();
-        self.collect_rust_files_recursive(&self.project_root, &mut rust_files)?;
-        Ok(rust_files)
-    }
-
-    fn collect_rust_files_recursive(
-        &self,
-        path: &Path,
-        rust_files: &mut Vec<PathBuf>,
-    ) -> Result<()> {
-        if path.to_string_lossy().contains("target/") {
-            return Ok(());
-        }
-
-        if path.is_file() {
-            if let Some(ext) = path.extension()
-                && ext == "rs"
-            {
-                rust_files.push(path.to_path_buf());
-            }
-        } else if path.is_dir() {
-            let entries = std::fs::read_dir(path)?;
-            for entry in entries {
-                let entry = entry?;
-                let entry_path = entry.path();
-                if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
-                    continue;
-                }
-                self.collect_rust_files_recursive(&entry_path, rust_files)?;
-            }
-        }
-
-        Ok(())
+        let root = self.project_root.clone();
+        tokio::task::spawn_blocking(move || {
+            let mut rust_files = Vec::new();
+            collect_rust_files_recursive(&root, &mut rust_files)?;
+            Ok(rust_files)
+        })
+        .await
+        .map_err(|e| Error::process(format!("Task join error: {}", e)))?
     }
 
     async fn find_cargo_files(&self) -> Result<Vec<PathBuf>> {
-        let mut cargo_files = Vec::new();
-        self.collect_cargo_files_recursive(&self.project_root, &mut cargo_files)?;
-        Ok(cargo_files)
+        let root = self.project_root.clone();
+        tokio::task::spawn_blocking(move || {
+            let mut cargo_files = Vec::new();
+            collect_cargo_files_recursive(&root, &mut cargo_files)?;
+            Ok(cargo_files)
+        })
+        .await
+        .map_err(|e| Error::process(format!("Task join error: {}", e)))?
+    }
+}
+
+/// Recursively collect `.rs` files, skipping `target/` directories.
+fn collect_rust_files_recursive(path: &Path, rust_files: &mut Vec<PathBuf>) -> Result<()> {
+    if path.to_string_lossy().contains("target/") {
+        return Ok(());
     }
 
-    fn collect_cargo_files_recursive(
-        &self,
-        path: &Path,
-        cargo_files: &mut Vec<PathBuf>,
-    ) -> Result<()> {
-        if path.to_string_lossy().contains("target/") {
-            return Ok(());
+    if path.is_file() {
+        if let Some(ext) = path.extension()
+            && ext == "rs"
+        {
+            rust_files.push(path.to_path_buf());
         }
-
-        if path.is_file() {
-            if path.file_name().and_then(|n| n.to_str()) == Some("Cargo.toml") {
-                cargo_files.push(path.to_path_buf());
+    } else if path.is_dir() {
+        let entries = std::fs::read_dir(path)?;
+        for entry in entries {
+            let entry = entry?;
+            let entry_path = entry.path();
+            if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
+                continue;
             }
-        } else if path.is_dir() {
-            let entries = std::fs::read_dir(path)?;
-            for entry in entries {
-                let entry = entry?;
-                let entry_path = entry.path();
-                if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
-                    continue;
-                }
-                self.collect_cargo_files_recursive(&entry_path, cargo_files)?;
-            }
+            collect_rust_files_recursive(&entry_path, rust_files)?;
         }
-
-        Ok(())
     }
+
+    Ok(())
+}
+
+/// Recursively collect `Cargo.toml` files, skipping `target/` directories.
+fn collect_cargo_files_recursive(path: &Path, cargo_files: &mut Vec<PathBuf>) -> Result<()> {
+    if path.to_string_lossy().contains("target/") {
+        return Ok(());
+    }
+
+    if path.is_file() {
+        if path.file_name().and_then(|n| n.to_str()) == Some("Cargo.toml") {
+            cargo_files.push(path.to_path_buf());
+        }
+    } else if path.is_dir() {
+        let entries = std::fs::read_dir(path)?;
+        for entry in entries {
+            let entry = entry?;
+            let entry_path = entry.path();
+            if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
+                continue;
+            }
+            collect_cargo_files_recursive(&entry_path, cargo_files)?;
+        }
+    }
+
+    Ok(())
 }
 
 // Re-export for backwards compatibility

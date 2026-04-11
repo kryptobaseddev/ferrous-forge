@@ -18,6 +18,8 @@ use crate::{
     validation::{RustValidator, Violation, ViolationType},
 };
 use console::style;
+use fs2::FileExt;
+use sha2::{Digest, Sha256};
 use std::path::{Path, PathBuf};
 
 /// Execute the validate command
@@ -28,6 +30,30 @@ use std::path::{Path, PathBuf};
 /// fails to initialize, or the validation process encounters an I/O error.
 pub async fn execute(path: Option<PathBuf>, ai_report: bool, locked_only: bool) -> Result<()> {
     let project_path = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
+
+    // Acquire process lock to prevent concurrent validation deadlocks.
+    // Two simultaneous `ferrous-forge validate` invocations (e.g. from parallel
+    // git commits in worktrees) would otherwise contend on cargo build locks
+    // and stall indefinitely.
+    let _lock_guard = match try_acquire_lock(&project_path) {
+        Ok(Some(file)) => Some(file),
+        Ok(None) => {
+            println!(
+                "{}",
+                style(
+                    "Another ferrous-forge validation is running for this project, skipping."
+                )
+                .yellow()
+            );
+            return Ok(());
+        }
+        Err(e) => {
+            // Lock acquisition failed unexpectedly; proceed without lock
+            // rather than blocking the user's workflow.
+            tracing::warn!("Failed to acquire process lock: {}", e);
+            None
+        }
+    };
 
     print_header(&project_path);
 
@@ -114,5 +140,28 @@ fn handle_final_result(violations: &[Violation], clippy_result: &crate::validati
             "{}",
             style("✅ All validation checks passed!").green().bold()
         );
+    }
+}
+
+/// Try to acquire an exclusive process lock for validation.
+///
+/// Uses an advisory file lock keyed by a hash of the project path. The lock is
+/// automatically released when the returned `File` handle is dropped (including
+/// on abnormal process exit, since the OS releases `flock` locks).
+///
+/// Returns `Ok(Some(file))` if the lock was acquired, `Ok(None)` if another
+/// instance is already validating this project, or `Err` on unexpected I/O
+/// failures.
+fn try_acquire_lock(project_path: &Path) -> std::io::Result<Option<std::fs::File>> {
+    let mut hasher = Sha256::new();
+    hasher.update(project_path.to_string_lossy().as_bytes());
+    let hash = format!("{:x}", hasher.finalize());
+    let lock_path = std::env::temp_dir().join(format!("ferrous-forge-{}.lock", &hash[..16]));
+
+    let file = std::fs::File::create(lock_path)?;
+    match file.try_lock_exclusive() {
+        Ok(()) => Ok(Some(file)),
+        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => Ok(None),
+        Err(e) => Err(e),
     }
 }

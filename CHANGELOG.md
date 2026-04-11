@@ -5,6 +5,27 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.4] - 2026-04-11
+
+### Fixed
+
+- **Concurrent validation deadlock** — When two `ferrous-forge validate` processes run
+  simultaneously on the same repository (e.g. parallel git commits from worktrees or
+  multi-agent workflows), both would hang indefinitely contending on cargo build locks
+  while blocking the tokio async runtime. Now the validate command acquires an advisory
+  file lock (`/tmp/ferrous-forge-{hash}.lock`) using `flock`; the second instance detects
+  the lock and exits cleanly with an informational message instead of deadlocking.
+- **Blocking I/O in async context** — `cargo clippy`, `cargo doc`, `cargo audit`, and
+  `rustc --version` invocations switched from `std::process::Command` (which blocks the
+  tokio worker thread pool) to `tokio::process::Command`. Filesystem traversal via
+  `WalkDir` and `std::fs::read_dir` in `find_rust_files`, `find_cargo_files`,
+  `check_hardcoded_versions`, and `count_documentation_items` now runs inside
+  `tokio::task::spawn_blocking` to avoid starving the async runtime.
+
+### Added
+
+- `fs2` dependency for cross-platform advisory file locking
+
 ## [1.9.3] - 2026-04-08
 
 ### Fixed
