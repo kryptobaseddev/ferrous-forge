@@ -26,7 +26,7 @@ exclude = [
 [dependencies]
 # CLI and terminal
 clap = { version = "4.5", features = ["derive", "env", "color"] }
-console = "0.15"
+console = "0.16"
 indicatif = "0.17"
 termcolor = "1.4"
 dialoguer = "0.11"
