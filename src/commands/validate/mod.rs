@@ -40,10 +40,8 @@ pub async fn execute(path: Option<PathBuf>, ai_report: bool, locked_only: bool) 
         Ok(None) => {
             println!(
                 "{}",
-                style(
-                    "Another ferrous-forge validation is running for this project, skipping."
-                )
-                .yellow()
+                style("Another ferrous-forge validation is running for this project, skipping.")
+                    .yellow()
             );
             return Ok(());
         }
