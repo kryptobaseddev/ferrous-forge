@@ -147,7 +147,7 @@ fn main_rs_content() -> String {
     r#"//! {{project_name}} - A Ferrous Forge compliant embedded project
 #![no_std]
 #![no_main]
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(
     missing_docs,
     clippy::all,

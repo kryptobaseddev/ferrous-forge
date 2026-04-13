@@ -1,5 +1,7 @@
 # Ferrous Forge project rustfmt configuration
 max_width = 100
-imports_granularity = "Crate"
-group_imports = "StdExternalCrate"
 edition = "2024"
+
+# Uncomment the following if using nightly rustfmt (these options are unstable):
+# imports_granularity = "Crate"
+# group_imports = "StdExternalCrate"

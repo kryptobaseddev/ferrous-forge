@@ -107,7 +107,8 @@ tokio = { version = "1.40", features = ["test-util"] }
 
 [lints.rust]
 missing_docs = "warn"
-unsafe_code = "forbid"
+# `deny` (not `forbid`) so FFI crates (napi-rs, wasm-bindgen, PyO3) can `#[allow(unsafe_code)]` where needed.
+unsafe_code = "deny"
 
 [lints.rustdoc]
 broken_intra_doc_links = "deny"
@@ -145,7 +146,7 @@ fn lib_rs_content() -> String {
 //! ```rust
 //! // Example usage here
 //! ```
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(
     missing_docs,
     clippy::all,
@@ -220,9 +221,11 @@ require_documentation = true
 fn rustfmt_toml_content() -> String {
     r#"# Ferrous Forge project rustfmt configuration
 max_width = 100
-imports_granularity = "Crate"
-group_imports = "StdExternalCrate"
 edition = "2024"
+
+# Uncomment the following if using nightly rustfmt (these options are unstable):
+# imports_granularity = "Crate"
+# group_imports = "StdExternalCrate"
 "#
     .to_string()
 }

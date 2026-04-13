@@ -3,7 +3,7 @@
 /// CLI main content
 pub fn cli_main_content() -> String {
     r#"//! Command-line interface for {{workspace_name}}
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(
     missing_docs,
     clippy::all,
@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
 /// Core library content
 pub fn core_lib_content() -> String {
     r#"//! Core functionality for {{workspace_name}}
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(
     missing_docs,
     clippy::all,
@@ -167,7 +167,7 @@ mod tests {
 /// Utils library content
 pub fn utils_lib_content() -> String {
     r#"//! Utility functions for {{workspace_name}}
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(
     missing_docs,
     clippy::all,

@@ -73,7 +73,7 @@ fn lib_rs_content() -> String {
 /// Library header with imports and macros
 fn lib_header() -> String {
     r#"//! {{project_name}} - WebAssembly library
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(
     missing_docs,
     clippy::all,

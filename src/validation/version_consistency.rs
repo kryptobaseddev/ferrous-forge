@@ -388,12 +388,12 @@ impl VersionConsistencyValidator {
             let mut paths = Vec::new();
             for entry in walker.filter_entry(|e| {
                 // Skip non-Rust directories at any depth
-                if e.file_type().is_dir() {
-                    if let Some(name) = e.file_name().to_str() {
-                        if WALK_SKIP_DIRS.contains(&name) {
-                            return false;
-                        }
-                    }
+                if e.file_type().is_dir()
+                    && e.file_name()
+                        .to_str()
+                        .is_some_and(|name| WALK_SKIP_DIRS.contains(&name))
+                {
+                    return false;
                 }
                 true
             }) {
@@ -403,10 +403,10 @@ impl VersionConsistencyValidator {
                     continue;
                 }
                 let s = p.to_string_lossy();
-                if (s.contains("/tests/")
+                if s.contains("/tests/")
                     || s.contains("/test/")
                     || s.contains("/fixtures/")
-                    || s.contains("/examples/"))
+                    || s.contains("/examples/")
                 {
                     continue;
                 }

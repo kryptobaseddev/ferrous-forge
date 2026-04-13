@@ -107,7 +107,7 @@ path = "src/main.rs"
 /// src/main.rs content
 fn main_rs_content() -> String {
     r#"//! {{project_name}} - A Ferrous Forge compliant CLI application
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(missing_docs)]
 
 use anyhow::Result;
@@ -160,7 +160,7 @@ async fn main() -> Result<()> {
 /// src/lib.rs content
 fn lib_rs_content() -> String {
     r#"//! {{project_name}} library implementation
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(missing_docs)]
 
 use anyhow::Result;

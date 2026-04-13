@@ -5,6 +5,38 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.6] - 2026-04-13
+
+### Fixed
+
+- **File walkers descend into non-Rust directories** — Both `collect_rust_files_recursive`
+  and the `WalkDir` walker in `version_consistency` now skip `node_modules/`, `.git/`,
+  `.claude/`, `.next/`, `dist/`, `build/`, `.turbo/`, `.pnpm/`, `.yarn/`, `__pycache__/`,
+  `.venv/`, and `vendor/` at any nesting depth. Previously only `target/` was excluded,
+  causing `ferrous-forge validate` to take 8+ minutes on JS/TS monorepos. (#26)
+
+- **`unsafe_code = "forbid"` breaks FFI crates** — All generated workspace and crate-level
+  lint configs now use `unsafe_code = "deny"` instead of `"forbid"`. `forbid` cannot be
+  overridden by `#[allow(unsafe_code)]`, which breaks napi-rs, wasm-bindgen, PyO3, and
+  other FFI macro crates that expand to code requiring the allow. The clippy rule flag was
+  also changed from `-F` (forbid) to `-D` (deny). Ferrous-forge's own crate retains
+  `#![forbid(unsafe_code)]` since it has no FFI dependencies. (Fixes #27)
+
+- **Generated `rustfmt.toml` uses nightly-only options on stable** — The `imports_granularity`
+  and `group_imports` options are now commented out by default with a note to uncomment on
+  nightly. Previously each `cargo fmt` invocation emitted hundreds of warnings on stable
+  toolchains, flooding validation output. (Fixes #28)
+
+- **Tarpaulin integration reports failure even when all tests pass** — `run_coverage()` now
+  reads from the `tarpaulin-report.json` file (where `--out Json` actually writes) instead
+  of stdout. Non-zero exit codes no longer hard-fail if a valid JSON report was produced
+  (works around tarpaulin/rustc version incompatibilities). Parse failures now surface
+  tarpaulin's stderr and exit code in the error message. (Fixes #29)
+
+- **Stale lock after SIGKILL** — The validation lock file now records the holder's PID.
+  When the lock is contended and the holder PID no longer exists (checked via `/proc/{pid}`
+  on Linux), the lock is retried after a 250ms delay to cover the kernel cleanup window.
+
 ## [1.9.5] - 2026-04-12
 
 ### Fixed
