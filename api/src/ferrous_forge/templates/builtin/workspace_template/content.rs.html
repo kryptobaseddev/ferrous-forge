@@ -49,154 +49,155 @@
 <a href=#49 id=49 data-nosnippet>49</a>assert_cmd = "2.0"
 <a href=#50 id=50 data-nosnippet>50</a>
 <a href=#51 id=51 data-nosnippet>51</a>[workspace.lints.rust]
-<a href=#52 id=52 data-nosnippet>52</a>unsafe_code = "forbid"
-<a href=#53 id=53 data-nosnippet>53</a>missing_docs = "warn"
-<a href=#54 id=54 data-nosnippet>54</a>
-<a href=#55 id=55 data-nosnippet>55</a>[workspace.lints.clippy]
-<a href=#56 id=56 data-nosnippet>56</a>all = "warn"
-<a href=#57 id=57 data-nosnippet>57</a>pedantic = "warn"
-<a href=#58 id=58 data-nosnippet>58</a>nursery = "warn"
-<a href=#59 id=59 data-nosnippet>59</a>cargo = "warn"
-<a href=#60 id=60 data-nosnippet>60</a>"#
-<a href=#61 id=61 data-nosnippet>61</a>    </span>.to_string()
-<a href=#62 id=62 data-nosnippet>62</a>}
-<a href=#63 id=63 data-nosnippet>63</a>
-<a href=#64 id=64 data-nosnippet>64</a><span class="doccomment">/// README.md content
-<a href=#65 id=65 data-nosnippet>65</a></span><span class="kw">fn </span>readme_content() -&gt; String {
-<a href=#66 id=66 data-nosnippet>66</a>    <span class="string">r#"# {{workspace_name}}
-<a href=#67 id=67 data-nosnippet>67</a>
-<a href=#68 id=68 data-nosnippet>68</a>{{description}}
-<a href=#69 id=69 data-nosnippet>69</a>
-<a href=#70 id=70 data-nosnippet>70</a>## Architecture
-<a href=#71 id=71 data-nosnippet>71</a>
-<a href=#72 id=72 data-nosnippet>72</a>This workspace consists of the following crates:
-<a href=#73 id=73 data-nosnippet>73</a>
-<a href=#74 id=74 data-nosnippet>74</a>- **core**: Core business logic and shared functionality
-<a href=#75 id=75 data-nosnippet>75</a>- **cli**: Command-line interface
-<a href=#76 id=76 data-nosnippet>76</a>- **utils**: Utility functions and helpers
-<a href=#77 id=77 data-nosnippet>77</a>
-<a href=#78 id=78 data-nosnippet>78</a>## Building
-<a href=#79 id=79 data-nosnippet>79</a>
-<a href=#80 id=80 data-nosnippet>80</a>```bash
-<a href=#81 id=81 data-nosnippet>81</a># Build all crates
-<a href=#82 id=82 data-nosnippet>82</a>cargo build --workspace
-<a href=#83 id=83 data-nosnippet>83</a>
-<a href=#84 id=84 data-nosnippet>84</a># Run tests
-<a href=#85 id=85 data-nosnippet>85</a>cargo test --workspace
-<a href=#86 id=86 data-nosnippet>86</a>
-<a href=#87 id=87 data-nosnippet>87</a># Format code
-<a href=#88 id=88 data-nosnippet>88</a>cargo fmt --all
-<a href=#89 id=89 data-nosnippet>89</a>
-<a href=#90 id=90 data-nosnippet>90</a># Check code quality
-<a href=#91 id=91 data-nosnippet>91</a>cargo clippy --workspace --all-features
-<a href=#92 id=92 data-nosnippet>92</a>```
-<a href=#93 id=93 data-nosnippet>93</a>
-<a href=#94 id=94 data-nosnippet>94</a>## Usage
-<a href=#95 id=95 data-nosnippet>95</a>
-<a href=#96 id=96 data-nosnippet>96</a>```bash
-<a href=#97 id=97 data-nosnippet>97</a># Run the CLI application
-<a href=#98 id=98 data-nosnippet>98</a>cargo run --bin cli
-<a href=#99 id=99 data-nosnippet>99</a>
-<a href=#100 id=100 data-nosnippet>100</a># Run tests for specific crate
-<a href=#101 id=101 data-nosnippet>101</a>cargo test -p core
-<a href=#102 id=102 data-nosnippet>102</a>```
-<a href=#103 id=103 data-nosnippet>103</a>
-<a href=#104 id=104 data-nosnippet>104</a>## License
-<a href=#105 id=105 data-nosnippet>105</a>
-<a href=#106 id=106 data-nosnippet>106</a>This project is licensed under the MIT OR Apache-2.0 license.
-<a href=#107 id=107 data-nosnippet>107</a>"#
-<a href=#108 id=108 data-nosnippet>108</a>    </span>.to_string()
-<a href=#109 id=109 data-nosnippet>109</a>}
-<a href=#110 id=110 data-nosnippet>110</a>
-<a href=#111 id=111 data-nosnippet>111</a><span class="doccomment">/// Core crate Cargo.toml
-<a href=#112 id=112 data-nosnippet>112</a></span><span class="kw">fn </span>core_cargo_toml() -&gt; String {
-<a href=#113 id=113 data-nosnippet>113</a>    <span class="string">r#"[package]
-<a href=#114 id=114 data-nosnippet>114</a>name = "{{workspace_name}}-core"
-<a href=#115 id=115 data-nosnippet>115</a>version.workspace = true
-<a href=#116 id=116 data-nosnippet>116</a>edition.workspace = true
-<a href=#117 id=117 data-nosnippet>117</a>authors.workspace = true
-<a href=#118 id=118 data-nosnippet>118</a>license.workspace = true
-<a href=#119 id=119 data-nosnippet>119</a>repository.workspace = true
-<a href=#120 id=120 data-nosnippet>120</a>description = "Core functionality for {{workspace_name}}"
-<a href=#121 id=121 data-nosnippet>121</a>
-<a href=#122 id=122 data-nosnippet>122</a>[dependencies]
-<a href=#123 id=123 data-nosnippet>123</a>anyhow.workspace = true
-<a href=#124 id=124 data-nosnippet>124</a>thiserror.workspace = true
-<a href=#125 id=125 data-nosnippet>125</a>serde.workspace = true
-<a href=#126 id=126 data-nosnippet>126</a>
-<a href=#127 id=127 data-nosnippet>127</a>[dev-dependencies]
-<a href=#128 id=128 data-nosnippet>128</a>tempfile.workspace = true
-<a href=#129 id=129 data-nosnippet>129</a>tokio = { workspace = true, features = ["test-util"] }
-<a href=#130 id=130 data-nosnippet>130</a>"#
-<a href=#131 id=131 data-nosnippet>131</a>    </span>.to_string()
-<a href=#132 id=132 data-nosnippet>132</a>}
-<a href=#133 id=133 data-nosnippet>133</a>
-<a href=#134 id=134 data-nosnippet>134</a><span class="doccomment">/// CLI crate Cargo.toml
-<a href=#135 id=135 data-nosnippet>135</a></span><span class="kw">fn </span>cli_cargo_toml() -&gt; String {
-<a href=#136 id=136 data-nosnippet>136</a>    <span class="string">r#"[package]
-<a href=#137 id=137 data-nosnippet>137</a>name = "{{workspace_name}}-cli"
-<a href=#138 id=138 data-nosnippet>138</a>version.workspace = true
-<a href=#139 id=139 data-nosnippet>139</a>edition.workspace = true
-<a href=#140 id=140 data-nosnippet>140</a>authors.workspace = true
-<a href=#141 id=141 data-nosnippet>141</a>license.workspace = true
-<a href=#142 id=142 data-nosnippet>142</a>repository.workspace = true
-<a href=#143 id=143 data-nosnippet>143</a>description = "Command-line interface for {{workspace_name}}"
-<a href=#144 id=144 data-nosnippet>144</a>
-<a href=#145 id=145 data-nosnippet>145</a>[[bin]]
-<a href=#146 id=146 data-nosnippet>146</a>name = "cli"
-<a href=#147 id=147 data-nosnippet>147</a>path = "src/main.rs"
-<a href=#148 id=148 data-nosnippet>148</a>
-<a href=#149 id=149 data-nosnippet>149</a>[dependencies]
-<a href=#150 id=150 data-nosnippet>150</a>{{workspace_name}}-core = { path = "../core" }
-<a href=#151 id=151 data-nosnippet>151</a>{{workspace_name}}-utils = { path = "../utils" }
-<a href=#152 id=152 data-nosnippet>152</a>clap.workspace = true
-<a href=#153 id=153 data-nosnippet>153</a>anyhow.workspace = true
-<a href=#154 id=154 data-nosnippet>154</a>tokio.workspace = true
-<a href=#155 id=155 data-nosnippet>155</a>
-<a href=#156 id=156 data-nosnippet>156</a>[dev-dependencies]
-<a href=#157 id=157 data-nosnippet>157</a>assert_cmd.workspace = true
-<a href=#158 id=158 data-nosnippet>158</a>tempfile.workspace = true
-<a href=#159 id=159 data-nosnippet>159</a>"#
-<a href=#160 id=160 data-nosnippet>160</a>    </span>.to_string()
-<a href=#161 id=161 data-nosnippet>161</a>}
-<a href=#162 id=162 data-nosnippet>162</a>
-<a href=#163 id=163 data-nosnippet>163</a><span class="doccomment">/// Utils crate Cargo.toml
-<a href=#164 id=164 data-nosnippet>164</a></span><span class="kw">fn </span>utils_cargo_toml() -&gt; String {
-<a href=#165 id=165 data-nosnippet>165</a>    <span class="string">r#"[package]
-<a href=#166 id=166 data-nosnippet>166</a>name = "{{workspace_name}}-utils"
-<a href=#167 id=167 data-nosnippet>167</a>version.workspace = true
-<a href=#168 id=168 data-nosnippet>168</a>edition.workspace = true
-<a href=#169 id=169 data-nosnippet>169</a>authors.workspace = true
-<a href=#170 id=170 data-nosnippet>170</a>license.workspace = true
-<a href=#171 id=171 data-nosnippet>171</a>repository.workspace = true
-<a href=#172 id=172 data-nosnippet>172</a>description = "Utility functions for {{workspace_name}}"
-<a href=#173 id=173 data-nosnippet>173</a>
-<a href=#174 id=174 data-nosnippet>174</a>[dependencies]
-<a href=#175 id=175 data-nosnippet>175</a>anyhow.workspace = true
-<a href=#176 id=176 data-nosnippet>176</a>tokio.workspace = true
-<a href=#177 id=177 data-nosnippet>177</a>
-<a href=#178 id=178 data-nosnippet>178</a>[dev-dependencies]
-<a href=#179 id=179 data-nosnippet>179</a>tempfile.workspace = true
-<a href=#180 id=180 data-nosnippet>180</a>"#
-<a href=#181 id=181 data-nosnippet>181</a>    </span>.to_string()
-<a href=#182 id=182 data-nosnippet>182</a>}
-<a href=#183 id=183 data-nosnippet>183</a>
-<a href=#184 id=184 data-nosnippet>184</a><span class="doccomment">/// .ferrous-forge/config.toml content
-<a href=#185 id=185 data-nosnippet>185</a></span><span class="kw">fn </span>config_toml_content() -&gt; String {
-<a href=#186 id=186 data-nosnippet>186</a>    <span class="string">r#"# Ferrous Forge configuration for workspace projects
-<a href=#187 id=187 data-nosnippet>187</a>
-<a href=#188 id=188 data-nosnippet>188</a>[validation]
-<a href=#189 id=189 data-nosnippet>189</a>max_line_length = 100
-<a href=#190 id=190 data-nosnippet>190</a>max_file_length = 300
-<a href=#191 id=191 data-nosnippet>191</a>max_function_length = 50
-<a href=#192 id=192 data-nosnippet>192</a>allow_unwrap = false
-<a href=#193 id=193 data-nosnippet>193</a>allow_expect = false
-<a href=#194 id=194 data-nosnippet>194</a>
-<a href=#195 id=195 data-nosnippet>195</a>[workspace]
-<a href=#196 id=196 data-nosnippet>196</a># Workspace-specific configuration
-<a href=#197 id=197 data-nosnippet>197</a>check_all_members = true
-<a href=#198 id=198 data-nosnippet>198</a>unified_formatting = true
-<a href=#199 id=199 data-nosnippet>199</a>"#
-<a href=#200 id=200 data-nosnippet>200</a>    </span>.to_string()
-<a href=#201 id=201 data-nosnippet>201</a>}
+<a href=#52 id=52 data-nosnippet>52</a># `deny` (not `forbid`) so FFI workspace members (napi-rs, wasm-bindgen, PyO3) can `#[allow(unsafe_code)]` where needed.
+<a href=#53 id=53 data-nosnippet>53</a>unsafe_code = "deny"
+<a href=#54 id=54 data-nosnippet>54</a>missing_docs = "warn"
+<a href=#55 id=55 data-nosnippet>55</a>
+<a href=#56 id=56 data-nosnippet>56</a>[workspace.lints.clippy]
+<a href=#57 id=57 data-nosnippet>57</a>all = "warn"
+<a href=#58 id=58 data-nosnippet>58</a>pedantic = "warn"
+<a href=#59 id=59 data-nosnippet>59</a>nursery = "warn"
+<a href=#60 id=60 data-nosnippet>60</a>cargo = "warn"
+<a href=#61 id=61 data-nosnippet>61</a>"#
+<a href=#62 id=62 data-nosnippet>62</a>    </span>.to_string()
+<a href=#63 id=63 data-nosnippet>63</a>}
+<a href=#64 id=64 data-nosnippet>64</a>
+<a href=#65 id=65 data-nosnippet>65</a><span class="doccomment">/// README.md content
+<a href=#66 id=66 data-nosnippet>66</a></span><span class="kw">fn </span>readme_content() -&gt; String {
+<a href=#67 id=67 data-nosnippet>67</a>    <span class="string">r#"# {{workspace_name}}
+<a href=#68 id=68 data-nosnippet>68</a>
+<a href=#69 id=69 data-nosnippet>69</a>{{description}}
+<a href=#70 id=70 data-nosnippet>70</a>
+<a href=#71 id=71 data-nosnippet>71</a>## Architecture
+<a href=#72 id=72 data-nosnippet>72</a>
+<a href=#73 id=73 data-nosnippet>73</a>This workspace consists of the following crates:
+<a href=#74 id=74 data-nosnippet>74</a>
+<a href=#75 id=75 data-nosnippet>75</a>- **core**: Core business logic and shared functionality
+<a href=#76 id=76 data-nosnippet>76</a>- **cli**: Command-line interface
+<a href=#77 id=77 data-nosnippet>77</a>- **utils**: Utility functions and helpers
+<a href=#78 id=78 data-nosnippet>78</a>
+<a href=#79 id=79 data-nosnippet>79</a>## Building
+<a href=#80 id=80 data-nosnippet>80</a>
+<a href=#81 id=81 data-nosnippet>81</a>```bash
+<a href=#82 id=82 data-nosnippet>82</a># Build all crates
+<a href=#83 id=83 data-nosnippet>83</a>cargo build --workspace
+<a href=#84 id=84 data-nosnippet>84</a>
+<a href=#85 id=85 data-nosnippet>85</a># Run tests
+<a href=#86 id=86 data-nosnippet>86</a>cargo test --workspace
+<a href=#87 id=87 data-nosnippet>87</a>
+<a href=#88 id=88 data-nosnippet>88</a># Format code
+<a href=#89 id=89 data-nosnippet>89</a>cargo fmt --all
+<a href=#90 id=90 data-nosnippet>90</a>
+<a href=#91 id=91 data-nosnippet>91</a># Check code quality
+<a href=#92 id=92 data-nosnippet>92</a>cargo clippy --workspace --all-features
+<a href=#93 id=93 data-nosnippet>93</a>```
+<a href=#94 id=94 data-nosnippet>94</a>
+<a href=#95 id=95 data-nosnippet>95</a>## Usage
+<a href=#96 id=96 data-nosnippet>96</a>
+<a href=#97 id=97 data-nosnippet>97</a>```bash
+<a href=#98 id=98 data-nosnippet>98</a># Run the CLI application
+<a href=#99 id=99 data-nosnippet>99</a>cargo run --bin cli
+<a href=#100 id=100 data-nosnippet>100</a>
+<a href=#101 id=101 data-nosnippet>101</a># Run tests for specific crate
+<a href=#102 id=102 data-nosnippet>102</a>cargo test -p core
+<a href=#103 id=103 data-nosnippet>103</a>```
+<a href=#104 id=104 data-nosnippet>104</a>
+<a href=#105 id=105 data-nosnippet>105</a>## License
+<a href=#106 id=106 data-nosnippet>106</a>
+<a href=#107 id=107 data-nosnippet>107</a>This project is licensed under the MIT OR Apache-2.0 license.
+<a href=#108 id=108 data-nosnippet>108</a>"#
+<a href=#109 id=109 data-nosnippet>109</a>    </span>.to_string()
+<a href=#110 id=110 data-nosnippet>110</a>}
+<a href=#111 id=111 data-nosnippet>111</a>
+<a href=#112 id=112 data-nosnippet>112</a><span class="doccomment">/// Core crate Cargo.toml
+<a href=#113 id=113 data-nosnippet>113</a></span><span class="kw">fn </span>core_cargo_toml() -&gt; String {
+<a href=#114 id=114 data-nosnippet>114</a>    <span class="string">r#"[package]
+<a href=#115 id=115 data-nosnippet>115</a>name = "{{workspace_name}}-core"
+<a href=#116 id=116 data-nosnippet>116</a>version.workspace = true
+<a href=#117 id=117 data-nosnippet>117</a>edition.workspace = true
+<a href=#118 id=118 data-nosnippet>118</a>authors.workspace = true
+<a href=#119 id=119 data-nosnippet>119</a>license.workspace = true
+<a href=#120 id=120 data-nosnippet>120</a>repository.workspace = true
+<a href=#121 id=121 data-nosnippet>121</a>description = "Core functionality for {{workspace_name}}"
+<a href=#122 id=122 data-nosnippet>122</a>
+<a href=#123 id=123 data-nosnippet>123</a>[dependencies]
+<a href=#124 id=124 data-nosnippet>124</a>anyhow.workspace = true
+<a href=#125 id=125 data-nosnippet>125</a>thiserror.workspace = true
+<a href=#126 id=126 data-nosnippet>126</a>serde.workspace = true
+<a href=#127 id=127 data-nosnippet>127</a>
+<a href=#128 id=128 data-nosnippet>128</a>[dev-dependencies]
+<a href=#129 id=129 data-nosnippet>129</a>tempfile.workspace = true
+<a href=#130 id=130 data-nosnippet>130</a>tokio = { workspace = true, features = ["test-util"] }
+<a href=#131 id=131 data-nosnippet>131</a>"#
+<a href=#132 id=132 data-nosnippet>132</a>    </span>.to_string()
+<a href=#133 id=133 data-nosnippet>133</a>}
+<a href=#134 id=134 data-nosnippet>134</a>
+<a href=#135 id=135 data-nosnippet>135</a><span class="doccomment">/// CLI crate Cargo.toml
+<a href=#136 id=136 data-nosnippet>136</a></span><span class="kw">fn </span>cli_cargo_toml() -&gt; String {
+<a href=#137 id=137 data-nosnippet>137</a>    <span class="string">r#"[package]
+<a href=#138 id=138 data-nosnippet>138</a>name = "{{workspace_name}}-cli"
+<a href=#139 id=139 data-nosnippet>139</a>version.workspace = true
+<a href=#140 id=140 data-nosnippet>140</a>edition.workspace = true
+<a href=#141 id=141 data-nosnippet>141</a>authors.workspace = true
+<a href=#142 id=142 data-nosnippet>142</a>license.workspace = true
+<a href=#143 id=143 data-nosnippet>143</a>repository.workspace = true
+<a href=#144 id=144 data-nosnippet>144</a>description = "Command-line interface for {{workspace_name}}"
+<a href=#145 id=145 data-nosnippet>145</a>
+<a href=#146 id=146 data-nosnippet>146</a>[[bin]]
+<a href=#147 id=147 data-nosnippet>147</a>name = "cli"
+<a href=#148 id=148 data-nosnippet>148</a>path = "src/main.rs"
+<a href=#149 id=149 data-nosnippet>149</a>
+<a href=#150 id=150 data-nosnippet>150</a>[dependencies]
+<a href=#151 id=151 data-nosnippet>151</a>{{workspace_name}}-core = { path = "../core" }
+<a href=#152 id=152 data-nosnippet>152</a>{{workspace_name}}-utils = { path = "../utils" }
+<a href=#153 id=153 data-nosnippet>153</a>clap.workspace = true
+<a href=#154 id=154 data-nosnippet>154</a>anyhow.workspace = true
+<a href=#155 id=155 data-nosnippet>155</a>tokio.workspace = true
+<a href=#156 id=156 data-nosnippet>156</a>
+<a href=#157 id=157 data-nosnippet>157</a>[dev-dependencies]
+<a href=#158 id=158 data-nosnippet>158</a>assert_cmd.workspace = true
+<a href=#159 id=159 data-nosnippet>159</a>tempfile.workspace = true
+<a href=#160 id=160 data-nosnippet>160</a>"#
+<a href=#161 id=161 data-nosnippet>161</a>    </span>.to_string()
+<a href=#162 id=162 data-nosnippet>162</a>}
+<a href=#163 id=163 data-nosnippet>163</a>
+<a href=#164 id=164 data-nosnippet>164</a><span class="doccomment">/// Utils crate Cargo.toml
+<a href=#165 id=165 data-nosnippet>165</a></span><span class="kw">fn </span>utils_cargo_toml() -&gt; String {
+<a href=#166 id=166 data-nosnippet>166</a>    <span class="string">r#"[package]
+<a href=#167 id=167 data-nosnippet>167</a>name = "{{workspace_name}}-utils"
+<a href=#168 id=168 data-nosnippet>168</a>version.workspace = true
+<a href=#169 id=169 data-nosnippet>169</a>edition.workspace = true
+<a href=#170 id=170 data-nosnippet>170</a>authors.workspace = true
+<a href=#171 id=171 data-nosnippet>171</a>license.workspace = true
+<a href=#172 id=172 data-nosnippet>172</a>repository.workspace = true
+<a href=#173 id=173 data-nosnippet>173</a>description = "Utility functions for {{workspace_name}}"
+<a href=#174 id=174 data-nosnippet>174</a>
+<a href=#175 id=175 data-nosnippet>175</a>[dependencies]
+<a href=#176 id=176 data-nosnippet>176</a>anyhow.workspace = true
+<a href=#177 id=177 data-nosnippet>177</a>tokio.workspace = true
+<a href=#178 id=178 data-nosnippet>178</a>
+<a href=#179 id=179 data-nosnippet>179</a>[dev-dependencies]
+<a href=#180 id=180 data-nosnippet>180</a>tempfile.workspace = true
+<a href=#181 id=181 data-nosnippet>181</a>"#
+<a href=#182 id=182 data-nosnippet>182</a>    </span>.to_string()
+<a href=#183 id=183 data-nosnippet>183</a>}
+<a href=#184 id=184 data-nosnippet>184</a>
+<a href=#185 id=185 data-nosnippet>185</a><span class="doccomment">/// .ferrous-forge/config.toml content
+<a href=#186 id=186 data-nosnippet>186</a></span><span class="kw">fn </span>config_toml_content() -&gt; String {
+<a href=#187 id=187 data-nosnippet>187</a>    <span class="string">r#"# Ferrous Forge configuration for workspace projects
+<a href=#188 id=188 data-nosnippet>188</a>
+<a href=#189 id=189 data-nosnippet>189</a>[validation]
+<a href=#190 id=190 data-nosnippet>190</a>max_line_length = 100
+<a href=#191 id=191 data-nosnippet>191</a>max_file_length = 300
+<a href=#192 id=192 data-nosnippet>192</a>max_function_length = 50
+<a href=#193 id=193 data-nosnippet>193</a>allow_unwrap = false
+<a href=#194 id=194 data-nosnippet>194</a>allow_expect = false
+<a href=#195 id=195 data-nosnippet>195</a>
+<a href=#196 id=196 data-nosnippet>196</a>[workspace]
+<a href=#197 id=197 data-nosnippet>197</a># Workspace-specific configuration
+<a href=#198 id=198 data-nosnippet>198</a>check_all_members = true
+<a href=#199 id=199 data-nosnippet>199</a>unified_formatting = true
+<a href=#200 id=200 data-nosnippet>200</a>"#
+<a href=#201 id=201 data-nosnippet>201</a>    </span>.to_string()
+<a href=#202 id=202 data-nosnippet>202</a>}
 </code></pre></div></section></main></body></html>

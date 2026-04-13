@@ -147,25 +147,65 @@
 <a href=#147 id=147 data-nosnippet>147</a>/// automatically released when the returned `File` handle is dropped (including
 <a href=#148 id=148 data-nosnippet>148</a>/// on abnormal process exit, since the OS releases `flock` locks).
 <a href=#149 id=149 data-nosnippet>149</a>///
-<a href=#150 id=150 data-nosnippet>150</a>/// Returns `Ok(Some(file))` if the lock was acquired, `Ok(None)` if another
-<a href=#151 id=151 data-nosnippet>151</a>/// instance is already validating this project, or `Err` on unexpected I/O
-<a href=#152 id=152 data-nosnippet>152</a>/// failures.
-<a href=#153 id=153 data-nosnippet>153</a></span><span class="kw">fn </span>try_acquire_lock(project_path: <span class="kw-2">&amp;</span>Path) -&gt; std::io::Result&lt;<span class="prelude-ty">Option</span>&lt;std::fs::File&gt;&gt; {
-<a href=#154 id=154 data-nosnippet>154</a>    <span class="comment">// Canonicalize so symlinks, trailing slashes, and relative paths all
-<a href=#155 id=155 data-nosnippet>155</a>    // resolve to the same lock file.
-<a href=#156 id=156 data-nosnippet>156</a>    </span><span class="kw">let </span>canonical = project_path
-<a href=#157 id=157 data-nosnippet>157</a>        .canonicalize()
-<a href=#158 id=158 data-nosnippet>158</a>        .unwrap_or_else(|<span class="kw">_</span>| project_path.to_path_buf());
-<a href=#159 id=159 data-nosnippet>159</a>    <span class="kw">let </span><span class="kw-2">mut </span>hasher = Sha256::new();
-<a href=#160 id=160 data-nosnippet>160</a>    hasher.update(canonical.to_string_lossy().as_bytes());
-<a href=#161 id=161 data-nosnippet>161</a>    <span class="kw">let </span>hash = <span class="macro">format!</span>(<span class="string">"{:x}"</span>, hasher.finalize());
-<a href=#162 id=162 data-nosnippet>162</a>    <span class="kw">let </span>lock_path = std::env::temp_dir().join(<span class="macro">format!</span>(<span class="string">"ferrous-forge-{}.lock"</span>, <span class="kw-2">&amp;</span>hash[..<span class="number">16</span>]));
-<a href=#163 id=163 data-nosnippet>163</a>
-<a href=#164 id=164 data-nosnippet>164</a>    <span class="kw">let </span>file = std::fs::File::create(lock_path)<span class="question-mark">?</span>;
-<a href=#165 id=165 data-nosnippet>165</a>    <span class="kw">match </span>file.try_lock_exclusive() {
-<a href=#166 id=166 data-nosnippet>166</a>        <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(file)),
-<a href=#167 id=167 data-nosnippet>167</a>        <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == std::io::ErrorKind::WouldBlock =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-<a href=#168 id=168 data-nosnippet>168</a>        <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e),
-<a href=#169 id=169 data-nosnippet>169</a>    }
-<a href=#170 id=170 data-nosnippet>170</a>}
+<a href=#150 id=150 data-nosnippet>150</a>/// If the lock is contended we read the PID written by the holder. When the
+<a href=#151 id=151 data-nosnippet>151</a>/// holder is no longer alive (e.g. after SIGKILL) the kernel may need a brief
+<a href=#152 id=152 data-nosnippet>152</a>/// moment to clean up the flock — we retry once after a short delay.
+<a href=#153 id=153 data-nosnippet>153</a>///
+<a href=#154 id=154 data-nosnippet>154</a>/// Returns `Ok(Some(file))` if the lock was acquired, `Ok(None)` if another
+<a href=#155 id=155 data-nosnippet>155</a>/// instance is already validating this project, or `Err` on unexpected I/O
+<a href=#156 id=156 data-nosnippet>156</a>/// failures.
+<a href=#157 id=157 data-nosnippet>157</a></span><span class="kw">fn </span>try_acquire_lock(project_path: <span class="kw-2">&amp;</span>Path) -&gt; std::io::Result&lt;<span class="prelude-ty">Option</span>&lt;std::fs::File&gt;&gt; {
+<a href=#158 id=158 data-nosnippet>158</a>    <span class="kw">use </span>std::io::Write;
+<a href=#159 id=159 data-nosnippet>159</a>
+<a href=#160 id=160 data-nosnippet>160</a>    <span class="kw">let </span>lock_path = lock_path_for(project_path);
+<a href=#161 id=161 data-nosnippet>161</a>
+<a href=#162 id=162 data-nosnippet>162</a>    <span class="kw">let </span>try_lock = || -&gt; std::io::Result&lt;<span class="prelude-ty">Option</span>&lt;std::fs::File&gt;&gt; {
+<a href=#163 id=163 data-nosnippet>163</a>        <span class="kw">let </span>file = std::fs::File::create(<span class="kw-2">&amp;</span>lock_path)<span class="question-mark">?</span>;
+<a href=#164 id=164 data-nosnippet>164</a>        <span class="kw">match </span>file.try_lock_exclusive() {
+<a href=#165 id=165 data-nosnippet>165</a>            <span class="prelude-val">Ok</span>(()) =&gt; {
+<a href=#166 id=166 data-nosnippet>166</a>                <span class="comment">// Write our PID so contenders can diagnose stale locks.
+<a href=#167 id=167 data-nosnippet>167</a>                </span><span class="kw">let </span><span class="kw-2">mut </span>f = <span class="kw-2">&amp;</span>file;
+<a href=#168 id=168 data-nosnippet>168</a>                <span class="kw">let _ </span>= f.write_all(<span class="macro">format!</span>(<span class="string">"{}"</span>, std::process::id()).as_bytes());
+<a href=#169 id=169 data-nosnippet>169</a>                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(file))
+<a href=#170 id=170 data-nosnippet>170</a>            }
+<a href=#171 id=171 data-nosnippet>171</a>            <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == std::io::ErrorKind::WouldBlock =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+<a href=#172 id=172 data-nosnippet>172</a>            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e),
+<a href=#173 id=173 data-nosnippet>173</a>        }
+<a href=#174 id=174 data-nosnippet>174</a>    };
+<a href=#175 id=175 data-nosnippet>175</a>
+<a href=#176 id=176 data-nosnippet>176</a>    <span class="kw">if let </span><span class="prelude-val">Some</span>(file) = try_lock()<span class="question-mark">? </span>{
+<a href=#177 id=177 data-nosnippet>177</a>        <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(file));
+<a href=#178 id=178 data-nosnippet>178</a>    }
+<a href=#179 id=179 data-nosnippet>179</a>
+<a href=#180 id=180 data-nosnippet>180</a>    <span class="comment">// Lock is held — check if the holder is still alive.
+<a href=#181 id=181 data-nosnippet>181</a>    </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(contents) = std::fs::read_to_string(<span class="kw-2">&amp;</span>lock_path)
+<a href=#182 id=182 data-nosnippet>182</a>        &amp;&amp; <span class="kw">let </span><span class="prelude-val">Ok</span>(pid) = contents.trim().parse::&lt;u32&gt;()
+<a href=#183 id=183 data-nosnippet>183</a>    {
+<a href=#184 id=184 data-nosnippet>184</a>        <span class="comment">// On Linux, /proc/&lt;pid&gt; vanishes when the process exits.
+<a href=#185 id=185 data-nosnippet>185</a>        </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
+<a href=#186 id=186 data-nosnippet>186</a>        </span>{
+<a href=#187 id=187 data-nosnippet>187</a>            <span class="kw">let </span>alive = Path::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/proc/{pid}"</span>)).exists();
+<a href=#188 id=188 data-nosnippet>188</a>            <span class="kw">if </span>!alive {
+<a href=#189 id=189 data-nosnippet>189</a>                <span class="comment">// Holder is dead; kernel may still be releasing the flock.
+<a href=#190 id=190 data-nosnippet>190</a>                // Brief sleep then retry once.
+<a href=#191 id=191 data-nosnippet>191</a>                </span>std::thread::sleep(std::time::Duration::from_millis(<span class="number">250</span>));
+<a href=#192 id=192 data-nosnippet>192</a>                <span class="kw">return </span>try_lock();
+<a href=#193 id=193 data-nosnippet>193</a>            }
+<a href=#194 id=194 data-nosnippet>194</a>        }
+<a href=#195 id=195 data-nosnippet>195</a>        <span class="kw">let _ </span>= pid; <span class="comment">// suppress unused warning on non-Linux
+<a href=#196 id=196 data-nosnippet>196</a>    </span>}
+<a href=#197 id=197 data-nosnippet>197</a>
+<a href=#198 id=198 data-nosnippet>198</a>    <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+<a href=#199 id=199 data-nosnippet>199</a>}
+<a href=#200 id=200 data-nosnippet>200</a>
+<a href=#201 id=201 data-nosnippet>201</a><span class="doccomment">/// Compute the lock-file path for a given project.
+<a href=#202 id=202 data-nosnippet>202</a></span><span class="kw">fn </span>lock_path_for(project_path: <span class="kw-2">&amp;</span>Path) -&gt; PathBuf {
+<a href=#203 id=203 data-nosnippet>203</a>    <span class="kw">let </span>canonical = project_path
+<a href=#204 id=204 data-nosnippet>204</a>        .canonicalize()
+<a href=#205 id=205 data-nosnippet>205</a>        .unwrap_or_else(|<span class="kw">_</span>| project_path.to_path_buf());
+<a href=#206 id=206 data-nosnippet>206</a>    <span class="kw">let </span><span class="kw-2">mut </span>hasher = Sha256::new();
+<a href=#207 id=207 data-nosnippet>207</a>    hasher.update(canonical.to_string_lossy().as_bytes());
+<a href=#208 id=208 data-nosnippet>208</a>    <span class="kw">let </span>hash = <span class="macro">format!</span>(<span class="string">"{:x}"</span>, hasher.finalize());
+<a href=#209 id=209 data-nosnippet>209</a>    std::env::temp_dir().join(<span class="macro">format!</span>(<span class="string">"ferrous-forge-{}.lock"</span>, <span class="kw-2">&amp;</span>hash[..<span class="number">16</span>]))
+<a href=#210 id=210 data-nosnippet>210</a>}
 </code></pre></div></section></main></body></html>

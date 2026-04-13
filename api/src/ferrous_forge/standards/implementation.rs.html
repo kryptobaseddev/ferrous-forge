@@ -54,84 +54,86 @@
 <a href=#54 id=54 data-nosnippet>54</a>        }
 <a href=#55 id=55 data-nosnippet>55</a>
 <a href=#56 id=56 data-nosnippet>56</a>        <span class="kw">if </span><span class="self">self</span>.security.ban_unsafe {
-<a href=#57 id=57 data-nosnippet>57</a>            rules.push(<span class="string">"-F unsafe_code"</span>.to_string());
-<a href=#58 id=58 data-nosnippet>58</a>        }
-<a href=#59 id=59 data-nosnippet>59</a>
-<a href=#60 id=60 data-nosnippet>60</a>        <span class="comment">// Add performance and style lints
-<a href=#61 id=61 data-nosnippet>61</a>        </span>rules.extend([
-<a href=#62 id=62 data-nosnippet>62</a>            <span class="string">"-W clippy::pedantic"</span>.to_string(),
-<a href=#63 id=63 data-nosnippet>63</a>            <span class="string">"-W clippy::nursery"</span>.to_string(),
-<a href=#64 id=64 data-nosnippet>64</a>            <span class="string">"-W clippy::cargo"</span>.to_string(),
-<a href=#65 id=65 data-nosnippet>65</a>            <span class="string">"-D clippy::dbg_macro"</span>.to_string(),
-<a href=#66 id=66 data-nosnippet>66</a>            <span class="string">"-D clippy::print_stdout"</span>.to_string(),
-<a href=#67 id=67 data-nosnippet>67</a>            <span class="string">"-D clippy::print_stderr"</span>.to_string(),
-<a href=#68 id=68 data-nosnippet>68</a>        ]);
-<a href=#69 id=69 data-nosnippet>69</a>
-<a href=#70 id=70 data-nosnippet>70</a>        rules
-<a href=#71 id=71 data-nosnippet>71</a>    }
-<a href=#72 id=72 data-nosnippet>72</a>
-<a href=#73 id=73 data-nosnippet>73</a>    <span class="doccomment">/// Generate clippy.toml configuration
-<a href=#74 id=74 data-nosnippet>74</a>    </span><span class="kw">pub fn </span>generate_clippy_config(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
-<a href=#75 id=75 data-nosnippet>75</a>        <span class="macro">format!</span>(
-<a href=#76 id=76 data-nosnippet>76</a>            <span class="string">r#"# Ferrous Forge - Rust Standards Enforcement
-<a href=#77 id=77 data-nosnippet>77</a># Generated automatically - do not edit manually
-<a href=#78 id=78 data-nosnippet>78</a>
-<a href=#79 id=79 data-nosnippet>79</a>msrv = "{}"
-<a href=#80 id=80 data-nosnippet>80</a>max-fn-params-bools = 2
-<a href=#81 id=81 data-nosnippet>81</a>max-struct-bools = 2
-<a href=#82 id=82 data-nosnippet>82</a>max-trait-bounds = 2
-<a href=#83 id=83 data-nosnippet>83</a>max-include-file-size = {}
-<a href=#84 id=84 data-nosnippet>84</a>min-ident-chars-threshold = 2
-<a href=#85 id=85 data-nosnippet>85</a>literal-representation-threshold = 1000
-<a href=#86 id=86 data-nosnippet>86</a>check-private-items = {}
-<a href=#87 id=87 data-nosnippet>87</a>missing-docs-allow-unused = false
-<a href=#88 id=88 data-nosnippet>88</a>allow-comparison-to-zero = false
-<a href=#89 id=89 data-nosnippet>89</a>allow-mixed-uninlined-format-args = false
-<a href=#90 id=90 data-nosnippet>90</a>allow-one-hash-in-raw-strings = false
-<a href=#91 id=91 data-nosnippet>91</a>allow-useless-vec-in-tests = false
-<a href=#92 id=92 data-nosnippet>92</a>allow-indexing-slicing-in-tests = false
-<a href=#93 id=93 data-nosnippet>93</a>allowed-idents-below-min-chars = ["i", "j", "x", "y", "z"]
-<a href=#94 id=94 data-nosnippet>94</a>allowed-wildcard-imports = []
-<a href=#95 id=95 data-nosnippet>95</a>allow-exact-repetitions = false
-<a href=#96 id=96 data-nosnippet>96</a>allow-private-module-inception = false
-<a href=#97 id=97 data-nosnippet>97</a>too-large-for-stack = 100
-<a href=#98 id=98 data-nosnippet>98</a>upper-case-acronyms-aggressive = true
-<a href=#99 id=99 data-nosnippet>99</a>allowed-scripts = ["Latin"]
-<a href=#100 id=100 data-nosnippet>100</a>disallowed-names = ["foo", "bar", "baz", "qux", "quux", "test", "tmp", "temp"]
-<a href=#101 id=101 data-nosnippet>101</a>unreadable-literal-lint-fractions = true
-<a href=#102 id=102 data-nosnippet>102</a>semicolon-inside-block-ignore-singleline = false
-<a href=#103 id=103 data-nosnippet>103</a>semicolon-outside-block-ignore-multiline = false
-<a href=#104 id=104 data-nosnippet>104</a>arithmetic-side-effects-allowed = []
-<a href=#105 id=105 data-nosnippet>105</a>"#</span>,
-<a href=#106 id=106 data-nosnippet>106</a>            <span class="self">self</span>.edition.min_rust_version,
-<a href=#107 id=107 data-nosnippet>107</a>            <span class="self">self</span>.file_limits.max_lines * <span class="number">1000</span>, <span class="comment">// Convert to bytes approximation
-<a href=#108 id=108 data-nosnippet>108</a>            </span><span class="self">self</span>.documentation.require_private_docs,
-<a href=#109 id=109 data-nosnippet>109</a>        )
-<a href=#110 id=110 data-nosnippet>110</a>    }
-<a href=#111 id=111 data-nosnippet>111</a>
-<a href=#112 id=112 data-nosnippet>112</a>    <span class="doccomment">/// Check if a project complies with these standards
-<a href=#113 id=113 data-nosnippet>113</a>    ///
-<a href=#114 id=114 data-nosnippet>114</a>    /// # Errors
+<a href=#57 id=57 data-nosnippet>57</a>            <span class="comment">// `-D` (deny), not `-F` (forbid), so FFI crates (napi-rs, wasm-bindgen, PyO3)
+<a href=#58 id=58 data-nosnippet>58</a>            // can `#[allow(unsafe_code)]` where macros require it. forbid breaks E0453.
+<a href=#59 id=59 data-nosnippet>59</a>            </span>rules.push(<span class="string">"-D unsafe_code"</span>.to_string());
+<a href=#60 id=60 data-nosnippet>60</a>        }
+<a href=#61 id=61 data-nosnippet>61</a>
+<a href=#62 id=62 data-nosnippet>62</a>        <span class="comment">// Add performance and style lints
+<a href=#63 id=63 data-nosnippet>63</a>        </span>rules.extend([
+<a href=#64 id=64 data-nosnippet>64</a>            <span class="string">"-W clippy::pedantic"</span>.to_string(),
+<a href=#65 id=65 data-nosnippet>65</a>            <span class="string">"-W clippy::nursery"</span>.to_string(),
+<a href=#66 id=66 data-nosnippet>66</a>            <span class="string">"-W clippy::cargo"</span>.to_string(),
+<a href=#67 id=67 data-nosnippet>67</a>            <span class="string">"-D clippy::dbg_macro"</span>.to_string(),
+<a href=#68 id=68 data-nosnippet>68</a>            <span class="string">"-D clippy::print_stdout"</span>.to_string(),
+<a href=#69 id=69 data-nosnippet>69</a>            <span class="string">"-D clippy::print_stderr"</span>.to_string(),
+<a href=#70 id=70 data-nosnippet>70</a>        ]);
+<a href=#71 id=71 data-nosnippet>71</a>
+<a href=#72 id=72 data-nosnippet>72</a>        rules
+<a href=#73 id=73 data-nosnippet>73</a>    }
+<a href=#74 id=74 data-nosnippet>74</a>
+<a href=#75 id=75 data-nosnippet>75</a>    <span class="doccomment">/// Generate clippy.toml configuration
+<a href=#76 id=76 data-nosnippet>76</a>    </span><span class="kw">pub fn </span>generate_clippy_config(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+<a href=#77 id=77 data-nosnippet>77</a>        <span class="macro">format!</span>(
+<a href=#78 id=78 data-nosnippet>78</a>            <span class="string">r#"# Ferrous Forge - Rust Standards Enforcement
+<a href=#79 id=79 data-nosnippet>79</a># Generated automatically - do not edit manually
+<a href=#80 id=80 data-nosnippet>80</a>
+<a href=#81 id=81 data-nosnippet>81</a>msrv = "{}"
+<a href=#82 id=82 data-nosnippet>82</a>max-fn-params-bools = 2
+<a href=#83 id=83 data-nosnippet>83</a>max-struct-bools = 2
+<a href=#84 id=84 data-nosnippet>84</a>max-trait-bounds = 2
+<a href=#85 id=85 data-nosnippet>85</a>max-include-file-size = {}
+<a href=#86 id=86 data-nosnippet>86</a>min-ident-chars-threshold = 2
+<a href=#87 id=87 data-nosnippet>87</a>literal-representation-threshold = 1000
+<a href=#88 id=88 data-nosnippet>88</a>check-private-items = {}
+<a href=#89 id=89 data-nosnippet>89</a>missing-docs-allow-unused = false
+<a href=#90 id=90 data-nosnippet>90</a>allow-comparison-to-zero = false
+<a href=#91 id=91 data-nosnippet>91</a>allow-mixed-uninlined-format-args = false
+<a href=#92 id=92 data-nosnippet>92</a>allow-one-hash-in-raw-strings = false
+<a href=#93 id=93 data-nosnippet>93</a>allow-useless-vec-in-tests = false
+<a href=#94 id=94 data-nosnippet>94</a>allow-indexing-slicing-in-tests = false
+<a href=#95 id=95 data-nosnippet>95</a>allowed-idents-below-min-chars = ["i", "j", "x", "y", "z"]
+<a href=#96 id=96 data-nosnippet>96</a>allowed-wildcard-imports = []
+<a href=#97 id=97 data-nosnippet>97</a>allow-exact-repetitions = false
+<a href=#98 id=98 data-nosnippet>98</a>allow-private-module-inception = false
+<a href=#99 id=99 data-nosnippet>99</a>too-large-for-stack = 100
+<a href=#100 id=100 data-nosnippet>100</a>upper-case-acronyms-aggressive = true
+<a href=#101 id=101 data-nosnippet>101</a>allowed-scripts = ["Latin"]
+<a href=#102 id=102 data-nosnippet>102</a>disallowed-names = ["foo", "bar", "baz", "qux", "quux", "test", "tmp", "temp"]
+<a href=#103 id=103 data-nosnippet>103</a>unreadable-literal-lint-fractions = true
+<a href=#104 id=104 data-nosnippet>104</a>semicolon-inside-block-ignore-singleline = false
+<a href=#105 id=105 data-nosnippet>105</a>semicolon-outside-block-ignore-multiline = false
+<a href=#106 id=106 data-nosnippet>106</a>arithmetic-side-effects-allowed = []
+<a href=#107 id=107 data-nosnippet>107</a>"#</span>,
+<a href=#108 id=108 data-nosnippet>108</a>            <span class="self">self</span>.edition.min_rust_version,
+<a href=#109 id=109 data-nosnippet>109</a>            <span class="self">self</span>.file_limits.max_lines * <span class="number">1000</span>, <span class="comment">// Convert to bytes approximation
+<a href=#110 id=110 data-nosnippet>110</a>            </span><span class="self">self</span>.documentation.require_private_docs,
+<a href=#111 id=111 data-nosnippet>111</a>        )
+<a href=#112 id=112 data-nosnippet>112</a>    }
+<a href=#113 id=113 data-nosnippet>113</a>
+<a href=#114 id=114 data-nosnippet>114</a>    <span class="doccomment">/// Check if a project complies with these standards
 <a href=#115 id=115 data-nosnippet>115</a>    ///
-<a href=#116 id=116 data-nosnippet>116</a>    /// Returns an error if reading `Cargo.toml` fails.
-<a href=#117 id=117 data-nosnippet>117</a>    </span><span class="kw">pub async fn </span>check_compliance(<span class="kw-2">&amp;</span><span class="self">self</span>, project_path: <span class="kw-2">&amp;</span>std::path::Path) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
-<a href=#118 id=118 data-nosnippet>118</a>        <span class="kw">let </span><span class="kw-2">mut </span>violations = Vec::new();
-<a href=#119 id=119 data-nosnippet>119</a>
-<a href=#120 id=120 data-nosnippet>120</a>        <span class="comment">// Check Cargo.toml for edition
-<a href=#121 id=121 data-nosnippet>121</a>        </span><span class="kw">let </span>cargo_toml = project_path.join(<span class="string">"Cargo.toml"</span>);
-<a href=#122 id=122 data-nosnippet>122</a>        <span class="kw">if </span>cargo_toml.exists() {
-<a href=#123 id=123 data-nosnippet>123</a>            <span class="kw">let </span>content = tokio::fs::read_to_string(<span class="kw-2">&amp;</span>cargo_toml).<span class="kw">await</span><span class="question-mark">?</span>;
-<a href=#124 id=124 data-nosnippet>124</a>            <span class="kw">if </span>!content.contains(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">r#"edition = "{}""#</span>, <span class="self">self</span>.edition.required_edition)) {
-<a href=#125 id=125 data-nosnippet>125</a>                violations.push(<span class="macro">format!</span>(
-<a href=#126 id=126 data-nosnippet>126</a>                    <span class="string">"Project must use Rust Edition {}"</span>,
-<a href=#127 id=127 data-nosnippet>127</a>                    <span class="self">self</span>.edition.required_edition
-<a href=#128 id=128 data-nosnippet>128</a>                ));
-<a href=#129 id=129 data-nosnippet>129</a>            }
-<a href=#130 id=130 data-nosnippet>130</a>        }
-<a href=#131 id=131 data-nosnippet>131</a>
-<a href=#132 id=132 data-nosnippet>132</a>        <span class="comment">// Additional compliance checks would go here
+<a href=#116 id=116 data-nosnippet>116</a>    /// # Errors
+<a href=#117 id=117 data-nosnippet>117</a>    ///
+<a href=#118 id=118 data-nosnippet>118</a>    /// Returns an error if reading `Cargo.toml` fails.
+<a href=#119 id=119 data-nosnippet>119</a>    </span><span class="kw">pub async fn </span>check_compliance(<span class="kw-2">&amp;</span><span class="self">self</span>, project_path: <span class="kw-2">&amp;</span>std::path::Path) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
+<a href=#120 id=120 data-nosnippet>120</a>        <span class="kw">let </span><span class="kw-2">mut </span>violations = Vec::new();
+<a href=#121 id=121 data-nosnippet>121</a>
+<a href=#122 id=122 data-nosnippet>122</a>        <span class="comment">// Check Cargo.toml for edition
+<a href=#123 id=123 data-nosnippet>123</a>        </span><span class="kw">let </span>cargo_toml = project_path.join(<span class="string">"Cargo.toml"</span>);
+<a href=#124 id=124 data-nosnippet>124</a>        <span class="kw">if </span>cargo_toml.exists() {
+<a href=#125 id=125 data-nosnippet>125</a>            <span class="kw">let </span>content = tokio::fs::read_to_string(<span class="kw-2">&amp;</span>cargo_toml).<span class="kw">await</span><span class="question-mark">?</span>;
+<a href=#126 id=126 data-nosnippet>126</a>            <span class="kw">if </span>!content.contains(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">r#"edition = "{}""#</span>, <span class="self">self</span>.edition.required_edition)) {
+<a href=#127 id=127 data-nosnippet>127</a>                violations.push(<span class="macro">format!</span>(
+<a href=#128 id=128 data-nosnippet>128</a>                    <span class="string">"Project must use Rust Edition {}"</span>,
+<a href=#129 id=129 data-nosnippet>129</a>                    <span class="self">self</span>.edition.required_edition
+<a href=#130 id=130 data-nosnippet>130</a>                ));
+<a href=#131 id=131 data-nosnippet>131</a>            }
+<a href=#132 id=132 data-nosnippet>132</a>        }
 <a href=#133 id=133 data-nosnippet>133</a>
-<a href=#134 id=134 data-nosnippet>134</a>        </span><span class="prelude-val">Ok</span>(violations)
-<a href=#135 id=135 data-nosnippet>135</a>    }
-<a href=#136 id=136 data-nosnippet>136</a>}
+<a href=#134 id=134 data-nosnippet>134</a>        <span class="comment">// Additional compliance checks would go here
+<a href=#135 id=135 data-nosnippet>135</a>
+<a href=#136 id=136 data-nosnippet>136</a>        </span><span class="prelude-val">Ok</span>(violations)
+<a href=#137 id=137 data-nosnippet>137</a>    }
+<a href=#138 id=138 data-nosnippet>138</a>}
 </code></pre></div></section></main></body></html>
