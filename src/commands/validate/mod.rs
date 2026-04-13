@@ -151,8 +151,13 @@ fn handle_final_result(violations: &[Violation], clippy_result: &crate::validati
 /// instance is already validating this project, or `Err` on unexpected I/O
 /// failures.
 fn try_acquire_lock(project_path: &Path) -> std::io::Result<Option<std::fs::File>> {
+    // Canonicalize so symlinks, trailing slashes, and relative paths all
+    // resolve to the same lock file.
+    let canonical = project_path
+        .canonicalize()
+        .unwrap_or_else(|_| project_path.to_path_buf());
     let mut hasher = Sha256::new();
-    hasher.update(project_path.to_string_lossy().as_bytes());
+    hasher.update(canonical.to_string_lossy().as_bytes());
     let hash = format!("{:x}", hasher.finalize());
     let lock_path = std::env::temp_dir().join(format!("ferrous-forge-{}.lock", &hash[..16]));
 
