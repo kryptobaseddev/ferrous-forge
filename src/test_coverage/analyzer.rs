@@ -88,13 +88,21 @@ impl CoverageAnalyzer {
 
         tracing::info!("Running test coverage analysis...");
 
+        // Use a known output directory so we can reliably read the JSON report file.
+        let report_dir = project_path.join("target").join("tarpaulin");
+        tokio::fs::create_dir_all(&report_dir)
+            .await
+            .map_err(|e| Error::process(format!("Failed to create tarpaulin output dir: {e}")))?;
+
         let mut args = vec![
             "tarpaulin".to_string(),
-            "--verbose".to_string(),
             "--timeout".to_string(),
             "120".to_string(),
+            "--skip-clean".to_string(),
             "--out".to_string(),
             "Json".to_string(),
+            "--output-dir".to_string(),
+            report_dir.display().to_string(),
         ];
 
         // Each exclude file must be its own --exclude-files argument (tarpaulin doesn't accept comma-separated)
@@ -114,18 +122,41 @@ impl CoverageAnalyzer {
             .current_dir(project_path)
             .output()
             .await
-            .map_err(|e| Error::process(format!("Failed to run cargo tarpaulin: {}", e)))?;
+            .map_err(|e| Error::process(format!("Failed to run cargo tarpaulin: {e}")))?;
 
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(Error::process(format!(
-                "cargo tarpaulin failed: {}",
-                stderr
-            )));
+        let exit_code = output.status.code().unwrap_or(-1);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+
+        // `--out Json` writes to a file, not stdout.  Read the report file.
+        let report_file = report_dir.join("tarpaulin-report.json");
+        let json_content = match tokio::fs::read_to_string(&report_file).await {
+            Ok(content) => content,
+            Err(read_err) => {
+                // No JSON file produced — surface both the read error and tarpaulin's stderr
+                return Err(Error::process(format!(
+                    "Tarpaulin produced no JSON report (exit code {exit_code}). \
+                     File error: {read_err}. Tarpaulin stderr: {stderr}"
+                )));
+            }
+        };
+
+        // Attempt to parse even on non-zero exit — tarpaulin sometimes exits
+        // non-zero on certain rustc versions despite all tests passing.
+        match self.parse_tarpaulin_output(&json_content) {
+            Ok(report) => {
+                if !output.status.success() {
+                    tracing::warn!(
+                        "Tarpaulin exited with code {exit_code} but produced a valid report. \
+                         stderr: {stderr}"
+                    );
+                }
+                Ok(report)
+            }
+            Err(parse_err) => Err(Error::process(format!(
+                "Failed to parse tarpaulin JSON (exit code {exit_code}): {parse_err}. \
+                 Tarpaulin stderr: {stderr}"
+            ))),
         }
-
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        self.parse_tarpaulin_output(&stdout)
     }
 
     /// Parse cargo-tarpaulin JSON output

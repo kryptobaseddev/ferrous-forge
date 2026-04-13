@@ -201,9 +201,11 @@ async fn write_rustfmt_toml(project_path: &std::path::Path) -> Result<()> {
     }
     let content = r#"# Ferrous Forge project rustfmt configuration
 max_width = 100
-imports_granularity = "Crate"
-group_imports = "StdExternalCrate"
 edition = "2024"
+
+# Uncomment the following if using nightly rustfmt (these options are unstable):
+# imports_granularity = "Crate"
+# group_imports = "StdExternalCrate"
 "#;
     tokio::fs::write(&path, content).await?;
     println!("  ✅ Written: rustfmt.toml");
@@ -266,7 +268,8 @@ async fn inject_cargo_toml_lints(cargo_toml: &std::path::Path) -> Result<()> {
     let lints_block = r#"
 [lints.rust]
 missing_docs = "warn"
-unsafe_code = "forbid"
+# `deny` (not `forbid`) so FFI crates (napi-rs, wasm-bindgen, PyO3) can `#[allow(unsafe_code)]` where needed.
+unsafe_code = "deny"
 
 [lints.rustdoc]
 broken_intra_doc_links = "deny"

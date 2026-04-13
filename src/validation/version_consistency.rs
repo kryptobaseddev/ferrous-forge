@@ -120,15 +120,28 @@ impl VersionConsistencyValidator {
 
         let mut exclusions = HashSet::new();
 
-        // Default exclusions
+        // Default exclusions — files
         exclusions.insert(project_root.join("Cargo.toml"));
         exclusions.insert(project_root.join("Cargo.lock"));
         exclusions.insert(project_root.join("CHANGELOG.md"));
         exclusions.insert(project_root.join("README.md"));
+        exclusions.insert(project_root.join("CHANGELOG"));
+
+        // Default exclusions — directories
         exclusions.insert(project_root.join("docs"));
         exclusions.insert(project_root.join(".github"));
         exclusions.insert(project_root.join("packaging"));
-        exclusions.insert(project_root.join("CHANGELOG"));
+        exclusions.insert(project_root.join("target"));
+        exclusions.insert(project_root.join("node_modules"));
+        exclusions.insert(project_root.join(".git"));
+        exclusions.insert(project_root.join(".claude"));
+        exclusions.insert(project_root.join("dist"));
+        exclusions.insert(project_root.join("build"));
+        exclusions.insert(project_root.join(".next"));
+        exclusions.insert(project_root.join(".turbo"));
+        exclusions.insert(project_root.join("vendor"));
+        exclusions.insert(project_root.join("__pycache__"));
+        exclusions.insert(project_root.join(".venv"));
 
         // Add configured exclusions
         if let Some(user_exclusions) = config.validation.version_check_exclusions.as_ref() {
@@ -353,24 +366,55 @@ impl VersionConsistencyValidator {
 
         // Collect file paths in a blocking context to avoid stalling the async
         // runtime (WalkDir is synchronous and holds directory handles).
+        /// Directory names to skip at any nesting depth.
+        const WALK_SKIP_DIRS: &[&str] = &[
+            "target",
+            "node_modules",
+            ".git",
+            ".claude",
+            ".next",
+            "dist",
+            "build",
+            ".turbo",
+            ".pnpm",
+            ".yarn",
+            "__pycache__",
+            ".venv",
+            "vendor",
+        ];
+
         let rs_paths: Vec<PathBuf> = tokio::task::spawn_blocking(move || {
-            WalkDir::new(&root)
-                .into_iter()
-                .filter_map(|e| e.ok())
-                .filter(|e| {
-                    let p = e.path();
-                    if exclusions.iter().any(|ex| p.starts_with(ex)) {
-                        return false;
-                    }
-                    let s = p.to_string_lossy();
-                    !(s.contains("/tests/")
-                        || s.contains("/test/")
-                        || s.contains("/fixtures/")
-                        || s.contains("/examples/"))
-                        && p.extension().is_some_and(|ext| ext == "rs")
-                })
-                .map(|e| e.path().to_path_buf())
-                .collect()
+            let walker = WalkDir::new(&root).into_iter();
+            let mut paths = Vec::new();
+            for entry in walker.filter_entry(|e| {
+                // Skip non-Rust directories at any depth
+                if e.file_type().is_dir()
+                    && e.file_name()
+                        .to_str()
+                        .is_some_and(|name| WALK_SKIP_DIRS.contains(&name))
+                {
+                    return false;
+                }
+                true
+            }) {
+                let Ok(e) = entry else { continue };
+                let p = e.path();
+                if exclusions.iter().any(|ex| p.starts_with(ex)) {
+                    continue;
+                }
+                let s = p.to_string_lossy();
+                if s.contains("/tests/")
+                    || s.contains("/test/")
+                    || s.contains("/fixtures/")
+                    || s.contains("/examples/")
+                {
+                    continue;
+                }
+                if p.extension().is_some_and(|ext| ext == "rs") {
+                    paths.push(p.to_path_buf());
+                }
+            }
+            paths
         })
         .await
         .map_err(|e| Error::process(format!("Task join error: {}", e)))?;

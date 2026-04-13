@@ -49,7 +49,8 @@ tempfile = "3.10"
 assert_cmd = "2.0"
 
 [workspace.lints.rust]
-unsafe_code = "forbid"
+# `deny` (not `forbid`) so FFI workspace members (napi-rs, wasm-bindgen, PyO3) can `#[allow(unsafe_code)]` where needed.
+unsafe_code = "deny"
 missing_docs = "warn"
 
 [workspace.lints.clippy]

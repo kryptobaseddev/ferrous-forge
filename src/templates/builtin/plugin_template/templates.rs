@@ -3,7 +3,7 @@
 /// src/lib.rs content for plugin system
 pub fn lib_rs_content() -> String {
     r#"//! {{project_name}} - Plugin system with dynamic loading
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(
     missing_docs,
     clippy::all,

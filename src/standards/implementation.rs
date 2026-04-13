@@ -54,7 +54,9 @@ impl CodingStandards {
         }
 
         if self.security.ban_unsafe {
-            rules.push("-F unsafe_code".to_string());
+            // `-D` (deny), not `-F` (forbid), so FFI crates (napi-rs, wasm-bindgen, PyO3)
+            // can `#[allow(unsafe_code)]` where macros require it. forbid breaks E0453.
+            rules.push("-D unsafe_code".to_string());
         }
 
         // Add performance and style lints

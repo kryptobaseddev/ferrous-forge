@@ -43,7 +43,7 @@ fn test_get_clippy_rules() {
     assert!(rules.contains(&"-D clippy::expect_used".to_string()));
     assert!(rules.contains(&"-D clippy::panic".to_string()));
     assert!(rules.contains(&"-D missing_docs".to_string()));
-    assert!(rules.contains(&"-F unsafe_code".to_string()));
+    assert!(rules.contains(&"-D unsafe_code".to_string()));
 }
 
 #[tokio::test]
