@@ -140,7 +140,7 @@
 <a href=#140 id=140 data-nosnippet>140</a>        <span class="kw">return </span><span class="prelude-val">Ok</span>(());
 <a href=#141 id=141 data-nosnippet>141</a>    }
 <a href=#142 id=142 data-nosnippet>142</a>
-<a href=#143 id=143 data-nosnippet>143</a>    <span class="kw">let </span>toolchains = rustup.list_toolchains()<span class="question-mark">?</span>;
+<a href=#143 id=143 data-nosnippet>143</a>    <span class="kw">let </span>toolchains = rustup.list_toolchains().<span class="kw">await</span><span class="question-mark">?</span>;
 <a href=#144 id=144 data-nosnippet>144</a>
 <a href=#145 id=145 data-nosnippet>145</a>    <span class="macro">println!</span>();
 <a href=#146 id=146 data-nosnippet>146</a>    <span class="macro">println!</span>(<span class="string">"{}"</span>, style(<span class="string">"🔧 Installed Toolchains"</span>).bold().cyan());
@@ -166,7 +166,7 @@
 <a href=#166 id=166 data-nosnippet>166</a>    }
 <a href=#167 id=167 data-nosnippet>167</a>
 <a href=#168 id=168 data-nosnippet>168</a>    <span class="comment">// Show active toolchain info
-<a href=#169 id=169 data-nosnippet>169</a>    </span><span class="kw">match </span>rustup.show_active_toolchain() {
+<a href=#169 id=169 data-nosnippet>169</a>    </span><span class="kw">match </span>rustup.show_active_toolchain().<span class="kw">await </span>{
 <a href=#170 id=170 data-nosnippet>170</a>        <span class="prelude-val">Ok</span>(active) =&gt; {
 <a href=#171 id=171 data-nosnippet>171</a>            <span class="macro">println!</span>();
 <a href=#172 id=172 data-nosnippet>172</a>            <span class="macro">println!</span>(<span class="string">"{} {}"</span>, style(<span class="string">"Active:"</span>).bold(), active);
@@ -216,7 +216,7 @@
 <a href=#216 id=216 data-nosnippet>216</a>        <span class="macro">println!</span>();
 <a href=#217 id=217 data-nosnippet>217</a>        <span class="macro">println!</span>(<span class="string">"Would update the following toolchains:"</span>);
 <a href=#218 id=218 data-nosnippet>218</a>
-<a href=#219 id=219 data-nosnippet>219</a>        <span class="kw">let </span>toolchains = rustup.list_toolchains()<span class="question-mark">?</span>;
+<a href=#219 id=219 data-nosnippet>219</a>        <span class="kw">let </span>toolchains = rustup.list_toolchains().<span class="kw">await</span><span class="question-mark">?</span>;
 <a href=#220 id=220 data-nosnippet>220</a>        <span class="kw">for </span>toolchain <span class="kw">in </span>toolchains {
 <a href=#221 id=221 data-nosnippet>221</a>            <span class="macro">println!</span>(<span class="string">"   • {}"</span>, toolchain.channel);
 <a href=#222 id=222 data-nosnippet>222</a>        }
@@ -454,7 +454,7 @@
 <a href=#454 id=454 data-nosnippet>454</a>    );
 <a href=#455 id=455 data-nosnippet>455</a>
 <a href=#456 id=456 data-nosnippet>456</a>    <span class="comment">// Show new active toolchain
-<a href=#457 id=457 data-nosnippet>457</a>    </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(active) = rustup.show_active_toolchain() {
+<a href=#457 id=457 data-nosnippet>457</a>    </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(active) = rustup.show_active_toolchain().<span class="kw">await </span>{
 <a href=#458 id=458 data-nosnippet>458</a>        <span class="macro">println!</span>(<span class="string">"{} {}"</span>, style(<span class="string">"Active:"</span>).bold(), active);
 <a href=#459 id=459 data-nosnippet>459</a>    }
 <a href=#460 id=460 data-nosnippet>460</a>

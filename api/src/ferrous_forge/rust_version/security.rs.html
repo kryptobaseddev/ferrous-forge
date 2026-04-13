@@ -97,7 +97,7 @@
 <a href=#97 id=97 data-nosnippet>97</a>    /// Returns an error if the current version cannot be detected or
 <a href=#98 id=98 data-nosnippet>98</a>    /// if the security check fails.
 <a href=#99 id=99 data-nosnippet>99</a>    </span><span class="kw">pub async fn </span>check_current_version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SecurityCheckResult&gt; {
-<a href=#100 id=100 data-nosnippet>100</a>        <span class="kw">let </span>current = detect_rust_version()<span class="question-mark">?</span>;
+<a href=#100 id=100 data-nosnippet>100</a>        <span class="kw">let </span>current = detect_rust_version().<span class="kw">await</span><span class="question-mark">?</span>;
 <a href=#101 id=101 data-nosnippet>101</a>        <span class="kw">let </span>offline_mode = <span class="self">self</span>.cache.should_use_offline();
 <a href=#102 id=102 data-nosnippet>102</a>
 <a href=#103 id=103 data-nosnippet>103</a>        <span class="kw">let </span>issues = <span class="kw">if </span>offline_mode {
