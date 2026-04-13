@@ -151,16 +151,21 @@
 <a href=#151 id=151 data-nosnippet>151</a>/// instance is already validating this project, or `Err` on unexpected I/O
 <a href=#152 id=152 data-nosnippet>152</a>/// failures.
 <a href=#153 id=153 data-nosnippet>153</a></span><span class="kw">fn </span>try_acquire_lock(project_path: <span class="kw-2">&amp;</span>Path) -&gt; std::io::Result&lt;<span class="prelude-ty">Option</span>&lt;std::fs::File&gt;&gt; {
-<a href=#154 id=154 data-nosnippet>154</a>    <span class="kw">let </span><span class="kw-2">mut </span>hasher = Sha256::new();
-<a href=#155 id=155 data-nosnippet>155</a>    hasher.update(project_path.to_string_lossy().as_bytes());
-<a href=#156 id=156 data-nosnippet>156</a>    <span class="kw">let </span>hash = <span class="macro">format!</span>(<span class="string">"{:x}"</span>, hasher.finalize());
-<a href=#157 id=157 data-nosnippet>157</a>    <span class="kw">let </span>lock_path = std::env::temp_dir().join(<span class="macro">format!</span>(<span class="string">"ferrous-forge-{}.lock"</span>, <span class="kw-2">&amp;</span>hash[..<span class="number">16</span>]));
-<a href=#158 id=158 data-nosnippet>158</a>
-<a href=#159 id=159 data-nosnippet>159</a>    <span class="kw">let </span>file = std::fs::File::create(lock_path)<span class="question-mark">?</span>;
-<a href=#160 id=160 data-nosnippet>160</a>    <span class="kw">match </span>file.try_lock_exclusive() {
-<a href=#161 id=161 data-nosnippet>161</a>        <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(file)),
-<a href=#162 id=162 data-nosnippet>162</a>        <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == std::io::ErrorKind::WouldBlock =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-<a href=#163 id=163 data-nosnippet>163</a>        <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e),
-<a href=#164 id=164 data-nosnippet>164</a>    }
-<a href=#165 id=165 data-nosnippet>165</a>}
+<a href=#154 id=154 data-nosnippet>154</a>    <span class="comment">// Canonicalize so symlinks, trailing slashes, and relative paths all
+<a href=#155 id=155 data-nosnippet>155</a>    // resolve to the same lock file.
+<a href=#156 id=156 data-nosnippet>156</a>    </span><span class="kw">let </span>canonical = project_path
+<a href=#157 id=157 data-nosnippet>157</a>        .canonicalize()
+<a href=#158 id=158 data-nosnippet>158</a>        .unwrap_or_else(|<span class="kw">_</span>| project_path.to_path_buf());
+<a href=#159 id=159 data-nosnippet>159</a>    <span class="kw">let </span><span class="kw-2">mut </span>hasher = Sha256::new();
+<a href=#160 id=160 data-nosnippet>160</a>    hasher.update(canonical.to_string_lossy().as_bytes());
+<a href=#161 id=161 data-nosnippet>161</a>    <span class="kw">let </span>hash = <span class="macro">format!</span>(<span class="string">"{:x}"</span>, hasher.finalize());
+<a href=#162 id=162 data-nosnippet>162</a>    <span class="kw">let </span>lock_path = std::env::temp_dir().join(<span class="macro">format!</span>(<span class="string">"ferrous-forge-{}.lock"</span>, <span class="kw-2">&amp;</span>hash[..<span class="number">16</span>]));
+<a href=#163 id=163 data-nosnippet>163</a>
+<a href=#164 id=164 data-nosnippet>164</a>    <span class="kw">let </span>file = std::fs::File::create(lock_path)<span class="question-mark">?</span>;
+<a href=#165 id=165 data-nosnippet>165</a>    <span class="kw">match </span>file.try_lock_exclusive() {
+<a href=#166 id=166 data-nosnippet>166</a>        <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(file)),
+<a href=#167 id=167 data-nosnippet>167</a>        <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == std::io::ErrorKind::WouldBlock =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+<a href=#168 id=168 data-nosnippet>168</a>        <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e),
+<a href=#169 id=169 data-nosnippet>169</a>    }
+<a href=#170 id=170 data-nosnippet>170</a>}
 </code></pre></div></section></main></body></html>
