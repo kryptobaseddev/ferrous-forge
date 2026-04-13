@@ -97,7 +97,7 @@ impl SecurityChecker {
     /// Returns an error if the current version cannot be detected or
     /// if the security check fails.
     pub async fn check_current_version(&self) -> Result<SecurityCheckResult> {
-        let current = detect_rust_version()?;
+        let current = detect_rust_version().await?;
         let offline_mode = self.cache.should_use_offline();
 
         let issues = if offline_mode {

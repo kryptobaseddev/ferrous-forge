@@ -2,7 +2,6 @@
 
 use crate::Result;
 use std::path::Path;
-use std::process::Command;
 use std::time::Instant;
 
 use super::SafetyCheck;
@@ -35,7 +34,7 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let mut result = CheckResult::new(CheckType::Audit);
 
     // Check if cargo-audit is available
-    if let Err(error_msg) = check_audit_availability() {
+    if let Err(error_msg) = check_audit_availability().await {
         result.add_error(&error_msg);
         result.add_suggestion("Install with: cargo install cargo-audit");
         result.set_duration(start.elapsed());
@@ -43,7 +42,7 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     }
 
     // Execute audit and process results
-    let output = execute_audit(project_path)?;
+    let output = execute_audit(project_path).await?;
     result.set_duration(start.elapsed());
 
     if output.status.success() {
@@ -56,8 +55,11 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
 }
 
 /// Check if cargo-audit is available on the system
-fn check_audit_availability() -> std::result::Result<(), String> {
-    let audit_check = Command::new("cargo").args(&["audit", "--version"]).output();
+async fn check_audit_availability() -> std::result::Result<(), String> {
+    let audit_check = tokio::process::Command::new("cargo")
+        .args(&["audit", "--version"])
+        .output()
+        .await;
 
     if audit_check
         .as_ref()
@@ -70,11 +72,12 @@ fn check_audit_availability() -> std::result::Result<(), String> {
 }
 
 /// Execute cargo audit command
-fn execute_audit(project_path: &Path) -> Result<std::process::Output> {
-    Command::new("cargo")
+async fn execute_audit(project_path: &Path) -> Result<std::process::Output> {
+    tokio::process::Command::new("cargo")
         .current_dir(project_path)
         .args(&["audit"])
         .output()
+        .await
         .map_err(Into::into)
 }
 

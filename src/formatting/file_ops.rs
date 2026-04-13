@@ -3,7 +3,6 @@
 use super::utils::ensure_rustfmt_installed;
 use crate::{Error, Result};
 use std::path::Path;
-use std::process::Command;
 
 /// Check if a single file is properly formatted
 ///
@@ -13,10 +12,11 @@ use std::process::Command;
 pub async fn check_file_formatting(file_path: &Path) -> Result<bool> {
     ensure_rustfmt_installed().await?;
 
-    let output = Command::new("rustfmt")
+    let output = tokio::process::Command::new("rustfmt")
         .args(&["--check", "--edition", "2021"])
         .arg(file_path)
         .output()
+        .await
         .map_err(|e| Error::process(format!("Failed to check file formatting: {}", e)))?;
 
     Ok(output.status.success())
@@ -30,10 +30,11 @@ pub async fn check_file_formatting(file_path: &Path) -> Result<bool> {
 pub async fn format_file(file_path: &Path) -> Result<()> {
     ensure_rustfmt_installed().await?;
 
-    let status = Command::new("rustfmt")
+    let status = tokio::process::Command::new("rustfmt")
         .args(&["--edition", "2021"])
         .arg(file_path)
         .status()
+        .await
         .map_err(|e| Error::process(format!("Failed to format file: {}", e)))?;
 
     if !status.success() {

@@ -4,7 +4,6 @@ use super::types::{CoverageConfig, CoverageReport};
 use super::utils::{calculate_branch_coverage, parse_tarpaulin_json, process_file_coverage};
 use crate::{Error, Result};
 use std::path::Path;
-use std::process::Command;
 
 /// Test coverage analyzer
 pub struct CoverageAnalyzer {
@@ -30,10 +29,11 @@ impl CoverageAnalyzer {
     /// # Errors
     ///
     /// Returns an error if the `cargo` command cannot be executed.
-    pub fn check_tarpaulin_installed(&self) -> Result<bool> {
-        let output = Command::new("cargo")
+    pub async fn check_tarpaulin_installed(&self) -> Result<bool> {
+        let output = tokio::process::Command::new("cargo")
             .args(["tarpaulin", "--version"])
-            .output();
+            .output()
+            .await;
 
         match output {
             Ok(output) => Ok(output.status.success()),
@@ -48,16 +48,17 @@ impl CoverageAnalyzer {
     /// Returns an error if `cargo install` fails to run or the installation
     /// process exits with a non-zero status.
     pub async fn install_tarpaulin(&self) -> Result<()> {
-        if self.check_tarpaulin_installed()? {
+        if self.check_tarpaulin_installed().await? {
             tracing::info!("cargo-tarpaulin already installed");
             return Ok(());
         }
 
         tracing::info!("Installing cargo-tarpaulin...");
 
-        let output = Command::new("cargo")
+        let output = tokio::process::Command::new("cargo")
             .args(["install", "cargo-tarpaulin"])
             .output()
+            .await
             .map_err(|e| Error::process(format!("Failed to run cargo install: {}", e)))?;
 
         if !output.status.success() {
@@ -79,7 +80,7 @@ impl CoverageAnalyzer {
     /// Returns an error if `cargo-tarpaulin` is not installed, the tarpaulin
     /// command fails, or the output cannot be parsed.
     pub async fn run_coverage(&self, project_path: &Path) -> Result<CoverageReport> {
-        if !self.check_tarpaulin_installed()? {
+        if !self.check_tarpaulin_installed().await? {
             return Err(Error::validation(
                 "cargo-tarpaulin not installed. Run 'cargo install cargo-tarpaulin' first.",
             ));
@@ -108,10 +109,11 @@ impl CoverageAnalyzer {
             args.push(exclude_dir.clone());
         }
 
-        let output = Command::new("cargo")
+        let output = tokio::process::Command::new("cargo")
             .args(&args)
             .current_dir(project_path)
             .output()
+            .await
             .map_err(|e| Error::process(format!("Failed to run cargo tarpaulin: {}", e)))?;
 
         if !output.status.success() {

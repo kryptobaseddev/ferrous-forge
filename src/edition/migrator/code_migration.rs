@@ -3,7 +3,6 @@
 use super::types::{MigrationResult, MigrationStep};
 use super::{Edition, EditionMigrator};
 use crate::Result;
-use std::process::Command;
 
 impl EditionMigrator {
     /// Apply code migrations for new edition
@@ -60,12 +59,13 @@ impl EditionMigrator {
 
     /// Apply rustfmt to format code
     pub(super) async fn apply_rustfmt(&self, result: &mut MigrationResult) -> Result<()> {
-        let output = Command::new("rustfmt")
+        let output = tokio::process::Command::new("rustfmt")
             .arg("--edition")
             .arg("2021")
             .arg("--check")
             .current_dir(&self.project_path)
-            .output()?;
+            .output()
+            .await?;
 
         if output.status.success() {
             result.steps_performed.push(MigrationStep {

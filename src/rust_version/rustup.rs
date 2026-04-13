@@ -14,7 +14,6 @@ use crate::rust_version::detector::{
 use crate::{Error, Result};
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::process::Command;
 use tracing::{debug, info};
 
 /// Toolchain channel types
@@ -167,7 +166,7 @@ impl RustupManager {
     ///
     /// Returns an error if `rustc` is not found or its version output cannot be parsed.
     pub async fn get_current_version(&self) -> Result<RustVersion> {
-        crate::rust_version::detector::detect_rust_version()
+        crate::rust_version::detector::detect_rust_version().await
     }
 
     /// List all installed toolchains
@@ -175,11 +174,11 @@ impl RustupManager {
     /// # Errors
     ///
     /// Returns an error if rustup is not available or the toolchain list cannot be retrieved.
-    pub fn list_toolchains(&self) -> Result<Vec<ToolchainInfo>> {
+    pub async fn list_toolchains(&self) -> Result<Vec<ToolchainInfo>> {
         self.ensure_rustup()?;
 
-        let active = get_active_toolchain()?;
-        let installed = get_installed_toolchains()?;
+        let active = get_active_toolchain().await?;
+        let installed = get_installed_toolchains().await?;
 
         let toolchains: Vec<ToolchainInfo> = installed
             .into_iter()
@@ -209,9 +208,10 @@ impl RustupManager {
         let channel_str = channel.to_string();
         info!("Installing toolchain: {}", channel_str);
 
-        let output = Command::new("rustup")
+        let output = tokio::process::Command::new("rustup")
             .args(["toolchain", "install", &channel_str, "--no-self-update"])
             .output()
+            .await
             .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
         if !output.status.success() {
@@ -237,9 +237,10 @@ impl RustupManager {
         let channel_str = channel.to_string();
         info!("Uninstalling toolchain: {}", channel_str);
 
-        let output = Command::new("rustup")
+        let output = tokio::process::Command::new("rustup")
             .args(["toolchain", "uninstall", &channel_str])
             .output()
+            .await
             .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
         if !output.status.success() {
@@ -265,9 +266,10 @@ impl RustupManager {
         let channel_str = channel.to_string();
         info!("Switching to toolchain: {}", channel_str);
 
-        let output = Command::new("rustup")
+        let output = tokio::process::Command::new("rustup")
             .args(["default", &channel_str])
             .output()
+            .await
             .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
         if !output.status.success() {
@@ -292,9 +294,10 @@ impl RustupManager {
 
         info!("Updating toolchains...");
 
-        let output = Command::new("rustup")
+        let output = tokio::process::Command::new("rustup")
             .args(["update", "--no-self-update"])
             .output()
+            .await
             .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -339,9 +342,10 @@ impl RustupManager {
 
         info!("Installing component '{}'", component);
 
-        let output = Command::new("rustup")
+        let output = tokio::process::Command::new("rustup")
             .args(&args)
             .output()
+            .await
             .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
         if !output.status.success() {
@@ -414,9 +418,10 @@ impl RustupManager {
 
         info!("Running rustup self-update...");
 
-        let output = Command::new("rustup")
+        let output = tokio::process::Command::new("rustup")
             .args(["self", "update"])
             .output()
+            .await
             .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
         if !output.status.success() {
@@ -436,12 +441,13 @@ impl RustupManager {
     /// # Errors
     ///
     /// Returns an error if rustup is not available or the active toolchain cannot be determined.
-    pub fn show_active_toolchain(&self) -> Result<String> {
+    pub async fn show_active_toolchain(&self) -> Result<String> {
         self.ensure_rustup()?;
 
-        let output = Command::new("rustup")
+        let output = tokio::process::Command::new("rustup")
             .args(["show", "active-toolchain"])
             .output()
+            .await
             .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
         if !output.status.success() {

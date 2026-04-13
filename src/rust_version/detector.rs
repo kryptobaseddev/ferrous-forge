@@ -5,7 +5,6 @@ use chrono::NaiveDate;
 use regex::Regex;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::process::Command;
 use std::str;
 
 use super::Channel;
@@ -34,7 +33,7 @@ impl RustVersion {
     ///
     /// Returns an error if the version output does not match the expected
     /// `rustc` format or the version string cannot be parsed.
-    pub fn parse(version_output: &str) -> Result<Self> {
+    pub async fn parse(version_output: &str) -> Result<Self> {
         // Example: rustc 1.90.0 (4b06a43a1 2025-08-07)
         let regex = Regex::new(
             r"rustc (\d+\.\d+\.\d+(?:-[\w.]+)?)\s*\(([a-f0-9]+)\s+(\d{4}-\d{2}-\d{2})\)",
@@ -51,7 +50,7 @@ impl RustVersion {
             .map_err(|e| Error::parse(format!("Failed to parse date: {}", e)))?;
 
         let channel = detect_channel(version_str);
-        let host = detect_host();
+        let host = detect_host().await;
 
         Ok(Self {
             version,
@@ -76,16 +75,17 @@ impl std::fmt::Display for RustVersion {
 ///
 /// Returns an error if `rustc` is not found on the system path or its
 /// version output cannot be parsed.
-pub fn detect_rust_version() -> Result<RustVersion> {
+pub async fn detect_rust_version() -> Result<RustVersion> {
     // Check if rustc is available
     let rustc_path = which::which("rustc").map_err(|_| {
         Error::rust_not_found("rustc not found. Please install Rust from https://rustup.rs")
     })?;
 
     // Get version output
-    let output = Command::new(rustc_path)
+    let output = tokio::process::Command::new(rustc_path)
         .arg("--version")
         .output()
+        .await
         .map_err(|e| Error::command(format!("Failed to run rustc: {}", e)))?;
 
     if !output.status.success() {
@@ -96,7 +96,7 @@ pub fn detect_rust_version() -> Result<RustVersion> {
     let stdout = str::from_utf8(&output.stdout)
         .map_err(|e| Error::parse(format!("Invalid UTF-8 in rustc output: {}", e)))?;
 
-    RustVersion::parse(stdout)
+    RustVersion::parse(stdout).await
 }
 
 /// Detect the channel from version string
@@ -114,9 +114,13 @@ fn detect_channel(version_str: &str) -> Channel {
 }
 
 /// Detect the host triple
-fn detect_host() -> String {
+async fn detect_host() -> String {
     // Try to get from rustc
-    if let Ok(output) = Command::new("rustc").arg("--print").arg("host").output()
+    if let Ok(output) = tokio::process::Command::new("rustc")
+        .arg("--print")
+        .arg("host")
+        .output()
+        .await
         && output.status.success()
         && let Ok(host) = str::from_utf8(&output.stdout)
     {
@@ -133,13 +137,14 @@ fn detect_host() -> String {
 ///
 /// Returns an error if `rustup` is not found or the `toolchain list`
 /// command fails.
-pub fn get_installed_toolchains() -> Result<Vec<String>> {
+pub async fn get_installed_toolchains() -> Result<Vec<String>> {
     let rustup_path =
         which::which("rustup").map_err(|_| Error::rust_not_found("rustup not found"))?;
 
-    let output = Command::new(rustup_path)
+    let output = tokio::process::Command::new(rustup_path)
         .args(&["toolchain", "list"])
         .output()
+        .await
         .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
     if !output.status.success() {
@@ -170,13 +175,14 @@ pub fn is_rustup_available() -> bool {
 ///
 /// Returns an error if `rustup` is not found or the `show active-toolchain`
 /// command fails.
-pub fn get_active_toolchain() -> Result<String> {
+pub async fn get_active_toolchain() -> Result<String> {
     let rustup_path =
         which::which("rustup").map_err(|_| Error::rust_not_found("rustup not found"))?;
 
-    let output = Command::new(rustup_path)
+    let output = tokio::process::Command::new(rustup_path)
         .args(&["show", "active-toolchain"])
         .output()
+        .await
         .map_err(|e| Error::command(format!("Failed to run rustup: {}", e)))?;
 
     if !output.status.success() {
@@ -198,10 +204,10 @@ pub fn get_active_toolchain() -> Result<String> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_parse_stable_version() {
+    #[tokio::test]
+    async fn test_parse_stable_version() {
         let output = "rustc 1.90.0 (4b06a43a1 2025-08-07)";
-        let version = RustVersion::parse(output).unwrap();
+        let version = RustVersion::parse(output).await.unwrap();
 
         assert_eq!(version.version, Version::new(1, 90, 0));
         assert_eq!(version.commit_hash, "4b06a43a1");
@@ -209,10 +215,10 @@ mod tests {
         assert_eq!(version.channel, Channel::Stable);
     }
 
-    #[test]
-    fn test_parse_beta_version() {
+    #[tokio::test]
+    async fn test_parse_beta_version() {
         let output = "rustc 1.91.0-beta.1 (5c8a0cafe 2025-09-01)";
-        let version = RustVersion::parse(output).unwrap();
+        let version = RustVersion::parse(output).await.unwrap();
 
         assert_eq!(version.version.major, 1);
         assert_eq!(version.version.minor, 91);
@@ -220,10 +226,10 @@ mod tests {
         assert_eq!(version.channel, Channel::Beta);
     }
 
-    #[test]
-    fn test_parse_nightly_version() {
+    #[tokio::test]
+    async fn test_parse_nightly_version() {
         let output = "rustc 1.92.0-nightly (abc123def 2025-09-15)";
-        let version = RustVersion::parse(output).unwrap();
+        let version = RustVersion::parse(output).await.unwrap();
 
         assert_eq!(version.channel, Channel::Nightly);
     }

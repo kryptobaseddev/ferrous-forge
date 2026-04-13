@@ -2,7 +2,6 @@
 
 use crate::Result;
 use std::path::Path;
-use std::process::Command;
 use std::time::Instant;
 
 use super::SafetyCheck;
@@ -36,11 +35,12 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
 
     // Run cargo build --release
     // Disable the Ferrous Forge cargo wrapper to avoid recursive validation
-    let output = Command::new("cargo")
+    let output = tokio::process::Command::new("cargo")
         .current_dir(project_path)
         .env("FERROUS_FORGE_ENABLED", "0")
         .args(["build", "--release"])
-        .output()?;
+        .output()
+        .await?;
 
     result.set_duration(start.elapsed());
 

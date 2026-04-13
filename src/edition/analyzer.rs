@@ -2,7 +2,6 @@
 
 use crate::{Error, Result};
 use std::path::Path;
-use std::process::Command;
 use walkdir::WalkDir;
 
 use super::Edition;
@@ -78,10 +77,11 @@ impl EditionAnalyzer {
 
         // Run cargo clippy with edition lints
         for lint in lints {
-            let output = Command::new(&cargo_path)
+            let output = tokio::process::Command::new(&cargo_path)
                 .current_dir(&self.project_path)
                 .args(&["clippy", "--", "-W", &lint])
-                .output()?;
+                .output()
+                .await?;
 
             let stderr = String::from_utf8_lossy(&output.stderr);
 

@@ -2,7 +2,6 @@
 
 use crate::Result;
 use std::path::Path;
-use std::process::Command;
 use std::time::Instant;
 
 use super::SafetyCheck;
@@ -43,7 +42,7 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     }
 
     // Execute format check and process results
-    let output = execute_format_check(project_path)?;
+    let output = execute_format_check(project_path).await?;
     result.set_duration(start.elapsed());
 
     if output.status.success() {
@@ -63,11 +62,12 @@ fn check_cargo_availability() -> std::result::Result<(), String> {
 }
 
 /// Execute cargo fmt --check command
-fn execute_format_check(project_path: &Path) -> Result<std::process::Output> {
-    Command::new("cargo")
+async fn execute_format_check(project_path: &Path) -> Result<std::process::Output> {
+    tokio::process::Command::new("cargo")
         .current_dir(project_path)
         .args(&["fmt", "--check"])
         .output()
+        .await
         .map_err(Into::into)
 }
 

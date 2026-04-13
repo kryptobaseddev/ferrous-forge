@@ -5,6 +5,18 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.5] - 2026-04-12
+
+### Fixed
+
+- **Remaining blocking I/O across all modules** — Converted every remaining
+  `std::process::Command` call in the codebase to `tokio::process::Command`,
+  completing the async migration started in v1.9.4. Affected modules:
+  `formatting` (rustfmt/cargo fmt), `test_coverage` (cargo tarpaulin),
+  `safety/checks` (build, clippy, test, format, audit, doc, publish),
+  `edition` (analyzer, migrator), and `rust_version` (detector, rustup).
+  Zero blocking process spawns remain in the source tree.
+
 ## [1.9.4] - 2026-04-11
 
 ### Fixed

@@ -2,7 +2,6 @@
 
 use crate::Result;
 use std::path::Path;
-use std::process::Command;
 use std::time::Instant;
 
 use super::SafetyCheck;
@@ -34,10 +33,11 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Doc);
 
-    match Command::new("cargo")
+    match tokio::process::Command::new("cargo")
         .args(["doc", "--no-deps"])
         .current_dir(project_path)
         .output()
+        .await
     {
         Ok(output) => {
             if !output.status.success() {

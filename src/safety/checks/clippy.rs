@@ -2,7 +2,6 @@
 
 use crate::Result;
 use std::path::Path;
-use std::process::Command;
 use std::time::Instant;
 
 use super::SafetyCheck;
@@ -34,14 +33,14 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let start = Instant::now();
     let mut result = CheckResult::new(CheckType::Clippy);
 
-    if !is_clippy_available() {
+    if !is_clippy_available().await {
         result.add_error("clippy not available");
         result.add_suggestion("Install clippy with: rustup component add clippy");
         result.set_duration(start.elapsed());
         return Ok(result);
     }
 
-    let output = run_clippy_command(project_path)?;
+    let output = run_clippy_command(project_path).await?;
     result.set_duration(start.elapsed());
 
     if !output.status.success() {
@@ -54,16 +53,17 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
 }
 
 /// Check if clippy is available
-fn is_clippy_available() -> bool {
-    Command::new("cargo")
+async fn is_clippy_available() -> bool {
+    tokio::process::Command::new("cargo")
         .args(&["clippy", "--version"])
         .output()
+        .await
         .is_ok_and(|output| output.status.success())
 }
 
 /// Run clippy command with strict settings
-fn run_clippy_command(project_path: &Path) -> Result<std::process::Output> {
-    let output = Command::new("cargo")
+async fn run_clippy_command(project_path: &Path) -> Result<std::process::Output> {
+    let output = tokio::process::Command::new("cargo")
         .current_dir(project_path)
         .args(&[
             "clippy",
@@ -73,7 +73,8 @@ fn run_clippy_command(project_path: &Path) -> Result<std::process::Output> {
             "-D",
             "warnings",
         ])
-        .output()?;
+        .output()
+        .await?;
 
     Ok(output)
 }

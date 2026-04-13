@@ -2,7 +2,6 @@
 
 use crate::Result;
 use std::path::Path;
-use std::process::Command;
 use std::time::Instant;
 
 use super::SafetyCheck;
@@ -35,10 +34,11 @@ pub async fn run(project_path: &Path) -> Result<CheckResult> {
     let mut result = CheckResult::new(CheckType::PublishDryRun);
 
     // Run cargo publish --dry-run
-    let output = Command::new("cargo")
+    let output = tokio::process::Command::new("cargo")
         .current_dir(project_path)
         .args(&["publish", "--dry-run"])
-        .output()?;
+        .output()
+        .await?;
 
     result.set_duration(start.elapsed());
 

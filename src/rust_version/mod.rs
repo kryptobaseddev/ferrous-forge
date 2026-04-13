@@ -124,7 +124,7 @@ impl VersionManager {
     ///
     /// Returns an error if `rustc` is not found or its output cannot be parsed.
     pub async fn check_current(&self) -> Result<RustVersion> {
-        detector::detect_rust_version()
+        detector::detect_rust_version().await
     }
 
     /// Get latest stable release

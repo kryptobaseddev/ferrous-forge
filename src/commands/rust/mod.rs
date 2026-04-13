@@ -140,7 +140,7 @@ async fn handle_list_toolchains() -> Result<()> {
         return Ok(());
     }
 
-    let toolchains = rustup.list_toolchains()?;
+    let toolchains = rustup.list_toolchains().await?;
 
     println!();
     println!("{}", style("🔧 Installed Toolchains").bold().cyan());
@@ -166,7 +166,7 @@ async fn handle_list_toolchains() -> Result<()> {
     }
 
     // Show active toolchain info
-    match rustup.show_active_toolchain() {
+    match rustup.show_active_toolchain().await {
         Ok(active) => {
             println!();
             println!("{} {}", style("Active:").bold(), active);
@@ -216,7 +216,7 @@ pub async fn handle_update(dry_run: bool, yes: bool, self_update: bool) -> Resul
         println!();
         println!("Would update the following toolchains:");
 
-        let toolchains = rustup.list_toolchains()?;
+        let toolchains = rustup.list_toolchains().await?;
         for toolchain in toolchains {
             println!("   • {}", toolchain.channel);
         }
@@ -454,7 +454,7 @@ pub async fn handle_switch(channel: String) -> Result<()> {
     );
 
     // Show new active toolchain
-    if let Ok(active) = rustup.show_active_toolchain() {
+    if let Ok(active) = rustup.show_active_toolchain().await {
         println!("{} {}", style("Active:").bold(), active);
     }
 

@@ -4,7 +4,6 @@ use super::types::FormatResult;
 use super::utils::ensure_rustfmt_installed;
 use crate::{Error, Result};
 use std::path::Path;
-use std::process::Command;
 use tokio::fs;
 
 /// Check formatting for entire project
@@ -15,10 +14,11 @@ use tokio::fs;
 pub async fn check_formatting(project_path: &Path) -> Result<FormatResult> {
     ensure_rustfmt_installed().await?;
 
-    let output = Command::new("cargo")
+    let output = tokio::process::Command::new("cargo")
         .args(&["fmt", "--", "--check"])
         .current_dir(project_path)
         .output()
+        .await
         .map_err(|e| Error::process(format!("Failed to run rustfmt: {}", e)))?;
 
     let formatted = output.status.success();
@@ -43,10 +43,11 @@ pub async fn check_formatting(project_path: &Path) -> Result<FormatResult> {
 pub async fn auto_format(project_path: &Path) -> Result<()> {
     ensure_rustfmt_installed().await?;
 
-    let status = Command::new("cargo")
+    let status = tokio::process::Command::new("cargo")
         .args(&["fmt", "--all"])
         .current_dir(project_path)
         .status()
+        .await
         .map_err(|e| Error::process(format!("Failed to run cargo fmt: {}", e)))?;
 
     if !status.success() {
@@ -64,10 +65,11 @@ pub async fn auto_format(project_path: &Path) -> Result<()> {
 pub async fn get_format_diff(project_path: &Path) -> Result<String> {
     ensure_rustfmt_installed().await?;
 
-    let output = Command::new("cargo")
+    let output = tokio::process::Command::new("cargo")
         .args(&["fmt", "--", "--check", "--print-diff"])
         .current_dir(project_path)
         .output()
+        .await
         .map_err(|e| Error::process(format!("Failed to get format diff: {}", e)))?;
 
     Ok(String::from_utf8_lossy(&output.stdout).to_string())

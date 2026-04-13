@@ -77,7 +77,7 @@ async fn check_test_coverage(project_path: &Path) {
     let analyzer = CoverageAnalyzer::new();
 
     // First check if tarpaulin is installed
-    match analyzer.check_tarpaulin_installed() {
+    match analyzer.check_tarpaulin_installed().await {
         Ok(true) => {
             // Tarpaulin is installed, run coverage analysis
             match analyzer.run_coverage(project_path).await {

@@ -3,17 +3,17 @@
 use super::EditionMigrator;
 use super::types::{MigrationResult, MigrationStep, TestResults};
 use crate::Result;
-use std::process::Command;
 
 impl EditionMigrator {
     /// Run tests after migration
     pub(super) async fn run_tests(&self, result: &mut MigrationResult) -> Result<()> {
-        let output = Command::new("cargo")
+        let output = tokio::process::Command::new("cargo")
             .arg("test")
             .arg("--")
             .arg("--nocapture")
             .current_dir(&self.project_path)
-            .output()?;
+            .output()
+            .await?;
 
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -53,11 +53,12 @@ impl EditionMigrator {
 
     /// Commit migration changes
     pub(super) async fn commit_changes(&self, result: &mut MigrationResult) -> Result<()> {
-        let output = Command::new("git")
+        let output = tokio::process::Command::new("git")
             .arg("add")
             .arg(".")
             .current_dir(&self.project_path)
-            .output()?;
+            .output()
+            .await?;
 
         if !output.status.success() {
             result.steps_performed.push(MigrationStep {
@@ -69,12 +70,13 @@ impl EditionMigrator {
             return Ok(());
         }
 
-        let output = Command::new("git")
+        let output = tokio::process::Command::new("git")
             .arg("commit")
             .arg("-m")
             .arg("feat: migrate to new Rust edition")
             .current_dir(&self.project_path)
-            .output()?;
+            .output()
+            .await?;
 
         if output.status.success() {
             result.steps_performed.push(MigrationStep {
