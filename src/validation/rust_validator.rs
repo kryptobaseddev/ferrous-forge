@@ -300,9 +300,34 @@ impl RustValidator {
     }
 }
 
-/// Recursively collect `.rs` files, skipping `target/` directories.
+/// Directories that should never be scanned for Rust sources.
+const SKIP_DIRS: &[&str] = &[
+    "target",
+    "node_modules",
+    ".git",
+    ".claude",
+    ".next",
+    "dist",
+    "build",
+    ".turbo",
+    ".pnpm",
+    ".yarn",
+    "__pycache__",
+    ".venv",
+    "vendor",
+];
+
+/// Returns `true` if the directory entry name matches a skip-listed directory.
+fn should_skip_dir(entry_path: &Path) -> bool {
+    entry_path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .is_some_and(|name| SKIP_DIRS.contains(&name))
+}
+
+/// Recursively collect `.rs` files, skipping non-Rust directories.
 fn collect_rust_files_recursive(path: &Path, rust_files: &mut Vec<PathBuf>) -> Result<()> {
-    if path.to_string_lossy().contains("target/") {
+    if should_skip_dir(path) {
         return Ok(());
     }
 
@@ -317,7 +342,7 @@ fn collect_rust_files_recursive(path: &Path, rust_files: &mut Vec<PathBuf>) -> R
         for entry in entries {
             let entry = entry?;
             let entry_path = entry.path();
-            if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
+            if should_skip_dir(&entry_path) {
                 continue;
             }
             collect_rust_files_recursive(&entry_path, rust_files)?;
@@ -327,9 +352,9 @@ fn collect_rust_files_recursive(path: &Path, rust_files: &mut Vec<PathBuf>) -> R
     Ok(())
 }
 
-/// Recursively collect `Cargo.toml` files, skipping `target/` directories.
+/// Recursively collect `Cargo.toml` files, skipping non-Rust directories.
 fn collect_cargo_files_recursive(path: &Path, cargo_files: &mut Vec<PathBuf>) -> Result<()> {
-    if path.to_string_lossy().contains("target/") {
+    if should_skip_dir(path) {
         return Ok(());
     }
 
@@ -342,7 +367,7 @@ fn collect_cargo_files_recursive(path: &Path, cargo_files: &mut Vec<PathBuf>) ->
         for entry in entries {
             let entry = entry?;
             let entry_path = entry.path();
-            if entry_path.file_name() == Some(std::ffi::OsStr::new("target")) {
+            if should_skip_dir(&entry_path) {
                 continue;
             }
             collect_cargo_files_recursive(&entry_path, cargo_files)?;
