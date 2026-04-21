@@ -5,6 +5,17 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.9] - 2026-04-20
+
+### Fixed
+
+- **`ferrous-forge update` now works** — The self-update command was a stub
+  that printed "not yet implemented". It is now fully wired to the GitHub
+  releases API using the `self_update` crate. Running `ferrous-forge update`
+  will check for a newer release, download the correct platform archive
+  (`.tar.gz` for Linux/macOS, `.zip` for Windows), extract it, verify the
+  SHA-256 hash, and replace the running binary automatically.
+
 ## [1.9.8] - 2026-04-20
 
 ### Fixed
@@ -809,7 +820,8 @@ ferrous-forge edition migrate 2024
 
 ## Version Comparison
 
-[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.8...HEAD
+[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.9...HEAD
+[1.9.9]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.8...v1.9.9
 [1.9.8]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.7...v1.9.8
 [1.9.7]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.6...v1.9.7
 [1.9.6]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.5...v1.9.6
