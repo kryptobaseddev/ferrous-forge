@@ -83,7 +83,7 @@ jobs:
           sed -i "s/PLACEHOLDER_SHA256_MACOS_AARCH64/$MACOS_ARM_SHA/" packaging/homebrew/ferrous-forge.rb
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update Homebrew formula to v${{ needs.get-checksums.outputs.version }}"
@@ -116,7 +116,7 @@ jobs:
           sed -i "s/pkgver = .*/pkgver = $VERSION/" packaging/aur/.SRCINFO
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update AUR package to v${{ needs.get-checksums.outputs.version }}"
@@ -147,7 +147,7 @@ jobs:
           sed -i "s/PLACEHOLDER_CHECKSUM/$WINDOWS_SHA/" packaging/chocolatey/tools/chocolateyinstall.ps1
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update Chocolatey package to v${{ needs.get-checksums.outputs.version }}"
@@ -180,7 +180,7 @@ jobs:
           echo "::warning::Nix cargoHash must be updated manually after first failed build attempt"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update Nix package to v${{ needs.get-checksums.outputs.version }}"
