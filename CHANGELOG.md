@@ -5,6 +5,18 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.7] - 2026-04-20
+
+### Fixed
+
+- **Tarpaulin JSON format compatibility** — Updated the coverage JSON parser to
+  match the output format produced by `cargo-tarpaulin >= 0.18` (tested with
+  0.35.2). The new format emits `files` as an array of objects with `path`,
+  `covered`, and `coverable` fields, rather than the legacy map-keyed format
+  with `linesCovered` / `linesTotal`. This eliminates the persistent
+  "Failed to parse tarpaulin output" warning that appeared on every
+  `ferrous-forge validate` run when tarpaulin was installed. (#29)
+
 ## [1.9.6] - 2026-04-13
 
 ### Fixed
@@ -789,5 +801,8 @@ ferrous-forge edition migrate 2024
 
 ## Version Comparison
 
-[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.7...HEAD
+[1.9.7]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.6...v1.9.7
+[1.9.6]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.5...v1.9.6
+[1.9.5]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.8.0...v1.9.5
 [1.8.0]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.7.6...v1.8.0
