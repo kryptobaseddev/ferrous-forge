@@ -10,3 +10,4 @@ CLAUDE.md
 GEMINI.md
 node_modules/
 test_project/
+tarpaulin-report.json
