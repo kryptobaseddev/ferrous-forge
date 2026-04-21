@@ -69,7 +69,7 @@ shell-escape = "0.1"
 
 # Version management and updates
 semver = { version = "1.0", features = ["serde"] }
-self_update = { version = "0.41", optional = true, default-features = false, features = ["rustls", "archive-tar", "compression-flate2", "archive-zip", "compression-zip-deflate"] }
+self_update = { version = "0.44", optional = true, default-features = false, features = ["rustls", "archive-tar", "compression-flate2", "archive-zip", "compression-zip-deflate"] }
 
 # Template processing
 handlebars = "6.0"
