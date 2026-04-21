@@ -1,5 +1,5 @@
 (function() {
-    const implementors = Object.fromEntries([["ferrous_forge",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.1/core/hash/trait.Hash.html\" title=\"trait core::hash::Hash\">Hash</a> for <a class=\"enum\" href=\"ferrous_forge/validation/violation/enum.ViolationType.html\" title=\"enum ferrous_forge::validation::violation::ViolationType\">ViolationType</a>",0]]]]);
+    const implementors = Object.fromEntries([["ferrous_forge",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.95.0/core/hash/trait.Hash.html\" title=\"trait core::hash::Hash\">Hash</a> for <a class=\"enum\" href=\"ferrous_forge/validation/violation/enum.ViolationType.html\" title=\"enum ferrous_forge::validation::violation::ViolationType\">ViolationType</a>",0]]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {
