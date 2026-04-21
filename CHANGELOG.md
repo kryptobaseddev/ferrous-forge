@@ -5,6 +5,14 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.8] - 2026-04-20
+
+### Fixed
+
+- **Clippy lints on Rust 1.95.0** — Resolved `collapsible_match` and
+  `unnecessary_sort_by` warnings that became errors with the latest stable
+  toolchain (1.95.0). CI "Check & Lint" job is now green.
+
 ## [1.9.7] - 2026-04-20
 
 ### Fixed
@@ -801,7 +809,8 @@ ferrous-forge edition migrate 2024
 
 ## Version Comparison
 
-[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.7...HEAD
+[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.8...HEAD
+[1.9.8]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.7...v1.9.8
 [1.9.7]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.6...v1.9.7
 [1.9.6]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.5...v1.9.6
 [1.9.5]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.8.0...v1.9.5
