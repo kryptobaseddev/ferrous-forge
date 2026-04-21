@@ -96,7 +96,7 @@ criterion = "0.5"
 # Note: Dogfooding via external binary, not as dependency to avoid conflicts
 
 [build-dependencies]
-built = "0.7"
+built = "0.8"
 
 [features]
 default = ["update-system", "telemetry"]
