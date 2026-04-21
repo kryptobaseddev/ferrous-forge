@@ -5,6 +5,18 @@ All notable changes to Ferrous Forge will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.10] - 2026-04-20
+
+### Fixed
+
+- **`ferrous-forge update` runtime panic** — The initial v1.9.9 self-update
+  implementation crashed with `Cannot drop a runtime in a context where
+  blocking is not allowed` because `self_update` performs synchronous I/O
+  (downloads, extraction, binary replacement) inside an async Tokio context.
+  The update call is now wrapped in `tokio::task::spawn_blocking` so it runs
+  on a dedicated blocking thread pool, which is the correct pattern for
+  synchronous I/O inside an async application.
+
 ## [1.9.9] - 2026-04-20
 
 ### Fixed
@@ -820,7 +832,8 @@ ferrous-forge edition migrate 2024
 
 ## Version Comparison
 
-[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.9...HEAD
+[Unreleased]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.10...HEAD
+[1.9.10]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.9...v1.9.10
 [1.9.9]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.8...v1.9.9
 [1.9.8]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.7...v1.9.8
 [1.9.7]: https://github.com/kryptobaseddev/ferrous-forge/compare/v1.9.6...v1.9.7
