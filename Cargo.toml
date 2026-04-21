@@ -64,7 +64,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 
 # Process management
-which = "6.0"
+which = "8.0"
 shell-escape = "0.1"
 
 # Version management and updates
