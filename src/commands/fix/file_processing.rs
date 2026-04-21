@@ -93,7 +93,7 @@ fn apply_fixes_to_lines(lines: &mut [String], violations: &[Violation]) -> usize
 
     // Sort violations by line number in descending order to avoid offset issues
     let mut sorted_violations = violations.to_vec();
-    sorted_violations.sort_by(|a, b| b.line.cmp(&a.line));
+    sorted_violations.sort_by_key(|b| std::cmp::Reverse(b.line));
 
     for violation in sorted_violations {
         if violation.line > 0 && violation.line <= lines.len() {

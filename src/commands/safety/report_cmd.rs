@@ -95,7 +95,7 @@ async fn load_recent_reports(limit: usize) -> Result<Vec<SafetyReport>> {
     }
 
     // Sort by timestamp (newest first) and limit
-    reports.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+    reports.sort_by_key(|b| std::cmp::Reverse(b.timestamp));
     reports.truncate(limit);
 
     Ok(reports)

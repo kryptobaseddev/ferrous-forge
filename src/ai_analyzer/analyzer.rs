@@ -195,15 +195,14 @@ impl AIAnalyzer {
         let mut effects = Vec::new();
 
         match violation.violation_type {
-            ViolationType::UnwrapInProduction => {
+            ViolationType::UnwrapInProduction
                 if !context
                     .return_type
                     .as_ref()
-                    .is_some_and(|r| r.contains("Result"))
-                {
-                    effects.push("Function signature change required".to_string());
-                    effects.push("All callers must be updated".to_string());
-                }
+                    .is_some_and(|r| r.contains("Result")) =>
+            {
+                effects.push("Function signature change required".to_string());
+                effects.push("All callers must be updated".to_string());
             }
             ViolationType::FunctionTooLarge => {
                 effects.push("May require creating new helper functions".to_string());

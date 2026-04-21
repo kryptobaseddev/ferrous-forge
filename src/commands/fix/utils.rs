@@ -63,7 +63,7 @@ pub fn group_violations_by_file(violations: &[Violation]) -> HashMap<PathBuf, Ve
     // Sort violations in each file by line number (descending)
     // so we fix from bottom to top and don't mess up line numbers
     for violations in grouped.values_mut() {
-        violations.sort_by(|a, b| b.line.cmp(&a.line));
+        violations.sort_by_key(|b| std::cmp::Reverse(b.line));
     }
 
     grouped
