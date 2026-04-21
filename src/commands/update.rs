@@ -54,23 +54,29 @@ async fn update_binary(channel: &str, dry_run: bool) -> Result<()> {
         return Ok(());
     }
 
-    let status = self_update::backends::github::Update::configure()
-        .repo_owner("kryptobaseddev")
-        .repo_name("ferrous-forge")
-        .bin_name("ferrous-forge")
-        .target(&get_target_name()?)
-        .bin_path_in_archive(&get_bin_path_in_archive())
-        .bin_install_path(
-            std::env::current_exe()
-                .map_err(|e| Error::io(format!("Cannot locate current executable: {e}")))?,
-        )
-        .current_version(env!("CARGO_PKG_VERSION"))
-        .show_download_progress(true)
-        .show_output(true)
-        .build()
-        .map_err(|e| Error::process(format!("Failed to configure updater: {e}")))?
-        .update()
-        .map_err(|e| Error::process(format!("Update failed: {e}")))?;
+    // self_update performs blocking I/O; run it on a dedicated blocking thread
+    // to avoid panicking the async runtime.
+    let status = tokio::task::spawn_blocking(move || {
+        self_update::backends::github::Update::configure()
+            .repo_owner("kryptobaseddev")
+            .repo_name("ferrous-forge")
+            .bin_name("ferrous-forge")
+            .target(&get_target_name()?)
+            .bin_path_in_archive(&get_bin_path_in_archive())
+            .bin_install_path(
+                std::env::current_exe()
+                    .map_err(|e| Error::io(format!("Cannot locate current executable: {e}")))?,
+            )
+            .current_version(env!("CARGO_PKG_VERSION"))
+            .show_download_progress(true)
+            .show_output(true)
+            .build()
+            .map_err(|e| Error::process(format!("Failed to configure updater: {e}")))?
+            .update()
+            .map_err(|e| Error::process(format!("Update failed: {e}")))
+    })
+    .await
+    .map_err(|e| Error::process(format!("Update task panicked: {e}")))??;
 
     match status {
         self_update::Status::Updated(v) => {
